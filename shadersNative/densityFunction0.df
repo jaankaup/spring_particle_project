@@ -1,0 +1,10 @@
+//voxels_per_block:16
+//SceneDimension:-12,-15,-12,12,15,12     this means => (xMin,yMin,zMin,xMax,yMax,zMax). The dimension of the scene.
+
+// The @v is the input vertice.
+// The diffuse3DTexture is for sampling. Now the 3d texture coordinates
+// See for application code src/Util/textureData.cpp::createPerlin3D
+// function for more details how the 3d texture creation.
+
+float ball = pow(v.x,3.0) + pow(v.y,3.0) + pow(v.z+3.0,3.0) - pow(2.2,1.2);  
+return abs(v.y + ball + v.x*v.z) - 3;

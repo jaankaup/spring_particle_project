@@ -1,0 +1,14 @@
+//voxels_per_block:16
+//SceneDimension:-12,-12,-12,12,12,12
+
+// This is a density function that creates a wierd ball.
+// The @v is the input vertice.
+// The diffuse3DTexture is for sampling. Now the 3d texture coordinates
+// See for application code src/Util/textureData.cpp::createPerlin3D
+// function for more details how the 3d texture creation.
+
+float noise = clamp(texture(diffuse3DTexture,v).w, 0.2, 0.7);
+float noise2 = texture(diffuse3DTexture,v*vec3(0.0,0.0,0.1)).b;
+//vec3 warp = texture(diffuse3DTexture,v*0.004).rbw;
+//float noise3 = texture(diffuse3DTexture,warp*v).b;
+return v.y + noise + noise2;

@@ -1,0 +1,17 @@
+//voxels_per_block:16
+//SceneDimension:-12,-12,-12,12,12,12 
+
+// The @v is the input vertice.
+// The diffuse3DTexture is for sampling. Now the 3d texture coordinates
+// See for application code src/Util/textureData.cpp::createPerlin3D
+// function for more details how the 3d texture creation.
+
+  vec3 again = vec3(mod(v.x,8.0) - 4.0,mod(v.y,6.0f),mod(v.z,2.0f));
+  float ball = pow(v.x,2.0) + pow(v.y,2.0) + pow(v.z+3.0,2.0) - pow(2.2,2.0);  
+  float noise = texture(diffuse3DTexture,v).w;
+  float noise2 = texture(diffuse3DTexture,v+vec3(0.2,0.1,0.3)).w;
+  float noise3 = texture(diffuse3DTexture,v+vec3(sin(v.x),tan(v.y),cos(v.z))).w;
+  float hils = noise2*2.0*sin(v.z);
+  float hils2 = noise*3.0*cos(v.z);
+
+ return ball + hils + hils2 - noise2*3.0 - noise*(30*sin(v.z*v.x));
