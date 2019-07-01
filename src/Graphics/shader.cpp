@@ -5,29 +5,32 @@
 
 Shader::Shader()
 {
+  pId = glCreateProgram();
 }
 
 Shader::~Shader()
 {
-}
-
-void Shader::dispose() const
-{
-  //Log::getDebug().log("Deleting shader program: %", std::to_string(pId));
+  Log::getDebug().log("Tuhotaan shader.");
   if (pId != 0) glDeleteProgram(pId);
 }
 
-void Shader::init()
-{
-  pId = glCreateProgram();
+//void Shader::dispose() const
+//{
+//  //Log::getDebug().log("Deleting shader program: %", std::to_string(pId));
+//  if (pId != 0) glDeleteProgram(pId);
+//}
 
-  //Log::getDebug().log("Created shader program: %", std::to_string(pId));
-
-  if (pId == 0)
-  {
-    Log::getError().log("%","Shader::Shader. Failed to create program.");
-  }
-}
+//void Shader::init()
+//{
+//  pId = glCreateProgram();
+//
+//  //Log::getDebug().log("Created shader program: %", std::to_string(pId));
+//
+//  if (pId == 0)
+//  {
+//    Log::getError().log("%","Shader::Shader. Failed to create program.");
+//  }
+//}
 
 void Shader::setFeedback(const bool feedback, const std::string& feedbackVarying)
 {
@@ -40,7 +43,6 @@ void Shader::buildDensity(const std::vector<std::string>& sources)
   std::string density;
   std::string geom;
   std::string vert;
-
 
   // This is a copy paste function. TODO: move it to the misc.cpp.
   static const auto endsWith = [](const std::string& str, const std::string& postFix)

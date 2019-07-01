@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <memory>
 #include "../Utils/log.h"
+#include "shader.h"
 //#include "../Utils/misc.h"
 
 
@@ -52,15 +53,15 @@ class Manager
     static auto& getInstance();
 
     /// Create resource (default).
-    T* create(const std::string& key);
+    virtual T* create(const std::string& key);
 
     /// Get the resource using a string key. Return pointer to the 
     /// created resource. Otherwise returns nullptr.
-    T* getByKey(const std::string& key) const;
+    virtual T* getByKey(const std::string& key) const;
 
     /// Deletes an element with a string key. Returns false if deletion fails. 
     /// Otherwise return true.
-    bool del(const std::string& key);
+    virtual bool del(const std::string& key);
   
     /// For some reason the destructor must be public.
     virtual ~Manager() {};
@@ -94,18 +95,7 @@ inline T* Manager<T>::create(const std::string& key)
 
   Element<T> e(key,std::unique_ptr<T>(new T()));
   auto ret_val = e.val.get();
-  Log::getInfo().log("BLAAH: %",key);
-////  e.val.get()->bind();
-  //Log::getInfo().log("BLAAH: %", std::to_string(e.val.get()));
-//  e.key = key;
-//  e.val = std::move(std::make_unique<T>());
-//  e.val = std::move(std::make_unique<T>());
-//  auto retval = e.val.get();
   pData.push_back(std::move(e));
-////  Log::getInfo().log("BLAAH: 2");
-////  pData[0].val.get()->bind();
-////  Log::getInfo().log("BLAAH: 3");
-//  return retval;
   return ret_val;
 }
 
@@ -116,6 +106,8 @@ inline T* Manager<T>::getByKey(const std::string& key) const
   {
     if (e.key == key)
     {
+      //Log::getInfo().log("getByKey: %",key);
+      //e.val.get()->bind();
       return e.val.get();
     }
   }
@@ -150,10 +142,26 @@ class ShaderManager : public Manager<Shader>
     // Get the singleton instance of this class.
     static auto& getInstance() { static ShaderManager instance; return instance; }
 
-    // A test method for this class.
-    void hekoheko() { std::cout << "HEKO!" << std::endl; }
+};
 
-  private:
+/****************************************************************************************
+ *                                                                                      *  
+ * Texture manager                                                                      *
+ *                                                                                      *  
+ ****************************************************************************************/
+
+class TextureManager : public Manager<Texture>
+{
+
+  public:
+
+    // Get the singleton instance of this class.
+    static auto& getInstance() { static TextureManager instance; return instance; }
+
+      //Log::getInfo().log("getByKey: %",key);
+    T* create(const std::string& key) override { Log::getInfo().log("TextureManager::create(): not implemented."); return nullptr; }
+
+    T* create(const std::string& key, )
 
 };
 

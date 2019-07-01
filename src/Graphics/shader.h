@@ -54,7 +54,7 @@ class Shader
     void init();
 
     /// Releases the shader object.
-    void dispose() const;
+    //void dispose() const;
 };
 
 

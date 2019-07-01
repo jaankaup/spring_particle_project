@@ -98,7 +98,8 @@ Vertexbuffer* VertexBufferManager::optimize_vertex_buffer(const std::string& opt
   glVertexAttribDivisor(1, 1); // tell OpenGL this is an instanced vertex attribute.
 
   // Find the trinagulate shader.
-  Shader* shader = ShaderManager::getInstance().getShaderByName(metadata->triangulationShader);
+  Log::getInfo().log("Etsitaan triandulation shaderi");
+  Shader* shader = ShaderManager::getInstance().getByKey(metadata->triangulationShader);
   shader->bind();
 
   // Bind the tri_table.
