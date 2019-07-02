@@ -29,7 +29,7 @@ set(graphics_src
       ${graphics_dir}/renderer.cpp
       ${graphics_dir}/texture.cpp
       ${graphics_dir}/camera.cpp
-      ${graphics_dir}/textureManager.cpp
+      #${graphics_dir}/textureManager.cpp
       ${graphics_dir}/programstate.cpp
       ${graphics_dir}/textureData.cpp
       # ${graphics_dir}/timer.cpp

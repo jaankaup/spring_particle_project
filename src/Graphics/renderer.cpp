@@ -49,8 +49,10 @@ void Renderer::renderModels(const Camera& camera)
     auto metadata = ProgramState::getInstance().getMetadata();
     auto tName = metadata->texture3Dname;
     glm::mat4 mx = com.modelMatrix ;
-    Texture texture = TextureManager::getInstance().getTextureByName(tName);//{TextureType::d2,0};
-    texture.use(0);
+    // TODO::: MODIFY ::: TODO
+    //Texture texture = TextureManager::getInstance().getTextureByName(tName);//{TextureType::d2,0};
+    Texture* texture = TextureManager::getInstance().getByKey(tName);//{TextureType::d2,0};
+    texture->use(0);
     glBindVertexArray(com.vao);
 
     // TODO: add lights only once.
@@ -65,11 +67,13 @@ void Renderer::renderModels(const Camera& camera)
     shader->setUniform("cameraPosition", eyePosition);
     shader->setUniform("lights[0].position", glm::vec3(8.0f,8.0f,8.0f));/* eyePosition);*/
 
-    Texture tritable = TextureManager::getInstance().getTextureByName("tri_table_texture");//{TextureType::d2,0};
+    // TODO::: MODIFY ::: TODO
+    //Texture tritable = TextureManager::getInstance().getTextureByName("tri_table_texture");//{TextureType::d2,0};
+    Texture* tritable = TextureManager::getInstance().getByKey("tri_table_texture");//{TextureType::d2,0};
 
     // TODO: wireframe is not available in this version. Remove these lines.
     if (com.shaderName == "marchingShaderLine" && !ProgramState::getInstance().getWireframe()) continue; 
-    switch (texture.getTextureType())
+    switch (texture->getTextureType())
     {
       case TextureType::d1:
         // Do nothing.
@@ -81,7 +85,7 @@ void Renderer::renderModels(const Camera& camera)
         shader->setUniform("diffuse3DTexture",0);
         break;
     }
-    tritable.use(1);
+    tritable->use(1);
     shader->setUniform("tri_table", 1);
 
     switch (com.draw)

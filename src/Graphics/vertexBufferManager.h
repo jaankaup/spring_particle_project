@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include "vertexbuffer.h"
 #include "texture.h"
-#include "textureManager.h"
+//#include "textureManager.h"
 #include "shader.h"
 #include "manager.h"
 #include "programstate.h"

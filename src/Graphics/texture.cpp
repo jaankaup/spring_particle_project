@@ -6,6 +6,7 @@ Texture::Texture()
 
 Texture::~Texture()
 {
+    if (pId != 0) glDeleteTextures(1,&pId);
 }
 
 void Texture::init(const TextureType t)
@@ -110,10 +111,10 @@ void Texture::createExample2D()
     delete[] image;
 }
 
-void Texture::dispose() const
-{
-    if (pId != 0) glDeleteTextures(1,&pId);
-}
+//void Texture::dispose() const
+//{
+//    if (pId != 0) glDeleteTextures(1,&pId);
+//}
 
 void Texture::create_tritable_texture()
 {

@@ -8,11 +8,13 @@
 #include <memory>
 #include "../Utils/log.h"
 #include "shader.h"
+#include "texture.h"
 //#include "../Utils/misc.h"
 
 
 /* Forward declarations. */
 class Shader;
+class Texture;
 
 /***************************************************************************************** 
  *                                                                                       *  
@@ -159,9 +161,10 @@ class TextureManager : public Manager<Texture>
     static auto& getInstance() { static TextureManager instance; return instance; }
 
       //Log::getInfo().log("getByKey: %",key);
-    T* create(const std::string& key) override { Log::getInfo().log("TextureManager::create(): not implemented."); return nullptr; }
+    Texture* create(const std::string& key) override { Log::getInfo().log("TextureManager::create(): not implemented."); return nullptr; }
 
-    T* create(const std::string& key, )
+    // MUISTA: init(texture:type)
+    //T* create(const std::string& key, )
 
 };
 

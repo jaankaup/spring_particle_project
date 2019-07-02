@@ -5,7 +5,7 @@
 #include <vector>
 #include <GL/glew.h>
 #include <SOIL.h>
-#include "textureManager.h"
+//#include "textureManager.h"
 #include "textureData.h"
 #include "../Utils/log.h"
 #include "../Utils/myrandom.h"
@@ -17,7 +17,7 @@ class Texture
 {
     /// TextureManager object has access to all Texture member functions.
     /// TextureManager creates and destroys textures objects.
-    friend class TextureManager;
+    template <typename T> friend class Manager;
 
     public:
 
@@ -59,7 +59,7 @@ class Texture
         void bind() const;
 
         /// Releases the texture object.
-        void dispose() const;
+        //void dispose() const;
 };
 
 #endif // TEXTURE_H

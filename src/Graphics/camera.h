@@ -8,7 +8,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "programstate.h"
-#include "textureManager.h"
+#include "manager.h"
 #include "modelManager.h"
 #include "../Utils/log.h"
 #include "../Utils/misc.h"

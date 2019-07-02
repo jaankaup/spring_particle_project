@@ -103,13 +103,13 @@ Vertexbuffer* VertexBufferManager::optimize_vertex_buffer(const std::string& opt
   shader->bind();
 
   // Bind the tri_table.
-  Texture tritable = TextureManager::getInstance().getTextureByName(metadata->tri_table_name);
-  tritable.use(1);
+  Texture* tritable = TextureManager::getInstance().getByKey(metadata->tri_table_name);
+  tritable->use(1);
   shader->setUniform("tri_table", 1);
   
   // Bind the 3D texture.
-  Texture texture = TextureManager::getInstance().getTextureByName(metadata->texture3Dname);
-  texture.use(0);
+  Texture* texture = TextureManager::getInstance().getByKey(metadata->texture3Dname);
+  texture->use(0);
 
   shader->setUniform("diffuse3DTexture",0);
   shader->setUniform("voxels_per_block", (float)metadata->block_size);

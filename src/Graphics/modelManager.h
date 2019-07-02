@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include "model.h"
 #include "texture.h"
-#include "textureManager.h"
+#include "manager.h"
 #include "vertexbuffer.h"
 #include "vertexBufferManager.h"
 #include "../Utils/log.h"

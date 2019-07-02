@@ -21,7 +21,6 @@
 //#include "Graphics/marchingCubes.h"
 //#include "Graphics/voxeldata.h"
 #include "Graphics/camera.h"
-#include "Graphics/textureManager.h"
 #include "Graphics/manager.h"
 #include "Graphics/model.h"
 #include "Graphics/programstate.h"
@@ -111,14 +110,18 @@ void createtextures()
   auto metadata = ProgramState::getInstance().getMetadata();
 
   // Create the 3D texture.
-  Texture tex3D = TextureManager::getInstance().create3D(TEXTURE_NAME);
+  // TODO::: MODIFY ::: TODO
+  //Texture tex3D = TextureManager::getInstance().create3D(TEXTURE_NAME);
+  Texture* tex3D = TextureManager::getInstance().create(TEXTURE_NAME);
   auto tex3D_data = createPerlin3D(256,256,256);
-  tex3D.create3D(tex3D_data);
+  tex3D->create3D(tex3D_data);
   metadata->texture3Dname = TEXTURE_NAME;
 
   // Create the tri_table.
-  Texture tritable = TextureManager::getInstance().create1D(TRITABLE_NAME);
-  tritable.create_tritable_texture();
+  // TODO::: MODIFY ::: TODO
+  //Texture tritable = TextureManager::getInstance().create1D(TRITABLE_NAME);
+  Texture* tritable = TextureManager::getInstance().create(TRITABLE_NAME);
+  tritable->create_tritable_texture();
   metadata->tri_table_name = TRITABLE_NAME;
 }
 
@@ -202,10 +205,14 @@ void loop_handler2(void *arg)
                     {
                     auto metadata = ProgramState::getInstance().getMetadata();
                     auto name = metadata->texture3Dname;
-                    TextureManager::getInstance().deleteTexture(name); 
-                    Texture tex3D = TextureManager::getInstance().create3D(name);
+                    // TODO::: MODIFY ::: TODO
+                    //TextureManager::getInstance().deleteTexture(name); 
+                    TextureManager::getInstance().del(name); 
+                    // TODO::: MODIFY ::: TODO
+                    //Texture tex3D = TextureManager::getInstance().create3D(name);
+                    Texture* tex3D = TextureManager::getInstance().create(name);
                     auto tex3D_data = createPerlin3D(256,256,256);
-                    tex3D.create3D(tex3D_data);
+                    tex3D->create3D(tex3D_data);
                     metadata->texture3Dname = name;
                     Log::getInfo().log("Creating a new 3D texture...");
                     // Recreate scene model.
@@ -217,10 +224,14 @@ void loop_handler2(void *arg)
                     {
                     auto metadata = ProgramState::getInstance().getMetadata();
                     auto name = metadata->texture3Dname;
-                    TextureManager::getInstance().deleteTexture(name); 
-                    Texture tex3D = TextureManager::getInstance().create3D(name);
+                    // TODO::: MODIFY ::: TODO
+                    //TextureManager::getInstance().deleteTexture(name); 
+                    TextureManager::getInstance().del(name); 
+                    // TODO::: MODIFY ::: TODO
+                    //Texture tex3D = TextureManager::getInstance().create3D(name);
+                    Texture* tex3D = TextureManager::getInstance().create(name);
                     auto tex3D_data = createPerlin3D_rough(256,256,256);
-                    tex3D.create3D(tex3D_data);
+                    tex3D->create3D(tex3D_data);
                     metadata->texture3Dname = name;
                     Log::getInfo().log("Creating a new 3D texture with more rought noise...");
                     // Recreate scene model.
@@ -274,7 +285,9 @@ int main(int argc, char* argv[])
   createtextures();
 
   // Creates a default texture for rendering the cube.
-  Texture textureCube = TextureManager::getInstance().create2D("cubeTexture");
+  // TODO::: MODIFY ::: TODO
+  //Texture textureCube = TextureManager::getInstance().create2D("cubeTexture");
+  Texture* textureCube = TextureManager::getInstance().create("cubeTexture");
 
   // Context creation. (webassembly).
   context c;

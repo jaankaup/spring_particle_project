@@ -17,7 +17,7 @@
 #include "texture.h"
 #include "model.h"
 #include "camera.h"
-#include "textureManager.h"
+#include "manager.h"
 #include "manager.h"
 #include "programstate.h"
 #include "timer.h"
