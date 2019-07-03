@@ -7,6 +7,9 @@ Vertexbuffer::Vertexbuffer()
 
 Vertexbuffer::~Vertexbuffer()
 {
+  if (pId != 0) glDeleteBuffers(1,&pId);
+  if (pVAO != 0) glDeleteVertexArrays(1, &pVAO);
+  // glDeleteBuffers(1, &pId); // WHY
 }
 
 void Vertexbuffer::bind() const
@@ -278,13 +281,13 @@ int Vertexbuffer::createExamplePoints(const int dimensionX, const int dimensionY
   return size;
 }
 
-void Vertexbuffer::dispose() const
-{
-//  Log::getDebug().log("Deleting vertexvuffer: %", std::to_string(pId));
-  if (pId != 0) glDeleteBuffers(1,&pId);
-  glDeleteVertexArrays(1, &pVAO);
-  glDeleteBuffers(1, &pId);
-}
+//void Vertexbuffer::dispose() const
+//{
+////  Log::getDebug().log("Deleting vertexvuffer: %", std::to_string(pId));
+//  if (pId != 0) glDeleteBuffers(1,&pId);
+//  glDeleteVertexArrays(1, &pVAO);
+//  glDeleteBuffers(1, &pId);
+//}
 
 int Vertexbuffer::getCount() const
 {

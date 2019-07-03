@@ -8,7 +8,8 @@
 #include "texture.h"
 #include "manager.h"
 #include "vertexbuffer.h"
-#include "vertexBufferManager.h"
+//#include "vertexBufferManager.h"
+#include "manager.h"
 #include "../Utils/log.h"
 #include "../Utils/misc.h"
 

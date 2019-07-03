@@ -18,6 +18,7 @@ class Texture
     /// TextureManager object has access to all Texture member functions.
     /// TextureManager creates and destroys textures objects.
     template <typename T> friend class Manager;
+    friend class TextureManager;
 
     public:
 

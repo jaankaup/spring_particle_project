@@ -59,10 +59,10 @@ Model* ModelManager::createSceneObject()
   }
   else {
     vb_name = metadata->base_vertex_buffer_name;
-    VertexBufferManager::getInstance().deleteVertexBuffer(vb_name);
+    VertexBufferManager::getInstance().del(vb_name);
     createBaseVertexBuffer();
   }
-  Vertexbuffer* vb = VertexBufferManager::getInstance().getVertexBufferByName(vb_name);
+  Vertexbuffer* vb = VertexBufferManager::getInstance().getByKey(vb_name);
   c.vao = vb->getVAO(); 
   c.draw = GL_TRIANGLES;
   c.shaderName = metadata->meshShader;

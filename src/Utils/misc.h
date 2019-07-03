@@ -11,8 +11,9 @@
 #include "log.h"
 #include "myrandom.h"
 #include "../Graphics/textureData.h"
+#include "../Graphics/manager.h"
 #include "../Graphics/programstate.h"
-#include "../Graphics/vertexBufferManager.h"
+//#include "../Graphics/vertexBufferManager.h"
 #include "../Graphics/modelManager.h"
 
 extern void joopajoo();

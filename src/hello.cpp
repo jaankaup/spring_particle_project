@@ -25,7 +25,7 @@
 #include "Graphics/model.h"
 #include "Graphics/programstate.h"
 //#include "Graphics/timer.h"
-#include "Graphics/vertexBufferManager.h"
+//#include "Graphics/vertexBufferManager.h"
 #include "Graphics/modelManager.h"
 #include "Utils/log.h"
 #include "Utils/misc.h"
@@ -112,7 +112,7 @@ void createtextures()
   // Create the 3D texture.
   // TODO::: MODIFY ::: TODO
   //Texture tex3D = TextureManager::getInstance().create3D(TEXTURE_NAME);
-  Texture* tex3D = TextureManager::getInstance().create(TEXTURE_NAME);
+  Texture* tex3D = TextureManager::getInstance().create(TEXTURE_NAME,TextureType::d3);
   auto tex3D_data = createPerlin3D(256,256,256);
   tex3D->create3D(tex3D_data);
   metadata->texture3Dname = TEXTURE_NAME;
@@ -120,7 +120,7 @@ void createtextures()
   // Create the tri_table.
   // TODO::: MODIFY ::: TODO
   //Texture tritable = TextureManager::getInstance().create1D(TRITABLE_NAME);
-  Texture* tritable = TextureManager::getInstance().create(TRITABLE_NAME);
+  Texture* tritable = TextureManager::getInstance().create(TRITABLE_NAME,TextureType::d1);
   tritable->create_tritable_texture();
   metadata->tri_table_name = TRITABLE_NAME;
 }
@@ -210,7 +210,7 @@ void loop_handler2(void *arg)
                     TextureManager::getInstance().del(name); 
                     // TODO::: MODIFY ::: TODO
                     //Texture tex3D = TextureManager::getInstance().create3D(name);
-                    Texture* tex3D = TextureManager::getInstance().create(name);
+                    Texture* tex3D = TextureManager::getInstance().create(name,TextureType::d3);
                     auto tex3D_data = createPerlin3D(256,256,256);
                     tex3D->create3D(tex3D_data);
                     metadata->texture3Dname = name;
@@ -229,7 +229,7 @@ void loop_handler2(void *arg)
                     TextureManager::getInstance().del(name); 
                     // TODO::: MODIFY ::: TODO
                     //Texture tex3D = TextureManager::getInstance().create3D(name);
-                    Texture* tex3D = TextureManager::getInstance().create(name);
+                    Texture* tex3D = TextureManager::getInstance().create(name,TextureType::d3);
                     auto tex3D_data = createPerlin3D_rough(256,256,256);
                     tex3D->create3D(tex3D_data);
                     metadata->texture3Dname = name;

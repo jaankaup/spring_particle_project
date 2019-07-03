@@ -33,7 +33,7 @@ set(graphics_src
       ${graphics_dir}/programstate.cpp
       ${graphics_dir}/textureData.cpp
       # ${graphics_dir}/timer.cpp
-      ${graphics_dir}/vertexBufferManager.cpp
+      # ${graphics_dir}/vertexBufferManager.cpp
       ${graphics_dir}/modelManager.cpp
       )
 

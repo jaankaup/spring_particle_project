@@ -26,7 +26,7 @@ class Vertexbuffer
     void init_transform_feedback(const GLuint id, GLuint count);
     // TODO: change.
     int getCount() const;
-    void dispose() const;
+    //void dispose() const;
 
 	private:
 
