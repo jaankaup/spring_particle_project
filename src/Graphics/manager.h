@@ -97,8 +97,9 @@ inline T* Manager<T>::create(const std::string& key)
   /* Check if the already existst. */
   if (getByKey(key) != nullptr)
   {
+    del(key);
     // TODO: log to debug.
-    return nullptr; 
+    //return nullptr; 
   }
 
   Element<T> e(key,std::unique_ptr<T>(new T()));
@@ -119,7 +120,7 @@ inline T* Manager<T>::getByKey(const std::string& key) const
       return e.val.get();
     }
   }
-  Log::getInfo().log("Ei loytynyt shaderia %", key);
+  Log::getInfo().log("Ei loytynyt resurssia %", key);
   return nullptr;
 }
 
@@ -130,10 +131,12 @@ inline bool Manager<T>::del(const std::string& key)
   {
     if (pData[i].key == key)
     {
+      Log::getInfo().log("Deleting %", key);
       pData.erase(pData.begin() + i);
       return true;
     }
   }
+  Log::getInfo().log("Not deleting %", key);
   return false;
 }
 
@@ -169,12 +172,12 @@ class TextureManager : public Manager<Texture>
       //Log::getInfo().log("getByKey: %",key);
     Texture* create(const std::string& key) override { Log::getInfo().log("TextureManager::create(): not implemented."); return nullptr; }
 
-    Texture* create(const std::string& key, const TextureType& type)
-    {
-      auto ret_val = Manager<Texture>::create(key); 
-      ret_val->init(type);
-      return ret_val;
-    }
+    Texture* create(const std::string& key, const TextureType& type);
+//    {
+//      auto ret_val = Manager<Texture>::create(key); 
+//      ret_val->init(type);
+//      return ret_val;
+//    }
 
 };
 
@@ -205,6 +208,13 @@ class VertexBufferManager : public Manager<Vertexbuffer>
 //    }
 
 };
+
+inline Texture* TextureManager::create(const std::string& key, const TextureType& type)
+{
+  auto ret_val = Manager<Texture>::create(key); 
+  ret_val->init(type);
+  return ret_val;
+}
 
 inline Vertexbuffer* VertexBufferManager::optimize_vertex_buffer(const std::string& optimized_name,
                                                           const std::string& shaderName)
@@ -334,12 +344,17 @@ inline Vertexbuffer* VertexBufferManager::optimize_vertex_buffer(const std::stri
   glDeleteBuffers(1, &instanceVBO);
   glDeleteBuffers(1, &quadVBO);
 
+  Log::getInfo().log("Generated % triangles... BLAH 1", std::to_string(primitiveCount));
   // Create the vertexbuffer from the geometry shader output data.
   Vertexbuffer* result = Manager<Vertexbuffer>::create(optimized_name);
+  Log::getInfo().log("Generated % triangles... BLAH 2", std::to_string(primitiveCount));
   result->init();
+  Log::getInfo().log("Generated % triangles... BLAH 3", std::to_string(primitiveCount));
   std::vector<std::string> types = {"3f","3f"};
   result->addData(feedback, actual_data_size, types);
+  Log::getInfo().log("Generated % triangles... BLAH 4", std::to_string(primitiveCount));
   result->pDataCount = primitiveCount*6;
+  Log::getInfo().log("Generated % triangles... BLAH 5", std::to_string(primitiveCount));
 
   delete[] feedback;
   return result;

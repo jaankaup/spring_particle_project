@@ -287,7 +287,7 @@ int main(int argc, char* argv[])
   // Creates a default texture for rendering the cube.
   // TODO::: MODIFY ::: TODO
   //Texture textureCube = TextureManager::getInstance().create2D("cubeTexture");
-  Texture* textureCube = TextureManager::getInstance().create("cubeTexture");
+  //Texture* textureCube = TextureManager::getInstance().create("cubeTexture",TextureType::d2);
 
   // Context creation. (webassembly).
   context c;

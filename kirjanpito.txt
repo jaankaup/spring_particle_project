@@ -1,0 +1,17 @@
+TIES531 Fysikaaliset mallit tietokoneanimaatiossa.
+
+Janne Kauppinen
+
++---------------+---------------------------------+--------------------------+-------------+
+| Kesto:        | Mitä tein                       | Mitä ongelmia jäi        | Tunnit yht. |
++---------------+---------------------------------+--------------------------+-------------+
+| 4h (1.7.2019) | Refaktoroin ohjelmaani.         | Vaikka mitä!             |    4h       |
+|               |                                 | Template/inharitance     |             |
++---------------+---------------------------------+--------------------------+-------------+
+| 8h (2.7.2019) | Ohjelman refaktorointia ja      | Kuinka toteuttaa jousi-  |   12h       |
+|               | jousimallien funtsimista.       | laskentaa shaderissa?    |             |
+|               | Kuinka toteuttaa laskenta       |                          |             |
+|               | shaderissa?                     |                          |             |
++---------------+---------------------------------+--------------------------+-------------+
+| ?h (3.7.2019) | Miten siirtää transformfeedback |                          |             |
+|               | puskurista data texstuuriin?    |                          |             | 

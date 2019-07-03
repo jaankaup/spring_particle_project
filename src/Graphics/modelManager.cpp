@@ -62,6 +62,8 @@ Model* ModelManager::createSceneObject()
     VertexBufferManager::getInstance().del(vb_name);
     createBaseVertexBuffer();
   }
+  //VertexBufferManager::getInstance().del(vb_name);
+  //VertexBufferManager::getInstance().create(vb_name);
   Vertexbuffer* vb = VertexBufferManager::getInstance().getByKey(vb_name);
   c.vao = vb->getVAO(); 
   c.draw = GL_TRIANGLES;
