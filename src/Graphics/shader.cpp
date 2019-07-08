@@ -313,21 +313,21 @@ GLuint Shader::getShaderType(const std::string& fileLoc)
 
 
     /* Supported shader object source code types. */
-    static std::array<std::string, 5> fileSuffixes = {".vert",
+    static std::array<std::string, 6> fileSuffixes = {".vert",
                                                       ".gtcs",
                                                       ".gtes",
                                                       ".geom",
-                                                      ".frag"
-//                                                      ".comp"
+                                                      ".frag",
+                                                      ".comp"
                                                      };
 
     /* Corrresponding shader object types in opengl. */
-    static std::array<GLuint, 5> GLStageEnums = {GL_VERTEX_SHADER,
+    static std::array<GLuint, 6> GLStageEnums = {GL_VERTEX_SHADER,
                                                  GL_TESS_CONTROL_SHADER,
                                                  GL_TESS_EVALUATION_SHADER,
                                                  GL_GEOMETRY_SHADER, // 0x8dd9,
-                                                 GL_FRAGMENT_SHADER
-                                                 //GL_COMPUTE_SHADER
+                                                 GL_FRAGMENT_SHADER,
+                                                 GL_COMPUTE_SHADER
                                                 };
 
     for (unsigned int i=0 ; i<fileSuffixes.size() ; i++)
@@ -364,7 +364,7 @@ bool Shader::checkShader(GLuint obj)
         glGetShaderiv(obj, GL_INFO_LOG_LENGTH, &errorLength);
         GLchar *errorMessage = new GLchar[errorLength];
         glGetShaderInfoLog(obj, errorLength, NULL, errorMessage);
-        Log::getError().log("Shader::getShaderType(%): Shader object compilation failed: %", errorMessage);
+        Log::getError().log("Shader::getShaderType(): Shader object compilation failed: %", errorMessage);
         delete[] errorMessage;
         return false;
     }

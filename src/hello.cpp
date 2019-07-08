@@ -50,6 +50,7 @@ void createShaders()
 //    const std::string MARCHING_CUBES_WIREFRAME = "marchingShaderWire_green"; 
     const std::string MARCHING_CUBES_TRIANGULATION = "triangulationShader"; 
     const std::string SCENE_SHADER = "cubeshader"; 
+    const std::string PARTICLE1 = "particle1"; 
 
 //    // The marching cubes shader.
 //    Shader* marchingShader = ShaderManager::getInstance().createShader(MARCHING_CUBES_SHADER);
@@ -75,14 +76,38 @@ void createShaders()
     }
 
     ProgramState::getInstance().getMetadata()->triangulationShader = MARCHING_CUBES_TRIANGULATION + std::to_string(1);
+    ProgramState::getInstance().getMetadata()->particle1 = PARTICLE1;
+
+    Shader* sParticle1 = ShaderManager::getInstance().create(PARTICLE1);
+    std::vector<std::string> srcKipinat = {"shaders/kipinat.comp"};
+    sParticle1->build(srcKipinat,false);
 
     // The shader for drawing the triangulated scene. The name is a bit
     // misleading.
+    //Shader* shaderCube = ShaderManager::getInstance().create(SCENE_SHADER);
+    //std::vector<std::string> shaderSourcesCube = {"shaders/default_notex.vert", "shaders/default_notex.frag"};
+    //shaderCube->build(shaderSourcesCube,false);
     Shader* shaderCube = ShaderManager::getInstance().create(SCENE_SHADER);
-    std::vector<std::string> shaderSourcesCube = {"shaders/default_notex.vert", "shaders/default_notex.frag"};
+    std::vector<std::string> shaderSourcesCube = {"shaders/defaultPoint.vert", "shaders/defaultPoint.frag"};
     shaderCube->build(shaderSourcesCube,false);
 
     ProgramState::getInstance().getMetadata()->meshShader = SCENE_SHADER;
+    ProgramState::getInstance().getMetadata()->baseState = "BState";
+    ProgramState::getInstance().getMetadata()->T1 = "T1";
+    ProgramState::getInstance().getMetadata()->T2 = "T2";
+    ProgramState::getInstance().getMetadata()->T3 = "T3";
+    ProgramState::getInstance().getMetadata()->T4 = "T4";
+
+    // Luodaan kipinat.
+    Vertexbuffer* bstate = VertexBufferManager::getInstance().createParticleBuffer("BState");
+    bstate->init();
+    std::vector<std::string> types = {"4f","4f"};
+    //GLfloat* feedback = new GLfloat[8];
+    auto array = new GLfloat[8]{0.0f,0.0f,0.0f,1.0f,0.2f,1.8f,0.0f,0.0f};
+    std::vector<std::string> types2 = {"4f","4f"};
+    bstate->addData(array, sizeof(float)*8, types2);
+    bstate->setCount(8);
+    delete[] array;
 }
 
 // Initialize the marching cubes attributes.
@@ -264,7 +289,8 @@ void loop_handler2(void *arg)
         }
     }
     c->camera.handleKeyInput();
-    c->renderer.renderModels(c->camera);
+    //c->renderer.renderModels(c->camera);
+    c->renderer.renderKipinat(c->camera);
     Window::getInstance().swapBuffers();
 }
 
@@ -302,6 +328,7 @@ int main(int argc, char* argv[])
 
   // Initialize the renderer.
   c.renderer.init();
+
 
     ModelManager::getInstance().createSceneObject();
     //Timer::getInstance().reset();

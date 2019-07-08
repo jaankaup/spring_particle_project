@@ -19,6 +19,7 @@ endif()
 set (graphics_dir ${src_dir}/Graphics)
 set (soil_dir ${src_dir}/soil)
 set (util_dir ${src_dir}/Utils)
+set (physics_dir ${src_dir}/Physics)
 
 set(graphics_src 
       ${graphics_dir}/window.cpp
@@ -40,6 +41,10 @@ set(graphics_src
 set(util_src 
       ${util_dir}/log.cpp
       ${util_dir}/misc.cpp
+      )
+
+set(physics_src 
+	#${physics_dir}/log.cpp
       )
 
 set (soil_src

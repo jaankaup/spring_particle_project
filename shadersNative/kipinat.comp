@@ -1,0 +1,52 @@
+#version 430
+
+uniform float h = 0.1;
+uniform vec4 gravity = vec4(0.0,9.81,0.0,0.0);
+uniform float phase = 1.0;
+
+// Position/velocity data.
+struct PVdata
+{
+  vec4 pos;
+  vec4 vel;
+};
+
+// Local work group size.
+layout (local_size_x = 1) in;
+
+layout (std430, binding = 0) buffer InBuf 
+{
+  PVdata input[];
+};
+
+layout (rgba32f, binding = 1) uniform image2D temp; 
+
+void euler(uint pos)
+{
+  PVdata t = input[pos]; 
+  //PVdata temp;
+  //temp.pos = vec4(1.5f,0.5,1.5,1.0);
+  //temp.vel = vec4(1.5f,1.5,1.5,1.0);
+  //PVdata temp = input[pos]; 
+  //vec4 newVel = temp.vel + h*gravity;
+  //temp.pos = h*newVel*temp.pos;
+  //temp.vel = newVel;
+  t.pos = t.pos + vec4(0.001,0.001,0.001,0.0);
+  //outbut[pos] = temp;
+  imageStore(temp, ivec2(pos,0), t.pos);
+}
+
+void copyToState(uint pos)
+{
+  vec4 pixel = imageLoad(temp, ivec2(pos,0));
+  input[pos].pos = pixel;
+}
+
+void main()
+{
+  // Euler.
+  uint pos = gl_GlobalInvocationID.x;
+  //euler(pos);
+  if (phase == 1.0) euler(pos);
+  else if (phase == 2.0) copyToState(pos);
+}

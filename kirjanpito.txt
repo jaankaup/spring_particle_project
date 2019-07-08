@@ -13,5 +13,13 @@ Janne Kauppinen
 |               | Kuinka toteuttaa laskenta       |                          |             |
 |               | shaderissa?                     |                          |             |
 +---------------+---------------------------------+--------------------------+-------------+
-| ?h (3.7.2019) | Miten siirtää transformfeedback |                          |             |
-|               | puskurista data texstuuriin?    |                          |             | 
+| 8h (3.7.2019) | Miten siirtää transformfeedback | Vielä jäi paljon mietit- |   20h       |
+|               | puskurista data texstuuriin?    | tävää.                   |             | 
+|               | Euler-methodiin tutustuminen.   |                          |             |
+|               | Timestepper ja Particlesystem   |                          |             |
+|               | luokat aloitettu omassa         |                          |             |
+|               | ohjelmassa.                     |                          |             |
++---------------+---------------------------------+--------------------------+-------------+
+| 8h (4.7.2019) | Compute shaderin opiskelua.     | Epäselvyyttä vielä on.   |   28h       |
++---------------+---------------------------------+--------------------------+-------------+
+| ?h 54.7.2019) |                                 |                          |             |

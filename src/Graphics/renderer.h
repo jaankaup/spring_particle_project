@@ -38,6 +38,7 @@ class Renderer
 
     void init();
     void renderModels(const Camera& camera);
+    void renderKipinat(const Camera& camera);
 
 	private:
 

@@ -68,6 +68,12 @@
     int activeShaderNumber = 1;
     // The xMin,yMin,zMin,xMax,yMax,zMax,voxels_per_block
     std::vector<std::tuple<int,int,int,int,int,int,int>> dimensionsPerDF;
+    std::string baseState;
+    std::string T1;
+    std::string T2;
+    std::string T3;
+    std::string T4;
+    std::string particle1;
     };
 
 class ProgramState

@@ -1,6 +1,8 @@
 #include "vertexbuffer.h"
 #include "../Utils/log.h"
 
+#include "manager.h"
+
 Vertexbuffer::Vertexbuffer()
 {
 }
@@ -11,6 +13,7 @@ Vertexbuffer::~Vertexbuffer()
   if (pVAO != 0) glDeleteVertexArrays(1, &pVAO);
   // glDeleteBuffers(1, &pId); // WHY
 }
+
 
 void Vertexbuffer::bind() const
 {
@@ -24,21 +27,6 @@ void Vertexbuffer::init()
 //    Log::getDebug().log("Created a vertex buffer: %", std::to_string(pId));
     pTarget = GL_ARRAY_BUFFER;
     pUsage = GL_STATIC_DRAW;
-}
-
-void Vertexbuffer::init_transform_feedback(const GLuint id, GLuint count)
-{
-    glGenVertexArrays(1, &pVAO);
-    glGenBuffers(1,&pId);
-    bind();
-    glBindBuffer(GL_ARRAY_BUFFER, id);
-    pId = id;
-    pDataCount = count;
-    VertexAttributes vas;
-    std::vector<std::string> types = {"3f"};
-    vas.create_interleaved_attributes(types, false);
-    vas.registerAttributes();
-    glBindVertexArray(0);
 }
 
 GLuint Vertexbuffer::getHandle() const
@@ -294,3 +282,110 @@ int Vertexbuffer::getCount() const
     return pDataCount;
 }
 
+void Vertexbuffer::setCount(const int count)
+{
+  pDataCount = count;
+}
+
+//// PARTICLE BUFFER
+  
+ParticleBuffer::ParticleBuffer()
+{
+}
+
+void ParticleBuffer::init()
+{
+    glGenVertexArrays(1, &pVAO);
+    glGenBuffers(1,&pId);
+//    glGenBuffers(1,&pTemp1);
+////    glBindBuffer(pTarget, pTemp1);
+////    glBufferData(pTarget, 8*sizeof(float), NULL, pTemp1);
+//    glGenBuffers(1,&pTemp2);
+//    glGenBuffers(1,&pTemp3);
+//    glGenBuffers(1,&pTemp4);
+    //pTarget = GL_SHADER_STORAGE_BUFFER;
+    pTarget = GL_ARRAY_BUFFER;
+    pUsage = GL_DYNAMIC_DRAW;
+
+    int work_group_sizes[3];
+
+    glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &work_group_sizes[0]);
+    glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, &work_group_sizes[1]);
+    glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, &work_group_sizes[2]);
+
+    pMax_group_size_x = work_group_sizes[0];
+    pMax_group_size_y = work_group_sizes[1];
+    pMax_group_size_z = work_group_sizes[2];
+
+    Log::getDebug().log("Max_work_group_sizes: x = %, y = %, z = %", pMax_group_size_x,pMax_group_size_y,pMax_group_size_z);
+
+    // Lets create n*4 texture for computeshader.
+    // We bind it to the "binding=1"
+    int t_w = 1;
+    int t_h = 4;
+    glGenTextures(1,&pTexture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, pTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, t_w, t_h, 0, GL_RGBA, GL_FLOAT, NULL);
+//    glBindImageTexture(1, pTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+}
+
+ParticleBuffer::~ParticleBuffer()
+{
+  //if (pTemp1 != 0) glDeleteBuffers(1,&pTemp1);
+  //if (pTemp2 != 0) glDeleteBuffers(1,&pTemp2);
+  //if (pTemp3 != 0) glDeleteBuffers(1,&pTemp3);
+  //if (pTemp4 != 0) glDeleteBuffers(1,&pTemp4);
+}
+
+void ParticleBuffer::takeStep(float t)
+{
+  //glBindVertexArray(0);
+  bind();
+
+  // Lets bind the ssbo to binding = 0.
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, pId);
+  //glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, pTemp1);
+    
+  // Lets bind the texture to binding = 1.
+  glBindImageTexture(1, pTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+
+  Shader* compute = ShaderManager::getInstance().getByKey("particle1");
+  compute->bind();
+  // Euler method. 
+  compute->setUniform("phase",1.0f);
+
+  // The time.
+  compute->setUniform("h",t);
+
+  //Log::getDebug().log("Eka vaihe....");
+  glDispatchCompute(1,1,1);
+  //Log::getDebug().log("Lopetellaan dispatsaillu....");
+
+  glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+  //Log::getDebug().log("Toka vaihe....");
+  compute->setUniform("phase",2.0f);
+  glDispatchCompute(1,1,1);
+
+  glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+}
+
+inline void ParticleBuffer::addData(const void* data, unsigned int size, const std::vector<std::string>& types) const
+{
+  //Log::getDebug().log("Vertexbuffer::addData: %", std::to_string(size));
+  bind();
+  glBindBuffer(pTarget, pId);
+  glBufferData(pTarget,size, data, pUsage);
+  VertexAttributes vas;
+  vas.create_interleaved_attributes(types, false);
+  vas.registerAttributes();
+  //glBindBuffer(pTarget, pTemp1);
+  //glBufferData(pTarget, size, NULL, pTemp1);
+  glBindVertexArray(0);
+}

@@ -78,10 +78,10 @@ class Manager
 
     /// Default constructor.
     Manager() {};
+    std::vector<Element<T>> pData;
 
   private:
 
-    std::vector<Element<T>> pData;
 };
 
 template<typename T>
@@ -195,7 +195,10 @@ class VertexBufferManager : public Manager<Vertexbuffer>
     // Get the singleton instance of this class.
     static auto& getInstance() { static VertexBufferManager instance; return instance; }
 
+    // TODO: shaderName is not used. Remove it.
     Vertexbuffer* optimize_vertex_buffer(const std::string& optimized_name, const std::string& shaderName);
+
+    Vertexbuffer* createParticleBuffer(const std::string& name);
 
       //Log::getInfo().log("getByKey: %",key);
     //Vertexbuffer* create(const std::string& key) override { Log::getInfo().log("TextureManager::create(): not implemented."); return nullptr; }
@@ -344,19 +347,29 @@ inline Vertexbuffer* VertexBufferManager::optimize_vertex_buffer(const std::stri
   glDeleteBuffers(1, &instanceVBO);
   glDeleteBuffers(1, &quadVBO);
 
-  Log::getInfo().log("Generated % triangles... BLAH 1", std::to_string(primitiveCount));
   // Create the vertexbuffer from the geometry shader output data.
   Vertexbuffer* result = Manager<Vertexbuffer>::create(optimized_name);
-  Log::getInfo().log("Generated % triangles... BLAH 2", std::to_string(primitiveCount));
   result->init();
-  Log::getInfo().log("Generated % triangles... BLAH 3", std::to_string(primitiveCount));
   std::vector<std::string> types = {"3f","3f"};
   result->addData(feedback, actual_data_size, types);
-  Log::getInfo().log("Generated % triangles... BLAH 4", std::to_string(primitiveCount));
   result->pDataCount = primitiveCount*6;
-  Log::getInfo().log("Generated % triangles... BLAH 5", std::to_string(primitiveCount));
 
   delete[] feedback;
   return result;
 }
+
+inline Vertexbuffer* VertexBufferManager::createParticleBuffer(const std::string& key)
+{
+  /* Check if the already existst. */
+  if (getByKey(key) != nullptr)
+  {
+    del(key);
+  }
+
+  Element<Vertexbuffer> e(key,std::unique_ptr<Vertexbuffer>(new ParticleBuffer()));
+  auto ret_val = e.val.get();
+  pData.push_back(std::move(e));
+  return ret_val;
+}
+
 #endif // MODELMANAGER_H

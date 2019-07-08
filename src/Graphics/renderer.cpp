@@ -17,6 +17,8 @@ void Renderer::init()
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glEnable(GL_MULTISAMPLE);
+    glEnable(GL_PROGRAM_POINT_SIZE);
+    glPointSize(5);
 }
 
 void Renderer::renderModels(const Camera& camera)
@@ -28,7 +30,7 @@ void Renderer::renderModels(const Camera& camera)
   glm::mat4 viewMatrix = camera.getMatrix();
 
   auto models = ModelManager::getInstance().getModels();
-  glm::mat4 projection = glm::perspective(glm::radians(45.0f), 16.0f / 9.0f, 0.001f, 100.0f);
+  glm::mat4 projection = glm::perspective(glm::radians(45.0f), 16.0f / 9.0f, 0.001f, 1000.0f);
   std::vector<Command> commands;
   for (const auto m : models)
   {
@@ -100,3 +102,54 @@ void Renderer::renderModels(const Camera& camera)
   }
 }
 
+void Renderer::renderKipinat(const Camera& camera)
+{
+  glClearColor(0.0f,0.0f,0.0f,1.0f);
+  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+  glm::vec3 eyePosition = camera.getPosition();
+  glm::mat4 viewMatrix = camera.getMatrix();
+  glm::mat4 projection = glm::perspective(glm::radians(45.0f), 16.0f / 9.0f, 0.001f, 1000.0f);
+  glm::mat4 mx = glm::mat4(1.0f);
+  auto render_shader_name = ProgramState::getInstance().getMetadata()->meshShader;
+  auto bState_name = ProgramState::getInstance().getMetadata()->baseState;
+  ParticleBuffer* vb = dynamic_cast<ParticleBuffer*>(VertexBufferManager::getInstance().getByKey(bState_name));
+  //if (vb == nullptr) {
+  //  Log::getInfo().log("NULLLLIIIIII");
+  //}
+  //else
+  //{
+  //  Log::getInfo().log("EI NULLLLIIIIII");
+  //}
+  vb->takeStep(0.01f);
+  vb->bind();
+  //Log::getInfo().log("BINDAUS ONNISTU");
+
+///  //vb->bind();
+///  unsigned int euler;
+///  //unsigned int vao;
+///  glGenBuffers(1,&euler);
+///  //glVertexArrays(1,&vao);
+///  //glBindVertexArray(vao);
+///  glBindBuffer(GL_ARRAY_BUFFER, euler);
+///  //glBindBuffer(GL_ARRAY_BUFFER, vb-getHandle());
+///  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, euler); // TODO continue
+///  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, vb->getHandle()); // TODO continue
+///
+///  Shader* compute = ShaderManager::getInstance().getByKey("particle1");
+///  compute->bind();
+///
+///  glDispatchCompute(1,1,1);
+///
+///  glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+  
+  //Log::getInfo().log("HIHHIIIIII 2");
+  Shader* shader = ShaderManager::getInstance().getByKey(render_shader_name);
+  //Log::getInfo().log("HIHHIIIIII 3");
+  shader->bind();
+  //Log::getInfo().log("HIHHIIIIII 4");
+  shader->setUniform("MVP", projection * viewMatrix * mx);
+  //Log::getInfo().log("HIHHIIIIII 5");
+  glDrawArrays(GL_POINTS, 0, 1);
+  //Log::getInfo().log("HIHHIIIIII");
+}
