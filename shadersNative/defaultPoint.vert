@@ -9,7 +9,7 @@ uniform mat4 MVP;
 
 void main(){
 
-	gl_Position =  MVP * vec4(vert_in);
+	gl_Position =  MVP * vec4(vert_in.xyz,1.0);
   //gl_PointSize = 15.0f;
   vFrag_in = vert_in.xyz;
 }

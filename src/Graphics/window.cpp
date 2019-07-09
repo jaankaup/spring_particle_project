@@ -11,7 +11,7 @@ Window& Window::getInstance()
 
 Window::Window()
 {
-    init(1200,800);
+    init(1280,720);
 }
 
 Window::~Window()

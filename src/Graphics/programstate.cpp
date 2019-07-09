@@ -128,6 +128,15 @@ Cube_meta_data* ProgramState::getMetadata()
   return &pMetaData;
 }
 
+void ProgramState::setParticleCount(const int particleCount)
+{
+   pParticleCount = particleCount;
+}
+
+int ProgramState::getParticleCount() const
+{
+  return pParticleCount;
+}
 //std::string ProgramState::dimensionToString() const
 //{
 //  return "([" + std::to_string(pMetaData.dimensionX_min) + ","  + std::to_string(pMetaData.dimensionX_max) + "] , " +

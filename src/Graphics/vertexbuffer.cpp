@@ -309,6 +309,10 @@ void ParticleBuffer::init()
 
     int work_group_sizes[3];
 
+    int result;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &result); 
+    Log::getDebug().log("Maximum texture size = %.", std::to_string(result));
+
     glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &work_group_sizes[0]);
     glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, &work_group_sizes[1]);
     glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, &work_group_sizes[2]);
@@ -321,8 +325,10 @@ void ParticleBuffer::init()
 
     // Lets create n*4 texture for computeshader.
     // We bind it to the "binding=1"
-    int t_w = 1;
-    int t_h = 4;
+    auto particleCount = ProgramState::getInstance().getParticleCount();
+    Log::getDebug().log("t_w = %.", std::to_string(particleCount));
+    int t_w = particleCount*2;
+    int t_h = 2;
     glGenTextures(1,&pTexture);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, pTexture);
@@ -336,6 +342,7 @@ void ParticleBuffer::init()
 
 ParticleBuffer::~ParticleBuffer()
 {
+  if (pTexture != 0) glDeleteTextures(1,&pTexture);
   //if (pTemp1 != 0) glDeleteBuffers(1,&pTemp1);
   //if (pTemp2 != 0) glDeleteBuffers(1,&pTemp2);
   //if (pTemp3 != 0) glDeleteBuffers(1,&pTemp3);
@@ -344,18 +351,19 @@ ParticleBuffer::~ParticleBuffer()
 
 void ParticleBuffer::takeStep(float t)
 {
-  //glBindVertexArray(0);
-  bind();
-
-  // Lets bind the ssbo to binding = 0.
-  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, pId);
-  //glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, pTemp1);
-    
-  // Lets bind the texture to binding = 1.
-  glBindImageTexture(1, pTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+  static int counter = 0;
+  glBindVertexArray(0);
+  //bind();
 
   Shader* compute = ShaderManager::getInstance().getByKey("particle1");
   compute->bind();
+
+  // Lets bind the ssbo to binding = 0.
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, pId);
+  // Lets bind the texture to binding = 1.
+  glBindImageTexture(1, pTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+
+  //glBindBuffer(GL_SHADER_STORAGE_BUFFER, pId);
   // Euler method. 
   compute->setUniform("phase",1.0f);
 
@@ -363,17 +371,54 @@ void ParticleBuffer::takeStep(float t)
   compute->setUniform("h",t);
 
   //Log::getDebug().log("Eka vaihe....");
-  glDispatchCompute(1,1,1);
+  glDispatchCompute(20,1,1);
   //Log::getDebug().log("Lopetellaan dispatsaillu....");
 
   glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
   //Log::getDebug().log("Toka vaihe....");
   compute->setUniform("phase",2.0f);
-  glDispatchCompute(1,1,1);
+  glDispatchCompute(20,1,1);
 
   glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
+  auto particle_count = ProgramState::getInstance().getParticleCount();
+  bool printJuttu = false;
+  if (printJuttu)
+  {
+  GLfloat* feedback = new GLfloat[particle_count*8];
+  GLfloat* textureData = new GLfloat[particle_count*16];
+  glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(float)*8*particle_count, feedback);
+  glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA,GL_FLOAT, textureData);
+
+
+  for (int i=0 ; i<particle_count ; i++)
+  {
+    int j = i*8;
+
+    Log::getDebug().log("%.",std::to_string(i));
+    Log::getDebug().log("Pos        (%,%,%,%)", std::to_string(feedback[j]),
+                                        std::to_string(feedback[j+1]),
+                                        std::to_string(feedback[j+2]),
+                                        std::to_string(feedback[j+3]));
+    Log::getDebug().log("Vel        (%,%,%,%)", std::to_string(feedback[j+4]),
+                                        std::to_string(feedback[j+5]),
+                                        std::to_string(feedback[j+6]),
+                                        std::to_string(feedback[j+7]));
+    Log::getDebug().log("Texture Pos(%,%,%,%)", std::to_string(textureData[j]),
+                                                std::to_string(textureData[j+1]),
+                                                std::to_string(textureData[j+2]),
+                                                std::to_string(textureData[j+3]));
+    Log::getDebug().log("Texture Vel(%,%,%,%)", std::to_string(textureData[j+4]),
+                                                std::to_string(textureData[j+5]),
+                                                std::to_string(textureData[j+6]),
+                                                std::to_string(textureData[j+7]));
+    counter++;
+  }
+
+   delete[] feedback; 
+   delete[] textureData;
+  }
 }
 
 inline void ParticleBuffer::addData(const void* data, unsigned int size, const std::vector<std::string>& types) const

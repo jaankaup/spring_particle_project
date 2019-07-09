@@ -18,7 +18,7 @@ void Renderer::init()
     glCullFace(GL_BACK);
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_PROGRAM_POINT_SIZE);
-    glPointSize(5);
+    glPointSize(4);
 }
 
 void Renderer::renderModels(const Camera& camera)
@@ -121,7 +121,7 @@ void Renderer::renderKipinat(const Camera& camera)
   //{
   //  Log::getInfo().log("EI NULLLLIIIIII");
   //}
-  vb->takeStep(0.01f);
+  vb->takeStep(0.0005f);
   vb->bind();
   //Log::getInfo().log("BINDAUS ONNISTU");
 
@@ -150,6 +150,7 @@ void Renderer::renderKipinat(const Camera& camera)
   //Log::getInfo().log("HIHHIIIIII 4");
   shader->setUniform("MVP", projection * viewMatrix * mx);
   //Log::getInfo().log("HIHHIIIIII 5");
-  glDrawArrays(GL_POINTS, 0, 1);
+  auto particleCount = ProgramState::getInstance().getParticleCount();
+  glDrawArrays(GL_POINTS, 0, particleCount);
   //Log::getInfo().log("HIHHIIIIII");
 }

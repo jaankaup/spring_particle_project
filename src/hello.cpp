@@ -38,7 +38,7 @@
 struct context
 {
     Renderer renderer;
-    Camera camera = Camera(glm::vec3(5.0f,7.0f,5.0f),glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f));
+    Camera camera = Camera(glm::vec3(0.0f,60.0f,60.0f),glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f));
 };
 
 void createShaders()
@@ -67,17 +67,17 @@ void createShaders()
 //    ProgramState::getInstance().getMetadata()->cubeMarchWireframe = MARCHING_CUBES_WIREFRAME;
 
     // The triangulation shader with density function 0-9 .
-    for (int i=0 ; i < 10 ; i++)
-    {
-      Shader* triangulationShader = ShaderManager::getInstance().create(MARCHING_CUBES_TRIANGULATION + std::to_string(i));
-      std::vector<std::string> triangulate_src = {"shaders/triangulate.vert", "shaders/triangulate.geom", "shaders/densityFunction" + std::to_string(i) + ".df"};
-      triangulationShader->setFeedback(true,"outputCase");
-      triangulationShader->buildDensity(triangulate_src);
-    }
-
-    ProgramState::getInstance().getMetadata()->triangulationShader = MARCHING_CUBES_TRIANGULATION + std::to_string(1);
+//////    for (int i=0 ; i < 10 ; i++)
+//////    {
+//////      Shader* triangulationShader = ShaderManager::getInstance().create(MARCHING_CUBES_TRIANGULATION + std::to_string(i));
+//////      std::vector<std::string> triangulate_src = {"shaders/triangulate.vert", "shaders/triangulate.geom", "shaders/densityFunction" + std::to_string(i) + ".df"};
+//////      triangulationShader->setFeedback(true,"outputCase");
+//////      triangulationShader->buildDensity(triangulate_src);
+//////    }
+//////
+//////    ProgramState::getInstance().getMetadata()->triangulationShader = MARCHING_CUBES_TRIANGULATION + std::to_string(1);
     ProgramState::getInstance().getMetadata()->particle1 = PARTICLE1;
-
+//////
     Shader* sParticle1 = ShaderManager::getInstance().create(PARTICLE1);
     std::vector<std::string> srcKipinat = {"shaders/kipinat.comp"};
     sParticle1->build(srcKipinat,false);
@@ -99,14 +99,47 @@ void createShaders()
     ProgramState::getInstance().getMetadata()->T4 = "T4";
 
     // Luodaan kipinat.
+    int particle_count = 20*400;
+    ProgramState::getInstance().setParticleCount(particle_count);
+
+
     Vertexbuffer* bstate = VertexBufferManager::getInstance().createParticleBuffer("BState");
     bstate->init();
     std::vector<std::string> types = {"4f","4f"};
     //GLfloat* feedback = new GLfloat[8];
-    auto array = new GLfloat[8]{0.0f,0.0f,0.0f,1.0f,0.2f,1.8f,0.0f,0.0f};
+    //auto array = new GLfloat[8]{0.0f,0.0f,0.0f,0.0f,0.0f,7.2f,0.0f,0.0f};
+    auto array = new GLfloat[8*particle_count];
+    MyRandom<float> mr;
+    mr.setDistribution(5.0f,40.0f);
+    MyRandom<float> mr2(std::to_string(mr()));
+    mr2.setDistribution(-27.0f,27.0f);
+    bool tulostaTama = false;
+    for (int i=0; i<particle_count ; ++i)
+    {
+      int j = 8*i;
+      array[j] = 0.0f; 
+      array[j+1] = 0.0f; 
+      array[j+2] = 0.0f; 
+      array[j+3] = 1.0f; 
+      array[j+4] = mr2(); 
+      array[j+5] = mr(); 
+      array[j+6] = mr2(); 
+      array[j+7] = 0.0f; 
+      if (tulostaTama) 
+      {
+      Log::getInfo().log("P: (%,%,%,%,%,%,%,%)", std::to_string(array[j]),
+                                                 std::to_string(array[j+1]),
+                                                 std::to_string(array[j+2]),
+                                                 std::to_string(array[j+3]),
+                                                 std::to_string(array[j+4]),
+                                                 std::to_string(array[j+5]),
+                                                 std::to_string(array[j+6]),
+                                                 std::to_string(array[j+7]));
+      }
+    }
     std::vector<std::string> types2 = {"4f","4f"};
-    bstate->addData(array, sizeof(float)*8, types2);
-    bstate->setCount(8);
+    bstate->addData(array, sizeof(float)*8*particle_count, types2);
+    bstate->setCount(8*particle_count);
     delete[] array;
 }
 
@@ -308,7 +341,7 @@ int main(int argc, char* argv[])
   Window window = Window::getInstance();
 
   // Create all textures.
-  createtextures();
+  //createtextures();
 
   // Creates a default texture for rendering the cube.
   // TODO::: MODIFY ::: TODO
@@ -330,7 +363,7 @@ int main(int argc, char* argv[])
   c.renderer.init();
 
 
-    ModelManager::getInstance().createSceneObject();
+    //ModelManager::getInstance().createSceneObject();
     //Timer::getInstance().reset();
 
     /**

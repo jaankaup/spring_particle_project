@@ -95,7 +95,7 @@ class ProgramState
     bool getDebugCube() const;
     glm::ivec3 getCubeDimension() const;
     Cube_meta_data* getMetadata();
-
+    int getParticleCount() const;
 
     void setScreenWidth(const int width);
     void setScreenHeight(const int height);
@@ -106,6 +106,7 @@ class ProgramState
     void setCubeMask(const float cubeMask);
     void setDebugCube(const bool debugCube);
     void setCubeDimension(const glm::ivec3& cubeDimension);
+    void setParticleCount(const int particleCount);
 //    std::string dimensionToString() const;
 
 	private:
@@ -121,6 +122,7 @@ class ProgramState
     bool pDebugCube = false;
     glm::ivec3 pCubeDimension;
     Cube_meta_data pMetaData;
+    int pParticleCount = 0;
 
 };
 
