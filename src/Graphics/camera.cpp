@@ -135,13 +135,15 @@ void Camera::update(const float time)
  */
 void Camera::handleKeyInput()
 {
-  uint32_t newTick = SDL_GetTicks();
-  auto del = newTick - pPrevTick;
-  if (del != 0)
-  {
-    deltaTime = float(newTick)/float(pPrevTick);
-  }
-  pPrevTick = newTick;
+  deltaTime = ProgramState::getInstance().getTimeDelta();
+//  uint32_t newTick = SDL_GetTicks();
+//  auto del = newTick - pPrevTick;
+//  if (del != 0)
+//  {
+//    ProgramState::getInstance().getDeltaTime();
+//    deltaTime = float(newTick)/float(pPrevTick);
+//  }
+//  pPrevTick = newTick;
     /* Pyydetään SDL:n näppäintila */
     const Uint8* keystate = SDL_GetKeyboardState(NULL);
 

@@ -6,6 +6,7 @@
 //#include <GL/glew.h>
 #include <cmath>
 #include <tuple>
+#include <SDL2/SDL.h>
 #include <glm/glm.hpp>
 //#include <glm/gtc/type_ptr.hpp>
 #include "vertexbuffer.h"
@@ -107,6 +108,10 @@ class ProgramState
     void setDebugCube(const bool debugCube);
     void setCubeDimension(const glm::ivec3& cubeDimension);
     void setParticleCount(const int particleCount);
+
+    void updateTick();
+    float getTimeDelta() const;
+    uint32_t getTimeDeltaMilliseconds() const;
 //    std::string dimensionToString() const;
 
 	private:
@@ -123,7 +128,9 @@ class ProgramState
     glm::ivec3 pCubeDimension;
     Cube_meta_data pMetaData;
     int pParticleCount = 0;
-
+    uint32_t pTick = 0;
+    float pDeltaTime = 0.0f;
+    uint32_t pDeltaMilliseconds = 0;
 };
 
 

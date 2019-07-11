@@ -18,7 +18,7 @@ void Renderer::init()
     glCullFace(GL_BACK);
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_PROGRAM_POINT_SIZE);
-    glPointSize(4);
+    glPointSize(8);
 }
 
 void Renderer::renderModels(const Camera& camera)
@@ -121,7 +121,7 @@ void Renderer::renderKipinat(const Camera& camera)
   //{
   //  Log::getInfo().log("EI NULLLLIIIIII");
   //}
-  vb->takeStep(0.0005f);
+  vb->takeStep(0.002f);
   vb->bind();
   //Log::getInfo().log("BINDAUS ONNISTU");
 

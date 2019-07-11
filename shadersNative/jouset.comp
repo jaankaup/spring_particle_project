@@ -4,7 +4,6 @@ uniform float h = 0.1;
 uniform vec4 gravity = vec4(0.0,-0.00981,0.0,0.0);
 uniform float phase = 1.0;
 
-// Position/velocity data.
 struct PVdata
 {
   vec4 pos;
@@ -18,30 +17,30 @@ layout (local_size_x = 200,local_size_y=1,local_size_z=1) in;
 // +--------------------------------------------------------------------------------------------
 // | (posX,posY,posZ,posW,velX,velY,velZ,velW) | (posX,posY,posZ,posW,velX,velY,velZ,velW) | 
 // +--------------------------------------------------------------------------------------------
-//
+
 layout (std430, binding = 0) buffer InBuf 
 {
   PVdata input[];
 };
 
-//        k1_0_vel                k2_0_vel                k3_0_vel            k4_0_vel 
+//layout (rgba32f, binding = 1) uniform image2D temp;  // Jos kaytetaan tekstuuria.
+
+//        k1_0                    k2_0                     k3_0                  k3_0 
 // +----------------------+----------------------+----------------------+----------------------+---
 // | (v_x, v_y, v_z, v_w) | (v_x, v_y, v_z, v_w) | (v_x, v_y, v_z, v_w) | (v_x, v_y, v_z, v_w) |
 // +----------------------+----------------------+----------------------+----------------------+---
-//
+
 layout (std430, binding = 1) buffer Temp1Buf 
 {
   vec4 temp1[];
 };
 
-// Lasketaan uusi vel. Eli lasketaan edellinen velocity ja "gravitaatio" yhteen.
 vec4 evalF(PVdata pv)
 {
-  return (pv.vel + gravity);
+  return (pv.vel + gravity); // * (1.0 + time);
 }
 
-// Tallennetaan alku-derivaatta temp[pos*4] kohtaan. Eli voimien summa alkupisteessa.
-// k1 = f(xn,tn)
+// Tallennetaan alku-derivaatta temp[pos*4] kohtaan.
 void k1(uint pos)
 {
   vec4 derivate_k1 = evalF(input[pos]); 
@@ -49,21 +48,20 @@ void k1(uint pos)
 }
 
 // Lasketaan mid point ja tallennetaan sen derivaatta temp[pos*4+1] kohtaan.
-// k2 = f(xn+h*0.5*k1,tn+h*0.5)
 void k2(uint pos)
 {
  // Haetaan derivaatta aloitus pisteessa.
  vec4 der = temp1[pos*4];
 
- // Lasketaan "middle point", eli positio alkupisteesta euler * h/2 suuntaan.
+ // Lasketaan "middle point".
  vec4 newPos = input[pos].pos + 0.5 * h * der;
 
  // Luodaan middle pointille positio ja velocity.
  PVdata pv_middle_point;
  pv_middle_point.pos = newPos;
- pv_middle_point.vel = der + h*0.5*der;
+ pv_middle_point.vel = der;
 
- // Lasketaan middle pointin derivaatta.
+ // Lasketaan middle pointin derivaatta / 2.
  vec4 middle_point_der = evalF(pv_middle_point);
 
  // Tallennetaan middle pointin derivaatta temp[pos*4+1].
@@ -82,7 +80,7 @@ void k3(uint pos)
  // Luodaan k3:lle positio ja velocity.
  PVdata pv_k3;
  pv_k3.pos = newPos;
- pv_k3.vel = der + h*0.5*der; //der;
+ pv_k3.vel = der;
 
  // Lasketaan derivaatta k3:lle.
  vec4 k3_der = evalF(pv_k3);
@@ -103,8 +101,7 @@ void k4(uint pos)
  // Luodaan k4:lle positio ja velocity.
  PVdata pv_k4;
  pv_k4.pos = newPos;
- pv_k4.vel = der + h*der;
- //pv_k4.vel = der;
+ pv_k4.vel = der;
 
  // Lasketaan k4:n derivaatta.
  vec4 k4_der = evalF(pv_k4);
@@ -114,7 +111,7 @@ void k4(uint pos)
 
  vec4 lopullinen_derivaatta = 1.0/6.0 * (temp1[pos*4]+2*temp1[pos*4+1]+2*temp1[pos*4+2]+temp1[pos*4+3]);
  input[pos].pos = input[pos].pos + lopullinen_derivaatta * h; 
- input[pos].vel = lopullinen_derivaatta + h * lopullinen_derivaatta;
+ input[pos].vel = lopullinen_derivaatta;
 }
 
 void euler(uint pos)
@@ -123,7 +120,7 @@ void euler(uint pos)
   vec4 der = temp1[pos*4];
   vec4 newPos = input[pos].pos + h*der;
   input[pos].pos = newPos;
-  input[pos].vel = der + h * der;
+  input[pos].vel = der;
 }
 
 void copyToState(uint pos)
@@ -144,23 +141,3 @@ void main()
   else if (phase == 5.0) euler(pos);
 //  else if (phase == 2.0) copyToState(pos);
 }
-
-// TEKSTUURIN KANSSA
-//void euler(uint pos)
-//{
-//  PVdata t = input[pos]; 
-//  PVdata joo; 
-//  joo.pos = t.pos + t.vel * h;// + h*gravity;
-//  joo.vel = h*gravity + t.vel;// + h*gravity;
-//  imageStore(temp, ivec2(2*pos,0), joo.pos);
-//  imageStore(temp, ivec2(2*pos+1,0), joo.vel);
-//}
-//
-//void copyToState(uint pos)
-//{
-//  vec4 position = imageLoad(temp, ivec2(2*pos,0));
-//  vec4 velocity = imageLoad(temp, ivec2(2*pos+1,0));
-//  input[pos].pos = position;
-//  input[pos].vel = velocity;
-//}
-//layout (rgba32f, binding = 1) uniform image2D temp;  // Jos kaytetaan tekstuuria.

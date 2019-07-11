@@ -62,10 +62,10 @@ class ParticleBuffer : public Vertexbuffer
     int pMax_group_size_x = 0;
     int pMax_group_size_y = 0;
     int pMax_group_size_z = 0;
-    //GLuint pTemp1 = 0;
-    //GLuint pTemp2 = 0;
-    //GLuint pTemp3 = 0;
-    //GLuint pTemp4 = 0;
+    GLuint pTemp1 = 0;
+//    GLuint pTemp2 = 0;
+//    GLuint pTemp3 = 0;
+//    GLuint pTemp4 = 0;
 
 };
 

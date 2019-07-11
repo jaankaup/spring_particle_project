@@ -22,4 +22,24 @@ Janne Kauppinen
 +---------------+---------------------------------+--------------------------+-------------+
 | 8h (4.7.2019) | Compute shaderin opiskelua.     | Epäselvyyttä vielä on.   |   28h       |
 +---------------+---------------------------------+--------------------------+-------------+
-| ?h 54.7.2019) |                                 |                          |             |
+| 7h 5.7.2019)  | Comput shaderin opiuskelua.     | Epäselvyyttä hieman.     |   35h       |
++---------------+---------------------------------+--------------------------+-------------+
+| 8h 8.7.2019)  | Comput shaderin opiuskelua.     | Vain yksi partikkeli     |   43h       |
+|               |                                 | onnistui.                |             |
++---------------+---------------------------------+--------------------------+-------------+
+| 8h 9.7.2019)  | Compute shaderin opiskelua.     | Vaikueksia hahmottaa se  |   51h       |
+|               | RK4-toteutusta.                 | kuinka RK4 pitaisi to-   |             |
+|               |                                 | teuttaa.                 |             |
++---------------+---------------------------------+--------------------------+-------------+
+| 9h 10.7.2019) | RK4 ja euler toteutettu putoa-  | Menikö toteutus oikein?  |   60h       |
+|               | villa palloilla compute shade-  | Pitää vielä palata ta-   |             |
+|               | rissa.                          | kaisin miettimään.       |             |
+|               |                                 | Selkeästi RK4:lla pa-    |             |
+|               |                                 | likat puotavat nopeammin.|             |
+|               |                                 | Mutta onko se oikein?    |             |
++---------------+---------------------------------+--------------------------+-------------+
+
+
+
+
+23.7. Klo 16:15 -> 

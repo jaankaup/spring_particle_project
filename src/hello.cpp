@@ -79,7 +79,7 @@ void createShaders()
     ProgramState::getInstance().getMetadata()->particle1 = PARTICLE1;
 //////
     Shader* sParticle1 = ShaderManager::getInstance().create(PARTICLE1);
-    std::vector<std::string> srcKipinat = {"shaders/kipinat.comp"};
+    std::vector<std::string> srcKipinat = {"shaders/kipinat2.comp"};
     sParticle1->build(srcKipinat,false);
 
     // The shader for drawing the triangulated scene. The name is a bit
@@ -99,9 +99,8 @@ void createShaders()
     ProgramState::getInstance().getMetadata()->T4 = "T4";
 
     // Luodaan kipinat.
-    int particle_count = 20*400;
+    int particle_count = 200*20;
     ProgramState::getInstance().setParticleCount(particle_count);
-
 
     Vertexbuffer* bstate = VertexBufferManager::getInstance().createParticleBuffer("BState");
     bstate->init();
@@ -109,8 +108,16 @@ void createShaders()
     //GLfloat* feedback = new GLfloat[8];
     //auto array = new GLfloat[8]{0.0f,0.0f,0.0f,0.0f,0.0f,7.2f,0.0f,0.0f};
     auto array = new GLfloat[8*particle_count];
+//    array[0] = 0.0f; 
+//    array[1] = 0.0f; 
+//    array[2] = 0.0f; 
+//    array[3] = 1.0f; 
+//    array[4] = 0.01f; 
+//    array[5] = 5.0f;; 
+//    array[6] = 0.01f; 
+//    array[7] = 0.0f; 
     MyRandom<float> mr;
-    mr.setDistribution(5.0f,40.0f);
+    mr.setDistribution(5.0f,10.0f);
     MyRandom<float> mr2(std::to_string(mr()));
     mr2.setDistribution(-27.0f,27.0f);
     bool tulostaTama = false;
@@ -188,6 +195,7 @@ void loop_handler2(void *arg)
     context* c = static_cast<context*>(arg);
     SDL_Event e;
 
+    ProgramState::getInstance().updateTick();
     while (SDL_PollEvent(&e))
     {
         switch (e.type)

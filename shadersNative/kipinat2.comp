@@ -1,0 +1,141 @@
+#version 430
+
+uniform float h = 0.1;
+uniform vec4 gravity = vec4(0.0,-1.81,0.0,0.0);
+uniform float phase = 1.0;
+
+// Particle data.
+struct PVdata
+{
+  vec4 pos;
+  vec4 vel;
+};
+
+// Local work group size.
+layout (local_size_x = 200,local_size_y=1,local_size_z=1) in;
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+//                        0                                          1                       //
+// +-----------------------------------------------------------------------------------------//
+// | (posX,posY,posZ,posW,velX,velY,velZ,velW) | (posX,posY,posZ,posW,velX,velY,velZ,velW) | //
+// +-----------------------------------------------------------------------------------------//
+//                                                                                           //
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+layout (std430, binding = 0) buffer InBuf 
+{
+  PVdata input[];
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+//        k1_0_vel                k2_0_vel                k3_0_vel            k4_0_vel       //
+// +----------------------+----------------------+----------------------+----------------------
+// | (v_x, v_y, v_z, v_w) | (v_x, v_y, v_z, v_w) | (v_x, v_y, v_z, v_w) | (v_x, v_y, v_z, v_w) 
+// +----------------------+----------------------+----------------------+----------------------
+//                                                                                           //
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+layout (std430, binding = 1) buffer Temp1Buf 
+{
+  PVdata temp[];
+};
+
+// Calculate new particle based on the  given particle and time. Now the only force is
+// "gravity".
+PVdata evalF(PVdata pv, float time)
+{
+  PVdata result;
+  result.pos = pv.pos + pv.vel*time; 
+  result.vel = pv.vel + gravity * time;
+  return result;
+}
+
+void k1(uint ind)
+{
+  PVdata k1 = evalF(input[ind], 0.0); 
+  temp[4*ind] = k1;
+}
+
+void k2(uint ind)
+{
+ PVdata k1 = temp[ind*4];
+ PVdata mid_point = evalF(input[ind],h*0.5);
+ PVdata k2 = evalF(mid_point,h*0.5); 
+ temp[4*ind+1] = k2;
+}
+
+void k3(uint ind)
+{
+ PVdata k2 = temp[ind*4+1];
+
+ PVdata k2_initial;
+ k2_initial.pos = input[ind].pos;
+ k2_initial.vel = k2.vel;
+
+ PVdata k2_middle_point = evalF(k2_initial,h*0.5);
+ PVdata k3 = evalF(k2_middle_point,h*0.5); 
+
+ temp[4*ind+2] = k3;
+}
+
+void k4(uint ind)
+{
+ PVdata k3 = temp[ind*4+2];
+
+ PVdata k3_initial;
+ k3_initial.pos = input[ind].pos;
+ k3_initial.vel = k3.vel;
+
+ PVdata k4 = evalF(k3_initial,h); 
+
+ temp[4*ind+3] = k4;
+
+ vec4 final_vel = 1.0/6.0 * (temp[ind*4].vel+2*temp[ind*4+1].vel+2*temp[ind*4+2].vel+temp[ind*4+3].vel);
+ PVdata final_initial;
+ final_initial.pos = input[ind].pos;
+ final_initial.vel = final_vel;
+
+ PVdata result = evalF(final_initial, h);
+ input[ind] = result;
+}
+
+void euler(uint ind)
+{
+  PVdata euler = evalF(input[ind],h);
+  input[ind] = euler;
+//  k1(ind);
+//  PVdata der = temp[ind*4];
+//  vec4 newPos = input[ind].pos + h*der;
+//  input[ind].pos = newPos;
+//  input[ind].vel = der + h * der;
+}
+
+void main()
+{
+  uint ind = gl_GlobalInvocationID.x;
+  if (phase == 1.0) k1(ind);
+  else if (phase == 2.0) k2(ind);
+  else if (phase == 3.0) k3(ind);
+  else if (phase == 4.0) k4(ind);
+  else if (phase == 5.0) euler(ind);
+}
+
+// TEKSTUURIN KANSSA
+//void euler(uint pos)
+//{
+//  PVdata t = input[pos]; 
+//  PVdata joo; 
+//  joo.pos = t.pos + t.vel * h;// + h*gravity;
+//  joo.vel = h*gravity + t.vel;// + h*gravity;
+//  imageStore(temp, ivec2(2*pos,0), joo.pos);
+//  imageStore(temp, ivec2(2*pos+1,0), joo.vel);
+//}
+//
+//void copyToState(uint pos)
+//{
+//  vec4 position = imageLoad(temp, ivec2(2*pos,0));
+//  vec4 velocity = imageLoad(temp, ivec2(2*pos+1,0));
+//  input[pos].pos = position;
+//  input[pos].vel = velocity;
+//}
+//layout (rgba32f, binding = 1) uniform image2D temp;  // Jos kaytetaan tekstuuria.

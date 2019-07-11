@@ -137,6 +137,28 @@ int ProgramState::getParticleCount() const
 {
   return pParticleCount;
 }
+
+void ProgramState::updateTick()
+{
+  uint32_t newTick = SDL_GetTicks();
+  auto del = newTick - pTick;
+  pDeltaMilliseconds = del; 
+  if (del != 0)
+  {
+    pDeltaTime = float(newTick)/float(pTick);
+  }
+  pTick = newTick;
+}
+
+float ProgramState::getTimeDelta() const
+{
+  return pDeltaTime;
+}
+
+uint32_t ProgramState::getTimeDeltaMilliseconds() const
+{
+  return pDeltaMilliseconds;
+}
 //std::string ProgramState::dimensionToString() const
 //{
 //  return "([" + std::to_string(pMetaData.dimensionX_min) + ","  + std::to_string(pMetaData.dimensionX_max) + "] , " +
