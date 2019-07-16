@@ -121,7 +121,7 @@ void Renderer::renderKipinat(const Camera& camera)
   //{
   //  Log::getInfo().log("EI NULLLLIIIIII");
   //}
-  vb->takeStep(0.05f);
+  vb->takeStep(0.0001f);
   vb->bind();
   //Log::getInfo().log("BINDAUS ONNISTU");
 

@@ -2,9 +2,11 @@
 
 uniform float h = 0.1;
 uniform float k = 0.1;
-uniform vec4 gravity = vec4(0.0,-0.00981,0.0,0.0);
+uniform vec4 gravity = vec4(0.0,-9.81,0.0,0.0);
 uniform float phase = 1.0;
-uniform float rest = 1.414214; 
+uniform float mass = 0.1;
+uniform float viskositeettiKerroin = 0.1;
+//uniform float rest = 1.414214; 
 
 struct PVdata
 {
@@ -19,7 +21,7 @@ struct StaticData
   vec4 rest_forces;
 };
 
-layout (local_size_x = 9,local_size_y=1,local_size_z=1) in;
+layout (local_size_x = 90,local_size_y=1,local_size_z=1) in;
 
 layout (std430, binding = 0) buffer InitialBuf { PVdata initial[]; };
 layout (std430, binding = 1) buffer TempBuf { PVdata temp[]; };
@@ -35,7 +37,7 @@ layout (std430, binding = 6) buffer K4 { vec4 k4[]; };
 vec4 laske_voima(vec4 posA, vec4 posB, float r) {
 
   vec3 d = posB.xyz - posA.xyz;
-  return 1.0 * k * (length(d) - rest) * vec4(normalize(d),0.0); // dist;  
+  return 1.0 * k * (length(d) - r) * vec4(normalize(d),0.0); // dist;  
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -70,7 +72,7 @@ void evalF_flex(uint index) {
    float is_static = sd.some_data.x;
 
    // Tahan voima.
-   vec4 force = vec4(0.0);
+   vec4 force = gravity * mass;
 
    // Kaveri indeksit.
    float friend0 = sd.friends[0]; 
@@ -101,41 +103,78 @@ void evalF_flex(uint index) {
      force = force + laske_voima(pv_now.pos, getParticle(uint(friend3)).pos, rest3);
    }
 
+   force = force - pv_now.vel * viskositeettiKerroin;
+   force = force * 1.0/mass;
+   force = force + pv_now.vel;
+
    if (is_static == -1.0) force = vec4(0.0);
 
-   // k1.
    if (phase == 1.0) {
      PVdata new_data;
-     new_data.pos = pv_initial.pos + pv_now.vel * 0.5 * h * force;  
+     new_data.pos = pv_initial.pos + 0.5 * h * force;  
      new_data.vel = pv_now.vel + 0.5 * h * force;  
      temp[index] = new_data;
      //k1[index] = pv_now.vel + h * force;
-     k1[index] = pv_now.vel * h * force;
+     k1[index] = h * force;
    }
 
    else if (phase == 2.0) {
      PVdata new_data;
-     new_data.pos = pv_initial.pos + pv_now.vel * 0.5 * h * force;  
+     new_data.pos = pv_initial.pos + 0.5 * h * force;  
      new_data.vel = pv_initial.vel + 0.5 * h * force;  
      temp[index] = new_data;
      //k2[index] = pv_now.vel + h * force;
-     k2[index] = pv_now.vel * h * force;
+     k2[index] = h * force;
    }
 
    else if (phase == 3.0) {
      PVdata new_data;
-     new_data.pos = pv_initial.pos + pv_now.vel * h * force;  
+     new_data.pos = pv_initial.pos + h * force;  
      new_data.vel = pv_initial.vel + h * force;  
      temp[index] = new_data;
      //k3[index] = pv_now.vel + h * force;
-     k3[index] = pv_now.vel * h * force;
+     k3[index] = h * force;
    }
 
    else if (phase == 4.0) {
      //PVdata new_data;
      //k4[index] = pv_now.vel + h * force;
-     k4[index] = pv_now.vel * h * force;
+     k4[index] = h * force;
    }
+
+   // k1.
+//   if (phase == 1.0) {
+//     PVdata new_data;
+//     new_data.pos = pv_initial.pos + pv_now.vel * 0.5 * h * force;  
+//     new_data.vel = pv_now.vel + 0.5 * h * force;  
+//     temp[index] = new_data;
+//     //k1[index] = pv_now.vel + h * force;
+//     k1[index] = pv_now.vel * h * force;
+//   }
+//
+//   else if (phase == 2.0) {
+//     PVdata new_data;
+//     new_data.pos = pv_initial.pos + pv_now.vel * 0.5 * h * force;  
+//     new_data.vel = pv_initial.vel + 0.5 * h * force;  
+//     temp[index] = new_data;
+//     //k2[index] = pv_now.vel + h * force;
+//     k2[index] = pv_now.vel * h * force;
+//   }
+//
+//   else if (phase == 3.0) {
+//     PVdata new_data;
+//     new_data.pos = pv_initial.pos + pv_now.vel * h * force;  
+//     new_data.vel = pv_initial.vel + h * force;  
+//     temp[index] = new_data;
+//     //k3[index] = pv_now.vel + h * force;
+//     k3[index] = pv_now.vel * h * force;
+//   }
+//
+//   else if (phase == 4.0) {
+//     //PVdata new_data;
+//     //k4[index] = pv_now.vel + h * force;
+//     k4[index] = pv_now.vel * h * force;
+//   }
 
 }
 

@@ -37,7 +37,7 @@
 struct context
 {
     Renderer renderer;
-    Camera camera = Camera(glm::vec3(40.0f,40.0f,80.0f),glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f));
+    Camera camera = Camera(glm::vec3(10.0f,10.0f,20.0f),glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f));
 };
 
 void createShaders()
@@ -145,10 +145,10 @@ void createShaders()
     ProgramState::getInstance().getMetadata()->T3 = "T3";
     ProgramState::getInstance().getMetadata()->T4 = "T4";
 
-    const int width = 3;
-    const int height = 3;
+    const int width = 90;
+    const int height = 90;
     int particle_count = width*height;
-    float offset = 1.0f;
+    float offset = 0.1f;
     glm::vec3 a = glm::vec3(0.0f);
     glm::vec3 b = glm::vec3(offset,offset,0.0f);
     float dist = glm::distance(a,b);
@@ -157,7 +157,7 @@ void createShaders()
     Shader* compute = ShaderManager::getInstance().getByKey("particle1");
     compute->bind();
     compute->setUniform("r",dist);
-    compute->setUniform("k",1.0f);
+    compute->setUniform("k",100.0f);
 
     ProgramState::getInstance().setParticleCount(particle_count);
     ProgramState::getInstance().setParticlesWidth(width);
@@ -186,7 +186,7 @@ void createShaders()
 
       // Positio, tehdaan verho.
       array[pah] = (i%width)*offset; 
-      array[pah+1] = (-10.5f)*j*offset; 
+      array[pah+1] = (-1.0f)*j*offset; 
       array[pah+2] = 0.0f; 
       array[pah+3] = 1.0f; 
 

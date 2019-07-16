@@ -398,7 +398,7 @@ void ParticleBuffer::takeStep(float h)
     // The time.
     compute->setUniform("h",h);
   
-    const static int X = 1;
+    const static int X = 90;
     const static int Y = 1;
 
 //    compute->setUniform("phase",5.0f);
