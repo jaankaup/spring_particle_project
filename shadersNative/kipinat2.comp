@@ -1,141 +1,444 @@
 #version 430
 
 uniform float h = 0.1;
-uniform vec4 gravity = vec4(0.0,-1.81,0.0,0.0);
+uniform vec4 gravitation = vec4(0.0,-0.981,0.0,0.0);
 uniform float phase = 1.0;
 
-// Particle data.
-struct PVdata
+const int WIDTH = 3;
+const int HEIGHT = 3;
+
+// Paikallisen work grouping koko. Partikkeleita on nyt siis 1000*1000.
+layout (local_size_x = 3,local_size_y=3,local_size_z=1) in;
+
+uniform float k = 10.5;  
+uniform float r = 10.5;  
+
+//  Initial data (vec4) positions.
+//     +-------+---------------+--------------------------------------------------------------------+
+//     | pos(0,0) | pos(0,1)   | pos(0,2)  | ...                                                    | 
+//     +-------+-------+---------+------------------------------------------------------------------+
+//     | pos(0,1) | pos(1,1)   | pos(2,1)  | ...                                                    | 
+//     +-------+---------------+--------------------------------------------------------------------+
+//                .
+//                .
+//                .
+//     +-------+-------+-------+--------------------------------------------------------------------+
+//     |pos_0_n-1 | pos_1_n-1  | pos_2_n-1 | ...                                                    | 
+//     +-------+-------+-------+--------------------------------------------------------------------+
+
+layout (rgba32f, binding = 0) uniform image2D input;
+
+// RK4-data (2Dtexture)
+layout (rgba32f, binding = 1) uniform image2D k1;
+
+//       +---------+---------+---------+------------------------------------------------------------+----------+
+//  K1   | k1(0,0) | k1(1,0) | k1(2,0) | ...                                                        | k1(n-1,0)|
+//       +---------+---------+---------+------------------------------------------------------------+----------+
+//  K1   | k1(0,1) | k1(1,1) | k1(2,1) | ...                                                        | k1(n-1,1)|
+//       +---------+---------+---------+------------------------------------------------------------+----------+
+//                 .
+//                 .
+
+layout (rgba32f, binding = 2) uniform image2D k2;
+//       +---------+---------+---------+------------------------------------------------------------+----------+
+//  K2   | k2(0,0) | k2(1,0) | k2(2,0) | ...                                                        | k2(n-1,0)|
+//       +---------+---------+---------+------------------------------------------------------------+----------+
+//  K2   | k2(0,1) | k2(1,1) | k2(2,1) | ...                                                        | k2(n-1,1)|
+//       +---------+---------+---------+------------------------------------------------------------+----------+
+//                 .
+//                 .
+
+layout (rgba32f, binding = 3) uniform image2D k3;
+//       +---------+---------+---------+------------------------------------------------------------+----------+
+//  K3   | k3(0,0) | k3(1,0) | k3(2,0) | ...                                                        | k3(n-1,0)|
+//       +---------+---------+---------+------------------------------------------------------------+----------+
+//  K3   | k3(0,1) | k3(1,1) | k3(2,1) | ...                                                        | k3(n-1,1)|
+//       +---------+---------+---------+------------------------------------------------------------+----------+
+//                 .
+//                 .
+
+layout (rgba32f, binding = 4) uniform image2D k4;
+//       +---------+---------+---------+------------------------------------------------------------+----------+
+//  K4   | k4(0,0) | k4(1,0) | k4(2,0) | ...                                                        | k4(n-1,0)|
+//       +---------+---------+---------+------------------------------------------------------------+----------+
+//  K4   | k4(0,1) | k4(1,1) | k4(2,1) | ...                                                        | k4(n-1,1)|
+//       +---------+---------+---------+------------------------------------------------------------+----------+
+//                 .
+//                 .
+
+layout (rgba32f, binding = 5) uniform image2D temp;
+//       +---------+---------+---------+------------------------------------------------------------+----------+
+// Temp  | t(0,0)  | t(1,0)  | t(2,0)  | ...                                                        | t(n-1,0)|
+//       +---------+---------+---------+------------------------------------------------------------+----------+
+// Temp  | t(0,1)  | t(1,1)  | t(2,1)  | ...                                                        | t(n-1,1)|
+//       +---------+---------+---------+------------------------------------------------------------+----------+
+//                 .
+//                 .
+
+// Piirrettava data.
+layout (std430, binding = 6) buffer OutputBufferi 
 {
-  vec4 pos;
-  vec4 vel;
+  vec4 result[];
 };
 
-// Local work group size.
-layout (local_size_x = 200,local_size_y=1,local_size_z=1) in;
+// Laske jousen aiheuttama voima. @posA on taman partikkelin positio. @posB on kaverin positio. 
+// Nyt lepopituudet on asetettu uniformiin r ja jousi-vakio k samoin.
+vec4 laske_voima(vec4 posA, vec4 posB) {
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-//                        0                                          1                       //
-// +-----------------------------------------------------------------------------------------//
-// | (posX,posY,posZ,posW,velX,velY,velZ,velW) | (posX,posY,posZ,posW,velX,velY,velZ,velW) | //
-// +-----------------------------------------------------------------------------------------//
-//                                                                                           //
-///////////////////////////////////////////////////////////////////////////////////////////////
+  vec4 d = posA - posB;
+  //float dist = distance(d,vec4(0.0));
+  float dist = distance(posA,posB);
 
-layout (std430, binding = 0) buffer InBuf 
-{
-  PVdata input[];
-};
-
-///////////////////////////////////////////////////////////////////////////////////////////////
-//        k1_0_vel                k2_0_vel                k3_0_vel            k4_0_vel       //
-// +----------------------+----------------------+----------------------+----------------------
-// | (v_x, v_y, v_z, v_w) | (v_x, v_y, v_z, v_w) | (v_x, v_y, v_z, v_w) | (v_x, v_y, v_z, v_w) 
-// +----------------------+----------------------+----------------------+----------------------
-//                                                                                           //
-///////////////////////////////////////////////////////////////////////////////////////////////
-
-layout (std430, binding = 1) buffer Temp1Buf 
-{
-  PVdata temp[];
-};
-
-// Calculate new particle based on the  given particle and time. Now the only force is
-// "gravity".
-PVdata evalF(PVdata pv, float time)
-{
-  PVdata result;
-  result.pos = pv.pos + pv.vel*time; 
-  result.vel = pv.vel + gravity * time;
-  return result;
+  return -1.0 * k * (dist - r) * d / dist;  
 }
 
-void k1(uint ind)
-{
-  PVdata k1 = evalF(input[ind], 0.0); 
-  temp[4*ind] = k1;
+// Hakee partikkelin indeksista @ind. Jos ollaan laskemassa k1:sta, niin 
+// haetaan inputista. Muussa tapauksessa haetaan tempista.
+vec4 getParticle(ivec2 index) {
+  if (phase == 1.0) return imageLoad(input, index); 
+  else return imageLoad(temp, index);
 }
 
-void k2(uint ind)
-{
- PVdata k1 = temp[ind*4];
- PVdata mid_point = evalF(input[ind],h*0.5);
- PVdata k2 = evalF(mid_point,h*0.5); 
- temp[4*ind+1] = k2;
-}
+// Laskee voimat pisteessa indeksissa (x,y). Nyt ei ole huomioita aikaa... 
+void evalF_flex(ivec2 index) {
 
-void k3(uint ind)
-{
- PVdata k2 = temp[ind*4+1];
+   // Haetaan partikkelin alkuperainen sijainti.
+   vec4 pos = imageLoad(input, index);
 
- PVdata k2_initial;
- k2_initial.pos = input[ind].pos;
- k2_initial.vel = k2.vel;
+   // Loppulaskenta.
+   if (phase == 5.0) {
+     vec4 final_pos = pos + 1.0/6.0 * h * (imageLoad(k1, index)   +
+                                           2*imageLoad(k2, index) + 
+                                           2*imageLoad(k3, index) + imageLoad(k4, index)); 
+     imageStore(input, index, final_pos);
 
- PVdata k2_middle_point = evalF(k2_initial,h*0.5);
- PVdata k3 = evalF(k2_middle_point,h*0.5); 
+     // Kopioidaan lopputulos piirto-puskuriin.
+     result[index.x+index.y*WIDTH] = final_pos; 
+     return;     
+   }
 
- temp[4*ind+2] = k3;
-}
 
-void k4(uint ind)
-{
- PVdata k3 = temp[ind*4+2];
+   // Haetaan laskettavan partikkelin sijainti.
+   vec4 currentPos;
+   if (phase == 1.0) currentPos = pos;
+   else currentPos = imageLoad(temp, index);
 
- PVdata k3_initial;
- k3_initial.pos = input[ind].pos;
- k3_initial.vel = k3.vel;
+   // Tahan lasketaan partikkeliin kohdistuvat voimat pisteessa.
+   vec4 force = vec4(0.0);
+   if (pos.w != -1.0) force = gravitation;
 
- PVdata k4 = evalF(k3_initial,h); 
+   int position = index.x + index.y*WIDTH; 
+   int position_stride = position * 4; 
+   
+   // Jos partikkelilla on kaveri vasemmassa ylakulmassa, niin lasketaan voimat sen suhteen.
+   // Huom. jos position w komponentti on -1.0, niin silloin piste on staattinen, 
+   // jolloin ei lasketa mitaan voimia.
+   if (index.x > 0 && index.y < HEIGHT - 1) {// && pos.w != -1.0
+      ivec2 delta = index + ivec2(-1,1);
+      result[position_stride] = vec4(index.x,index.y,imageLoad(input, delta).w,111.0);
+      //result[index.x + index.y * WIDTH] = vec4(index.x,index.y,imageLoad(input, delta).w,delta.x + delta.y*WIDTH);
+      //vec4 buddy = getParticle(index + ivec2(-1,1));
+      //force = force + laske_voima(currentPos,buddy);
+   }
+   else {
+      ivec2 delta = index + ivec2(-1,1);
+      result[position_stride] = vec4(index.x,index.y,-111.0,delta.x + delta.y*WIDTH);
+   }
 
- temp[4*ind+3] = k4;
+   // Jos partikkelilla on kaveri oikeassa ylakulmassa, niin lasketaan voimat sen suhteen.
+   if (index.x < WIDTH-1 && index.y < HEIGHT - 1 ) { // && pos.w != -1.0  
+      ivec2 delta = index + ivec2(1,1);
+      result[position_stride+1] = vec4(index.x,index.y,imageLoad(input, delta).w,222.0);
+      //result[index.x + index.y * WIDTH + WIDTH*HEIGHT] = vec4(index.x,index.y,imageLoad(input, delta).w,delta.x + delta.y*WIDTH);
+      //vec4 buddy = getParticle(index + ivec2(1,1));
+      //force = force + laske_voima(currentPos,buddy);
+   }
+   else {
+      ivec2 delta = index + ivec2(1,1);
+      result[position_stride+1] = vec4(index.x,index.y,-222.0,delta.x + delta.y*WIDTH);
+   }
 
- vec4 final_vel = 1.0/6.0 * (temp[ind*4].vel+2*temp[ind*4+1].vel+2*temp[ind*4+2].vel+temp[ind*4+3].vel);
- PVdata final_initial;
- final_initial.pos = input[ind].pos;
- final_initial.vel = final_vel;
+   // Jos partikkelilla on kaveri vasemmassa alakulmassa, niin lasketaan voimat sen suhteen.
+   if (index.x > 0 && index.y > 0 ) { // && pos.w != -1.0   
+      ivec2 delta = index + ivec2(-1,-1);
+      result[position_stride+2] = vec4(index.x,index.y,imageLoad(input, delta).w,333.0);
+      //result[index.x + index.y * WIDTH + WIDTH*HEIGHT*2] = vec4(index.x,index.y,imageLoad(input, delta).w,delta.x + delta.y*WIDTH);
+      //vec4 buddy = getParticle(index + ivec2(-1,-1));
+      //force = force + laske_voima(currentPos,buddy);
+   }
+   else {
+      ivec2 delta = index + ivec2(-1,-1);
+      result[position_stride+2] = vec4(index.x,index.y,-333.0,delta.x + delta.y*WIDTH);
+   }
 
- PVdata result = evalF(final_initial, h);
- input[ind] = result;
-}
+   // Jos partikkelilla on kaveri oikeassa alakulmassa, niin lasketaan voimat sen suhteen.
+   if (index.x < WIDTH - 1 && index.y > 0 ) {// && pos.w != -1.0 
+      ivec2 delta = index + ivec2(1,-1);
+      result[position_stride+3] = vec4(index.x,index.y,imageLoad(input, delta).w,444.0);
+      //result[index.x + index.y * WIDTH + WIDTH*HEIGHT*3] = vec4(index.x,index.y,imageLoad(input, delta).w,delta.x + delta.y*WIDTH);
+      //vec4 buddy = getParticle(index + ivec2(1,-1));
+      //force = force + laske_voima(currentPos,buddy);
+   }   
+   else {
+      ivec2 delta = index + ivec2(-1,-1);
+      result[position_stride+3] = vec4(index.x,index.y,-444.0,delta.x + delta.y*WIDTH);
+   }
 
-void euler(uint ind)
-{
-  PVdata euler = evalF(input[ind],h);
-  input[ind] = euler;
-//  k1(ind);
-//  PVdata der = temp[ind*4];
-//  vec4 newPos = input[ind].pos + h*der;
-//  input[ind].pos = newPos;
-//  input[ind].vel = der + h * der;
+////   // k1.
+////   if (phase == 1.0) {
+////     vec4 newPos = pos + 0.5 * h * force;  
+////     imageStore(k1, index, force);
+////     imageStore(temp, index, newPos);
+////   }
+////   // k2.
+////   else if (phase == 2.0) {
+////     vec4 newPos = pos + 0.5 * h * force;  
+////     imageStore(k2, index, force);
+////     imageStore(temp, index, newPos);
+////   }
+////   // k3.
+////   else if (phase == 3.0) {
+////     vec4 newPos = pos + h * force;  
+////     imageStore(k3, index, force);
+////     imageStore(temp, index, newPos);
+////   }
+////   // k4.
+////   else if (phase == 4.0) {
+////     //vec4 newPos = pos + h * force;  
+////     imageStore(k4, index, force);
+////     //imageStore(temp, index, newPos);
+////   }
+
 }
 
 void main()
 {
-  uint ind = gl_GlobalInvocationID.x;
-  if (phase == 1.0) k1(ind);
-  else if (phase == 2.0) k2(ind);
-  else if (phase == 3.0) k3(ind);
-  else if (phase == 4.0) k4(ind);
-  else if (phase == 5.0) euler(ind);
+  ivec2 ind = ivec2(gl_GlobalInvocationID.xy);
+  evalF_flex(ind);
+//  if (phase == 1.0) k1(ind);
+//  else if (phase == 2.0) k2(ind);
+//  else if (phase == 3.0) k3(ind);
+//  else if (phase == 4.0) k4(ind);
+//  else if (phase == 5.0) euler(ind);
+//  else if (phase == 6.0) copyToInput(ind);
 }
 
-// TEKSTUURIN KANSSA
-//void euler(uint pos)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+////vec4 calculate_friend_force(PVdata thisParticle, float friend_index, float r)
+////{
+////  if (friend_index == -1.0) return vec4(0.0);
+////
+////  float k = 10.5;  
+////
+////  PVdata friend;
+////
+////  if (phase == 1.0) friend = input[int(friend_index)];
+////  if (phase == 2.0) friend = input[int(friend_index)];
+////  if (phase == 3.0) friend = input[int(friend_index)];
+////  if (phase == 4.0) friend = input[int(friend_index)];
+////  
+////  vec4 d = thisParticle.pos - friend.pos;
+////  float dist = distance(d,vec4(0.0));
+////
+////  return (-1.0) * k * (dist - r) * d / dist;  
+////}
+////
+////
+////PVdata evalF(PVdata pv, float time)
+////{
+////  if (time == 0.0) return pv;
+////  
+////  PVdata result;
+////  result.pos = pv.pos + pv.vel*time; 
+////  vec4 total_force = gravity +
+////                     calculate_friend_force(pv,pv.friends[0], pv.rest_forces[0]) + 
+////                     calculate_friend_force(pv,pv.friends[1], pv.rest_forces[1]) + 
+////                     calculate_friend_force(pv,pv.friends[2], pv.rest_forces[2]) + 
+////                     calculate_friend_force(pv,pv.friends[3], pv.rest_forces[3]); 
+//////  vec4 total_force = calculate_friend_force(pv,pv.friends[0], pv.rest_forces[0]) + 
+//////                     calculate_friend_force(pv,pv.friends[1], pv.rest_forces[1]) + 
+//////                     calculate_friend_force(pv,pv.friends[2], pv.rest_forces[2]) + 
+//////                     calculate_friend_force(pv,pv.friends[3], pv.rest_forces[3]); 
+////  result.vel = pv.vel + total_force * time;
+////  result.friends = pv.friends;
+////  result.rest_forces = pv.rest_forces;
+////  return result;
+////}
+////
+////void k1(uint ind)
+////{
+////  // If particle is static.
+////  PVdata particle = input[ind];
+////  if (particle.pos.w == 2.0) temp[4*ind] = particle;
+////  
+////  else {
+////    PVdata k1 = evalF(particle, 0.0); 
+////    temp[4*ind] = k1;
+////  }
+////}
+////
+////void midpoint(uint ind)
+////{
+////  PVdata k1 = temp[ind*4];
+////  if (k1.pos.w == 2.0) temp[4*ind+1] = k1;
+////
+////  else {
+////    PVdata mid_point = evalF(k1,h*0.5);
+////    mid_point.friends = k1.friends;
+////    mid_point.rest_forces = k1.rest_forces;
+////    temp[4*ind+1] = mid_point;
+////  }
+////}
+////
+////void k2(uint ind)
+////{
+////  PVdata mid_point = temp[ind*4+1];
+////  if (mid_point.pos.w == 2.0) temp[4*ind+2] = mid_point;
+////
+////  else {
+////    PVdata k2 = evalF(mid_point,h*0.5); 
+////    k2.friends = mid_point.friends;
+////    k2.rest_forces = mid_point.rest_forces;
+////    temp[4*ind+2] = k2;
+////  }
+////}
+////
+////void midpoint2(uint ind)
+////{
+////  PVdata k2 = temp[ind*4+2];
+////  if (k2.pos.w == 2.0) temp[4*ind+3] = k2;
+////
+////  k2.pos = input[ind].pos;
+////
+////  else {
+////    PVdata mid_point2 = evalF(k2,h*0.5);
+////    mid_point2.friends = k2.friends;
+////    mid_point2.rest_forces = k2.rest_forces;
+////    temp[4*ind+3] = mid_point2;
+////  }
+////}
+////
+////void k3(uint ind)
+////{
+////  PVdata mid_point2 = temp[ind*4+3];
+////
+////  if (mid_point2.pos.w == 2.0) temp[4*ind+4] = mid_point2;
+////
+////  else {
+////    PVdata k2_initial;
+////    k2_initial.pos = input[ind].pos;
+////    k2_initial.vel = k2.vel;
+////    k2_initial.friends = k2.friends;
+////    k2_initial.rest_forces = k2.rest_forces;
+////
+////    PVdata k2_middle_point = evalF(k2_initial,h*0.5);
+////    PVdata k3 = evalF(k2_middle_point,h*0.5); 
+////
+////    temp[4*ind+2] = k3;
+////  }
+////}
+////
+////void k4(uint ind)
+////{
+////  PVdata k3 = temp[ind*4+2];
+////
+////  if (k3.pos.w == 2.0) temp[4*ind+3] = k3;
+////
+////  else {
+////    PVdata k3_initial;
+////    k3_initial.pos = input[ind].pos;
+////    k3_initial.vel = k3.vel;
+////    k3_initial.friends = k3.friends;
+////    k3_initial.rest_forces = k3.rest_forces;
+////
+////    PVdata k4 = evalF(k3_initial,h); 
+////
+////    temp[4*ind+3] = k4;
+////
+////    vec4 final_vel = 1.0/6.0 * (temp[ind*4].vel+2*temp[ind*4+1].vel+2*temp[ind*4+2].vel+temp[ind*4+3].vel);
+////    PVdata final_initial;
+////    final_initial.pos = input[ind].pos;
+////    final_initial.vel = final_vel;
+////    final_initial.friends = k4.friends;
+////    final_initial.rest_forces = k4.rest_forces;
+////
+////    PVdata result = evalF(final_initial, h);
+////    input[ind] = result;
+////  }
+////}
+////
+////void euler(uint ind)
+////{
+////  PVdata particle = input[ind];
+////  if (particle.pos.w == 2.0) temp[ind] = input[ind];
+////  else
+////  {
+//////  PVdata joo = input[ind];
+//////  joo.pos = vec4(666.0);
+//////  input[ind] = joo;
+////  PVdata euler = evalF(input[ind],h);
+////  temp[ind] = euler;
+////  }
+////}
+////
+////void copyToInput(uint ind)
+////{
+////  //PVdata joo = input[ind];
+////  //joo.pos = vec4(666.0);
+////  //input[ind] = joo;
+////  input[ind] = temp[ind];
+////}
+////
+////void main()
+////{
+////  uint ind = gl_GlobalInvocationID.x;
+////  if (phase == 1.0) k1(ind);
+////  else if (phase == 2.0) k2(ind);
+////  else if (phase == 3.0) k3(ind);
+////  else if (phase == 4.0) k4(ind);
+////  else if (phase == 5.0) euler(ind);
+////  else if (phase == 6.0) copyToInput(ind);
+////}
+////
+////// TEKSTUURIN KANSSA
+//////void euler(uint pos)
+//////{
+//////  PVdata t = input[pos]; 
+//////  PVdata joo; 
+//////  joo.pos = t.pos + t.vel * h;// + h*gravity;
+//////  joo.vel = h*gravity + t.vel;// + h*gravity;
+//////  imageStore(temp, ivec2(2*pos,0), joo.pos);
+//////  imageStore(temp, ivec2(2*pos+1,0), joo.vel);
+//////}
+//////
+//////void copyToState(uint pos)
+//////{
+//////  vec4 position = imageLoad(temp, ivec2(2*pos,0));
+//////  vec4 velocity = imageLoad(temp, ivec2(2*pos+1,0));
+//////  input[pos].pos = position;
+//////  input[pos].vel = velocity;
+//////}
+//////layout (rgba32f, binding = 1) uniform image2D temp;  // Jos kaytetaan tekstuuria.
+//layout (std430, binding = 0) buffer InBuf 
 //{
-//  PVdata t = input[pos]; 
-//  PVdata joo; 
-//  joo.pos = t.pos + t.vel * h;// + h*gravity;
-//  joo.vel = h*gravity + t.vel;// + h*gravity;
-//  imageStore(temp, ivec2(2*pos,0), joo.pos);
-//  imageStore(temp, ivec2(2*pos+1,0), joo.vel);
-//}
-//
-//void copyToState(uint pos)
-//{
-//  vec4 position = imageLoad(temp, ivec2(2*pos,0));
-//  vec4 velocity = imageLoad(temp, ivec2(2*pos+1,0));
-//  input[pos].pos = position;
-//  input[pos].vel = velocity;
-//}
-//layout (rgba32f, binding = 1) uniform image2D temp;  // Jos kaytetaan tekstuuria.
+//  vec4 input[];
+//};

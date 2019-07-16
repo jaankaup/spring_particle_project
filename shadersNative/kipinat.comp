@@ -9,6 +9,8 @@ struct PVdata
 {
   vec4 pos;
   vec4 vel;
+  vec4 friend;
+  vec4 rest;
 };
 
 // Local work group size.

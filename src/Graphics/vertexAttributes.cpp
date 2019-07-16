@@ -29,6 +29,7 @@ bool VertexAttributes::create_interleaved_attributes(const std::vector<std::stri
 //    Log::getDebug().log("VertexAttributes::create_interleaved_attributes(%).", vector2str );
   #endif  
 
+  Log::getInfo().log("GL_MAX_VARYING_COMPONENTS '%'.", std::to_string(GL_MAX_VARYING_COMPONENTS));
 
   GLsizei stride = 0; 
   //const GLvoid* offset = 0; 

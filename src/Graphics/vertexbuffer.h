@@ -51,18 +51,18 @@ class ParticleBuffer : public Vertexbuffer
   public:
 
     void init() override;
-    virtual void addData(const void* data, unsigned int size, const std::vector<std::string>& types) const override;
+    void addData(const void* data, unsigned int size, const std::vector<std::string>& types) const override;
     void takeStep(float t);
 		virtual ~ParticleBuffer();
 
   private:
 
 		ParticleBuffer();
-    GLuint pTexture = 0;
+    GLuint* pTexture = new GLuint(6);
     int pMax_group_size_x = 0;
     int pMax_group_size_y = 0;
     int pMax_group_size_z = 0;
-    GLuint pTemp1 = 0;
+//    GLuint pTemp1 = 0;
 //    GLuint pTemp2 = 0;
 //    GLuint pTemp3 = 0;
 //    GLuint pTemp4 = 0;

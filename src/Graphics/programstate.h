@@ -97,6 +97,8 @@ class ProgramState
     glm::ivec3 getCubeDimension() const;
     Cube_meta_data* getMetadata();
     int getParticleCount() const;
+    int getParticlesWidth() const;
+    int getParticlesHeight() const;
 
     void setScreenWidth(const int width);
     void setScreenHeight(const int height);
@@ -108,6 +110,8 @@ class ProgramState
     void setDebugCube(const bool debugCube);
     void setCubeDimension(const glm::ivec3& cubeDimension);
     void setParticleCount(const int particleCount);
+    void setParticlesWidth(const int width);
+    void setParticlesHeight(const int height);
 
     void updateTick();
     float getTimeDelta() const;
@@ -131,6 +135,8 @@ class ProgramState
     uint32_t pTick = 0;
     float pDeltaTime = 0.0f;
     uint32_t pDeltaMilliseconds = 0;
+    int pParticlesWidth = 0;
+    int pParticlesHeight = 0;
 };
 
 

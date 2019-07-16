@@ -159,6 +159,25 @@ uint32_t ProgramState::getTimeDeltaMilliseconds() const
 {
   return pDeltaMilliseconds;
 }
+
+void ProgramState::setParticlesWidth(const int width)
+{
+  pParticlesWidth = width;
+}
+
+void ProgramState::setParticlesHeight(const int height)
+{
+  pParticlesHeight = height;
+}
+int ProgramState::getParticlesWidth() const
+{
+  return pParticlesWidth;
+}
+
+int ProgramState::getParticlesHeight() const
+{
+  return pParticlesHeight;
+}
 //std::string ProgramState::dimensionToString() const
 //{
 //  return "([" + std::to_string(pMetaData.dimensionX_min) + ","  + std::to_string(pMetaData.dimensionX_max) + "] , " +

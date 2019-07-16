@@ -22,6 +22,7 @@ void Vertexbuffer::bind() const
 
 void Vertexbuffer::init()
 {
+    Log::getInfo().log("VertexBuffer::init");
     glGenVertexArrays(1, &pVAO);
     glGenBuffers(1,&pId);
 //    Log::getDebug().log("Created a vertex buffer: %", std::to_string(pId));
@@ -36,6 +37,7 @@ GLuint Vertexbuffer::getHandle() const
 
 void Vertexbuffer::addData(const void* data, unsigned int size, const std::vector<std::string>& types) const
 {
+  Log::getInfo().log("Vertexbuffer::addData");
   //Log::getDebug().log("Vertexbuffer::addData: %", std::to_string(size));
   bind();
   glBindBuffer(pTarget, pId);
@@ -291,13 +293,17 @@ void Vertexbuffer::setCount(const int count)
   
 ParticleBuffer::ParticleBuffer()
 {
+  for (int i=0 ; i<5 ; i++) {
+    pTexture[i] = 0;     
+  }
 }
 
 void ParticleBuffer::init()
 {
+    Log::getInfo().log("ParticleBuffer::init");
     glGenVertexArrays(1, &pVAO);
     glGenBuffers(1,&pId);
-    glGenBuffers(1,&pTemp1);
+//    glGenBuffers(1,&pTemp1);
 //    glBindBuffer(GL_SHADER_STORAGE_BUFFER, pTemp1);
 ////    glBufferData(pTarget, 8*sizeof(float), NULL, pTemp1);
 //    glGenBuffers(1,&pTemp2);
@@ -327,23 +333,19 @@ void ParticleBuffer::init()
     // We bind it to the "binding=1"
 ////    auto particleCount = ProgramState::getInstance().getParticleCount();
 ////    Log::getDebug().log("t_w = %.", std::to_string(particleCount));
-////    int t_w = particleCount*2;
-////    int t_h = 2;
-////    glGenTextures(1,&pTexture);
-////    glActiveTexture(GL_TEXTURE0);
-////    glBindTexture(GL_TEXTURE_2D, pTexture);
-////    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-////    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-////    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-////    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-////    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, t_w, t_h, 0, GL_RGBA, GL_FLOAT, NULL);
 //    glBindImageTexture(1, pTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 }
 
 ParticleBuffer::~ParticleBuffer()
 {
-  if (pTexture != 0) glDeleteTextures(1,&pTexture);
-  if (pTemp1 != 0) glDeleteBuffers(1,&pTemp1);
+  //if (pId != 0) glDeleteBuffers(1,&pId);
+  bool destroy_textures = false;
+  for (int i=0 ; i<6 ; i++) {
+    if (pTexture[i] != 0) destroy_textures = true;     
+  }
+  if (destroy_textures) glDeleteTextures(6,pTexture);
+  delete[] pTexture;
+//  if (pTemp1 != 0) glDeleteBuffers(1,&pTemp1);
 //  if (pTemp2 != 0) glDeleteBuffers(1,&pTemp2);
 //  if (pTemp3 != 0) glDeleteBuffers(1,&pTemp3);
 //  if (pTemp4 != 0) glDeleteBuffers(1,&pTemp4);
@@ -365,13 +367,18 @@ void ParticleBuffer::takeStep(float h)
   compute->bind();
 
   // Lets bind the ssbo to binding = 0.
-  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, pId);
-  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, pTemp1);
-  //glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, pTemp2);
-  //glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, pTemp3);
-  //glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, pTemp4);
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, pId);
+  //glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, pTemp1);
+    
   // Lets bind the texture to binding = 1.
-  //glBindImageTexture(1, pTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+
+  /* Tekstruurin bindaus shaderiin "layout (rgba32f, binding = 1) uniform image2D temp;" */
+  glBindImageTexture(0, pTexture[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+  glBindImageTexture(1, pTexture[1], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+  glBindImageTexture(2, pTexture[2], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+  glBindImageTexture(3, pTexture[3], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+  glBindImageTexture(4, pTexture[4], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+  glBindImageTexture(5, pTexture[5], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
   
 //  do {
     //glBindBuffer(GL_SHADER_STORAGE_BUFFER, pId);
@@ -380,93 +387,150 @@ void ParticleBuffer::takeStep(float h)
     // The time.
     compute->setUniform("h",h);
   
-    const static int X = 20;
+    const static int X = 1;
+    const static int Y = 1;
 
 //    compute->setUniform("phase",5.0f);
 //    glDispatchCompute(X,1,1);
 //    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-
+//
+//    compute->setUniform("phase",6.0f);
+//    glDispatchCompute(X,1,1);
+//    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+    
     compute->setUniform("phase",1.0f);
-    glDispatchCompute(X,1,1);
+    glDispatchCompute(X,Y,1);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
-    compute->setUniform("phase",2.0f);
-    glDispatchCompute(X,1,1);
-    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+//    compute->setUniform("phase",2.0f);
+//    glDispatchCompute(X,Y,1);
+//    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+//
+//    compute->setUniform("phase",3.0f);
+//    glDispatchCompute(X,Y,1);
+//    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+//
+//    compute->setUniform("phase",4.0f);
+//    glDispatchCompute(X,Y,1);
+//    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+//
+//    compute->setUniform("phase",5.0f);
+//    glDispatchCompute(X,Y,1);
+//    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
-    compute->setUniform("phase",3.0f);
-    glDispatchCompute(X,1,1);
-    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-
-    compute->setUniform("phase",4.0f);
-    glDispatchCompute(X,1,1);
-    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+//    compute->setUniform("phase",6.0f);
+//    glDispatchCompute(X,1,1);
+//    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
     auto particle_count = ProgramState::getInstance().getParticleCount();
-//    bool printJuttu = counter > 1 ? false : true;
-    bool printJuttu = false;
+    bool printJuttu = counter > 2 ? false : true;
+//    bool printJuttu = false;
     if (printJuttu)
     {
-      GLfloat* feedback = new GLfloat[particle_count*8];
-      GLfloat* textureData = new GLfloat[particle_count*32];
-      glGetNamedBufferSubData(pId, 0, sizeof(float)*8*particle_count, feedback);
-      glGetNamedBufferSubData(pTemp1, 0, sizeof(float)*32*particle_count, textureData);
-      //glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA,GL_FLOAT, textureData);
-
-
-      for (int i=0 ; i<1 ; i++)
+      GLfloat* feedback = new GLfloat[particle_count*4*4];
+////      GLfloat* textureData = new GLfloat[particle_count*64];
+      glGetNamedBufferSubData(pId, 0, sizeof(float)*4*4*particle_count, feedback);
+////      //glGetNamedBufferSubData(pTemp1, 0, sizeof(float)*64*particle_count, textureData);
+////      //glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA,GL_FLOAT, pTexture[0]);
+////
+////
+      for (int i=0 ; i<particle_count*4 ; i++)
       {
-        int j = i*8;
-        int k = i*32;
-
+        int j = i*4;
+////        int k = i*64;
+////
         Log::getDebug().log("%.",std::to_string(i));
-        Log::getDebug().log("Pos:input (%,%,%,%)", std::to_string(feedback[j]),
-                                             std::to_string(feedback[j+1]),
-                                             std::to_string(feedback[j+2]),
-                                             std::to_string(feedback[j+3]));
-        Log::getDebug().log("Vel:input (%,%,%,%)", std::to_string(feedback[j+4]),
-                                             std::to_string(feedback[j+5]),
-                                             std::to_string(feedback[j+6]),
-                                             std::to_string(feedback[j+7]));
-        Log::getDebug().log("K1:pos (%,%,%,%)", std::to_string(textureData[k]),
-                                            std::to_string(textureData[k+1]),
-                                            std::to_string(textureData[k+2]),
-                                            std::to_string(textureData[k+3]));
-        Log::getDebug().log("k1:vel (%,%,%,%)", std::to_string(textureData[k+4]),
-                                            std::to_string(textureData[k+5]),
-                                            std::to_string(textureData[k+6]),
-                                            std::to_string(textureData[k+7]));
-        Log::getDebug().log("K2:pos (%,%,%,%)", std::to_string(textureData[k+8]),
-                                            std::to_string(textureData[k+9]),
-                                            std::to_string(textureData[k+10]),
-                                            std::to_string(textureData[k+11]));
-        Log::getDebug().log("k2:vel (%,%,%,%)", std::to_string(textureData[k+12]),
-                                            std::to_string(textureData[k+13]),
-                                            std::to_string(textureData[k+14]),
-                                            std::to_string(textureData[k+15]));
-        Log::getDebug().log("K3:pos (%,%,%,%)", std::to_string(textureData[k+16]),
-                                            std::to_string(textureData[k+17]),
-                                            std::to_string(textureData[k+18]),
-                                            std::to_string(textureData[k+19]));
-        Log::getDebug().log("k3:vel (%,%,%,%)", std::to_string(textureData[k+20]),
-                                            std::to_string(textureData[k+21]),
-                                            std::to_string(textureData[k+22]),
-                                            std::to_string(textureData[k+23]));
-        Log::getDebug().log("K4:pos (%,%,%,%)", std::to_string(textureData[k+24]),
-                                            std::to_string(textureData[k+25]),
-                                            std::to_string(textureData[k+26]),
-                                            std::to_string(textureData[k+27]));
-        Log::getDebug().log("k4:vel (%,%,%,%)", std::to_string(textureData[k+28]),
-                                            std::to_string(textureData[k+29]),
-                                            std::to_string(textureData[k+30]),
-                                            std::to_string(textureData[k+31]));
-        counter++;
-//        if (counter == 1) break;
+        Log::getDebug().log("%,%,%,%.",std::to_string(j),std::to_string(j+1),std::to_string(j+2),std::to_string(j+3));
+        Log::getDebug().log("INPUT::pos (%,%,%,%)", std::to_string(feedback[j]),
+                                                    std::to_string(feedback[j+1]),
+                                                    std::to_string(feedback[j+2]),
+                                                    std::to_string(feedback[j+3]));
       }
-
-       delete[] feedback; 
-       delete[] textureData;
+      delete[] feedback; 
     }
+////        Log::getDebug().log("INPUT::vel (%,%,%,%)", std::to_string(feedback[j+4]),
+////                                                    std::to_string(feedback[j+5]),
+////                                                    std::to_string(feedback[j+6]),
+////                                                    std::to_string(feedback[j+7]));
+////        Log::getDebug().log("INPUT::friends (%,%,%,%)", std::to_string(feedback[j+8]),
+////                                                        std::to_string(feedback[j+9]),
+////                                                        std::to_string(feedback[j+10]),
+////                                                        std::to_string(feedback[j+11]));
+////        Log::getDebug().log("INPUT::rest_forces (%,%,%,%)", std::to_string(feedback[j+12]),
+////                                                            std::to_string(feedback[j+13]),
+////                                                            std::to_string(feedback[j+14]),
+////                                                            std::to_string(feedback[j+15]));
+////        Log::getDebug().log("K1::pos (%,%,%,%)", std::to_string(textureData[k]),
+////                                                 std::to_string(textureData[k+1]),
+////                                                 std::to_string(textureData[k+2]),
+////                                                 std::to_string(textureData[k+3]));
+////        Log::getDebug().log("K1::vel (%,%,%,%)", std::to_string(textureData[k+4]),
+////                                                 std::to_string(textureData[k+5]),
+////                                                 std::to_string(textureData[k+6]),
+////                                                 std::to_string(textureData[k+7]));
+////        Log::getDebug().log("K1::friends (%,%,%,%)", std::to_string(textureData[k+8]),
+////                                                     std::to_string(textureData[k+9]),
+////                                                     std::to_string(textureData[k+10]),
+////                                                     std::to_string(textureData[k+11]));
+////        Log::getDebug().log("K1::rest_forces (%,%,%,%)", std::to_string(textureData[k+12]),
+////                                                         std::to_string(textureData[k+13]),
+////                                                         std::to_string(textureData[k+14]),
+////                                                         std::to_string(textureData[k+15]));
+////        Log::getDebug().log("K2::pos (%,%,%,%)", std::to_string(textureData[k+16]),
+////                                                 std::to_string(textureData[k+17]),
+////                                                 std::to_string(textureData[k+18]),
+////                                                 std::to_string(textureData[k+19]));
+////        Log::getDebug().log("K2::vel (%,%,%,%)", std::to_string(textureData[k+20]),
+////                                                 std::to_string(textureData[k+21]),
+////                                                 std::to_string(textureData[k+22]),
+////                                                 std::to_string(textureData[k+23]));
+////        Log::getDebug().log("K2::friends (%,%,%,%)", std::to_string(textureData[k+24]),
+////                                                     std::to_string(textureData[k+25]),
+////                                                     std::to_string(textureData[k+26]),
+////                                                     std::to_string(textureData[k+27]));
+////        Log::getDebug().log("K2::rest_forces (%,%,%,%)", std::to_string(textureData[k+28]),
+////                                                         std::to_string(textureData[k+29]),
+////                                                         std::to_string(textureData[k+30]),
+////                                                         std::to_string(textureData[k+31]));
+////        Log::getDebug().log("K3::pos (%,%,%,%)", std::to_string(textureData[k+32]),
+////                                                 std::to_string(textureData[k+33]),
+////                                                 std::to_string(textureData[k+34]),
+////                                                 std::to_string(textureData[k+35]));
+////        Log::getDebug().log("K3::vel (%,%,%,%)", std::to_string(textureData[k+36]),
+////                                                 std::to_string(textureData[k+37]),
+////                                                 std::to_string(textureData[k+38]),
+////                                                 std::to_string(textureData[k+39]));
+////        Log::getDebug().log("K3::friends (%,%,%,%)", std::to_string(textureData[k+40]),
+////                                                     std::to_string(textureData[k+41]),
+////                                                     std::to_string(textureData[k+42]),
+////                                                     std::to_string(textureData[k+43]));
+////        Log::getDebug().log("K3::rest_forces (%,%,%,%)", std::to_string(textureData[k+44]),
+////                                                         std::to_string(textureData[k+45]),
+////                                                         std::to_string(textureData[k+46]),
+////                                                         std::to_string(textureData[k+47]));
+////        Log::getDebug().log("K4::pos (%,%,%,%)", std::to_string(textureData[k+48]),
+////                                                 std::to_string(textureData[k+49]),
+////                                                 std::to_string(textureData[k+50]),
+////                                                 std::to_string(textureData[k+51]));
+////        Log::getDebug().log("K4::vel (%,%,%,%)", std::to_string(textureData[k+52]),
+////                                                 std::to_string(textureData[k+53]),
+////                                                 std::to_string(textureData[k+54]),
+////                                                 std::to_string(textureData[k+55]));
+////        Log::getDebug().log("K4::friends (%,%,%,%)", std::to_string(textureData[k+56]),
+////                                                     std::to_string(textureData[k+57]),
+////                                                     std::to_string(textureData[k+58]),
+////                                                     std::to_string(textureData[k+59]));
+////        Log::getDebug().log("K4::rest_forces (%,%,%,%)", std::to_string(textureData[k+60]),
+////                                                         std::to_string(textureData[k+61]),
+////                                                         std::to_string(textureData[k+62]),
+////                                                         std::to_string(textureData[k+63]));
+////        counter++;
+//////        if (counter == 1) break;
+////      }
+////
+////       delete[] feedback; 
+////       delete[] textureData;
+////    }
 //    t_temp = t_temp + h;
 //  } while (t_temp < t);
 //    do {
@@ -481,21 +545,42 @@ void ParticleBuffer::takeStep(float h)
 inline void ParticleBuffer::addData(const void* data, unsigned int size, const std::vector<std::string>& types) const
 {
   //Log::getDebug().log("Vertexbuffer::addData: %", std::to_string(size));
+  Log::getInfo().log("ParticleBuffer::addData");
+  auto particle_count = ProgramState::getInstance().getParticleCount();
+  auto array = new GLfloat[4*4*particle_count];
+  for (int i=0 ; i<4*4*particle_count ; i++) {
+    array[i] = -77.0f;
+  }
   bind();
   glBindBuffer(pTarget, pId);
-  glBufferData(pTarget,size, data, pUsage);
+  //glBufferData(pTarget,size, data, pUsage);
+  glBufferData(pTarget,sizeof(float)*particle_count*4*4, array, pUsage);
   VertexAttributes vas;
   vas.create_interleaved_attributes(types, false);
   vas.registerAttributes();
   //glBindBuffer(pTarget, pTemp1);
   //glBufferData(pTarget, size, NULL, pTemp1);
-  glBindBuffer(GL_SHADER_STORAGE_BUFFER, pTemp1);
-  glBufferData(GL_SHADER_STORAGE_BUFFER, size*4, NULL, pUsage);
-//  glBindBuffer(GL_SHADER_STORAGE_BUFFER, pTemp2);
-//  glBufferData(GL_SHADER_STORAGE_BUFFER, size, NULL, pUsage);
-//  glBindBuffer(GL_SHADER_STORAGE_BUFFER, pTemp3);
-//  glBufferData(GL_SHADER_STORAGE_BUFFER, size, NULL, pUsage);
-//  glBindBuffer(GL_SHADER_STORAGE_BUFFER, pTemp4);
-//  glBufferData(GL_SHADER_STORAGE_BUFFER, size, NULL, pUsage);
+  //glBindBuffer(GL_SHADER_STORAGE_BUFFER, pTemp1);
+  //glBufferData(GL_SHADER_STORAGE_BUFFER, size*6, NULL, pUsage);
+  //glBindBuffer(GL_SHADER_STORAGE_BUFFER, pTemp2);
+  //glBufferData(GL_SHADER_STORAGE_BUFFER, size, NULL, pUsage);
+  //glBindBuffer(GL_SHADER_STORAGE_BUFFER, pTemp3);
+  //glBufferData(GL_SHADER_STORAGE_BUFFER, size, NULL, pUsage);
+  //glBindBuffer(GL_SHADER_STORAGE_BUFFER, pTemp4);
+  //glBufferData(GL_SHADER_STORAGE_BUFFER, size, NULL, pUsage);
   glBindVertexArray(0);
+
+  int t_w = ProgramState::getInstance().getParticlesWidth();
+  int t_h = ProgramState::getInstance().getParticlesHeight();
+  glGenTextures(6,pTexture);
+  for (int i=0; i<6 ; i++) {
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, pTexture[i]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    i != 0 ? glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, t_w, t_h, 0, GL_RGBA, GL_FLOAT, NULL) 
+           : glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, t_w, t_h, 0, GL_RGBA, GL_FLOAT, data); 
+  }
 }

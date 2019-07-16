@@ -38,7 +38,7 @@
 struct context
 {
     Renderer renderer;
-    Camera camera = Camera(glm::vec3(0.0f,60.0f,60.0f),glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f));
+    Camera camera = Camera(glm::vec3(40.0f,40.0f,80.0f),glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f));
 };
 
 void createShaders()
@@ -98,56 +98,162 @@ void createShaders()
     ProgramState::getInstance().getMetadata()->T3 = "T3";
     ProgramState::getInstance().getMetadata()->T4 = "T4";
 
-    // Luodaan kipinat.
-    int particle_count = 200*20;
-    ProgramState::getInstance().setParticleCount(particle_count);
+    const int width = 3;
+    const int height = 3;
+    int particle_count = width*height;
+    float offset = 1.0f;
+    glm::vec3 a = glm::vec3(0.0f);
+    glm::vec3 b = glm::vec3(offset,offset,0.0f);
+    float dist = glm::distance(a,b);
+    //float dist = 0.5f;
+    Shader* compute = ShaderManager::getInstance().getByKey("particle1");
+    compute->bind();
+    compute->setUniform("r",dist);
+    compute->setUniform("k",1.0f);
 
-    Vertexbuffer* bstate = VertexBufferManager::getInstance().createParticleBuffer("BState");
+    ProgramState::getInstance().setParticleCount(particle_count);
+    ProgramState::getInstance().setParticlesWidth(width);
+    ProgramState::getInstance().setParticlesHeight(height);
+
+    //Vertexbuffer* bstate = VertexBufferManager::getInstance().createParticleBuffer("BState");
+    ParticleBuffer* bstate = dynamic_cast<ParticleBuffer*>(VertexBufferManager::getInstance().createParticleBuffer("BState"));
     bstate->init();
-    std::vector<std::string> types = {"4f","4f"};
+//    std::vector<std::string> types = {"4f","4f","4f"}; // HUOM, "4f","4f","4f,"4f" ei toimi!!!!
     //GLfloat* feedback = new GLfloat[8];
     //auto array = new GLfloat[8]{0.0f,0.0f,0.0f,0.0f,0.0f,7.2f,0.0f,0.0f};
-    auto array = new GLfloat[8*particle_count];
-//    array[0] = 0.0f; 
-//    array[1] = 0.0f; 
-//    array[2] = 0.0f; 
-//    array[3] = 1.0f; 
-//    array[4] = 0.01f; 
-//    array[5] = 5.0f;; 
-//    array[6] = 0.01f; 
-//    array[7] = 0.0f; 
-    MyRandom<float> mr;
-    mr.setDistribution(5.0f,10.0f);
-    MyRandom<float> mr2(std::to_string(mr()));
-    mr2.setDistribution(-27.0f,27.0f);
-    bool tulostaTama = false;
-    for (int i=0; i<particle_count ; ++i)
+
+    const static auto getLeft = [](const int index, const int width, const int height)
     {
-      int j = 8*i;
-      array[j] = 0.0f; 
-      array[j+1] = 0.0f; 
-      array[j+2] = 0.0f; 
-      array[j+3] = 1.0f; 
-      array[j+4] = mr2(); 
-      array[j+5] = mr(); 
-      array[j+6] = mr2(); 
-      array[j+7] = 0.0f; 
-      if (tulostaTama) 
-      {
-      Log::getInfo().log("P: (%,%,%,%,%,%,%,%)", std::to_string(array[j]),
-                                                 std::to_string(array[j+1]),
-                                                 std::to_string(array[j+2]),
-                                                 std::to_string(array[j+3]),
-                                                 std::to_string(array[j+4]),
-                                                 std::to_string(array[j+5]),
-                                                 std::to_string(array[j+6]),
-                                                 std::to_string(array[j+7]));
-      }
-    }
-    std::vector<std::string> types2 = {"4f","4f"};
-    bstate->addData(array, sizeof(float)*8*particle_count, types2);
-    bstate->setCount(8*particle_count);
+      if (index % width == 0) return -1;  
+      return index - 1;
+    };
+
+    const static auto getRight = [](const int index, const int width, const int height)
+    {
+      if (index % width == width-1) return -1;  
+      return index + 1;
+    };
+
+    const static auto getUp = [](const int index, const int width, const int height)
+    {
+      if (index - width < 0) return -1;  
+      return index - width;
+    };
+    
+    const static auto getBottom = [](const int index, const int width, const int height)
+    {
+      if (index + width > width*height - 1) return -1;  
+      return index + width;
+    };
+
+    const static auto getUpLeft = [](const int index, const int width, const int height)
+    {
+      if (getLeft(index,width,height) == -1 || getUp(index,width,height) == -1) return -1;
+      return index - width - 1;
+    };
+
+    const static auto getUpRight = [](const int index, const int width, const int height)
+    {
+      if (getRight(index,width,height) == -1 || getUp(index,width,height) == -1) return -1;
+      return index - width + 1;
+    };
+
+    const static auto getBottomLeft = [](const int index, const int width, const int height)
+    {
+      if (getBottom(index,width,height) == -1 || getLeft(index,width,height) == -1) return -1;
+      return index + width - 1;
+    };
+
+    const static auto getBottomRight = [](const int index, const int width, const int height)
+    {
+      if (getBottom(index,width,height) == -1 || getRight(index,width,height) == -1) return -1;
+      return index + width + 1;
+    };
+
+
+//    -1 -1 -1 -1 -1 -1 -1
+//    -1  0   1   2   3 -1
+//    -1  4   5   6   7 -1
+//    -1  8   9  10  11 -1
+//    -1 12  13  14  15 -1
+//    -1 -1 -1 -1 -1 -1 -1
+//
+//    0    1    2    3
+//             
+//    4    5    6    7
+//       
+//    8    9    10   11 
+//
+//    12   13   14   15 
+
+    auto array = new GLfloat[4*particle_count];
+
+    for (int j=0 ; j<width ; j++) {
+    for (int i=0 ; i<height ; i++) {
+      int position = i + width * j;
+      int pah = position*4; 
+      array[pah] = (i%width)*offset; 
+      array[pah+1] = (-1.0f)*j*offset; 
+      array[pah+2] = 0.0f; // 0.0f; 
+      array[pah+3] = float(position); // getUp(position,width,height) == -1 ? -1.0f : 6.0f; 
+      Log::getInfo().log("Position = % ", std::to_string(position));
+      Log::getInfo().log("(%,%,%,%)", std::to_string(array[pah]),
+                                      std::to_string(array[pah+1]),
+                                      std::to_string(array[pah+2]),
+                                      std::to_string(array[pah+3]));
+    }}; 
+    std::vector<std::string> types2 = {"4f"};
+    bstate->addData(array, sizeof(float)*4*particle_count, types2);
+    bstate->setCount(4*particle_count);
     delete[] array;
+/////      int position = i + width * j;
+///////      Log::getInfo().log("Position = % ", std::to_string(position));
+/////      int pah = position*16; 
+///////      Log::getInfo().log("PAH = %", std::to_string(pah));
+/////      array[pah] = (i%width)*offset; 
+/////      array[pah+1] = (-1.0f)*j*offset; 
+/////      array[pah+2] = 0.0f; 
+/////      //array[pah+3] = getUp(position,width,height) == -1 ? 2.0f : 0.0f; 
+/////      array[pah+3] = position == 0 || position == width -1 ? 2.0f : 0.0f; 
+///////      Log::getInfo().log("STATIC (%) = %", std::to_string(position), std::to_string(array[pah+3]));
+/////
+/////      array[pah+4] = 0.0f; 
+/////      array[pah+5] = 0.0f; 
+/////      array[pah+6] = 0.0f; 
+/////      array[pah+7] = 0.0f; 
+/////
+///////      if (j == 0 && i == 0) array[i+8] = width + 1.0f;
+///////      if (j == 0 && i == width - 1) array[i+8] = 2*width - 2.0f;
+///////      if (j == height-1 && i == 0) array[i+8] = (j-1)*width + 1.0f;
+///////      if (j == height-1 && i == width - 1) array[i+8] = j*width - 2.0f;
+///////
+///////      if (j == 0 && i == 0) array[i+8] = width + 1.0f;
+///////      if (j == 0 && i == width - 1) array[i+8] = 2*width - 2.0f;
+/////      float ur = float(getUpRight(position,width,height)); 
+/////      float ul = float(getUpLeft(position,width,height)); 
+/////      float br = float(getBottomRight(position,width,height)); 
+/////      float bl = float(getBottomLeft(position,width,height)); 
+/////      array[pah+8] =  ur; 
+/////      array[pah+9] =  ul;  
+/////      array[pah+10] = br;
+/////      array[pah+11] = bl;
+///////      Log::getInfo().log("(%) = (%,%,%,%)", std::to_string(position),
+///////                                            std::to_string(ur),std::to_string(ul),
+///////                                            std::to_string(br),std::to_string(bl));
+///////      Log::getInfo().log("Dist = %", std::to_string(dist));
+/////      array[pah+12] = ur == -1.0 ? 0.0f : dist; 
+/////      array[pah+13] = ul == -1.0 ? 0.0f : dist; 
+/////      array[pah+14] = br == -1.0 ? 0.0f : dist; 
+/////      array[pah+15] = bl == -1.0 ? 0.0f : dist; 
+/////    }
+/////    Log::getInfo().log("Ei koredumppaile1!");
+/////    std::vector<std::string> types2 = {"4f","4f","4f","4f"};
+/////    Log::getInfo().log("Ei koredumppaile2!");
+/////    bstate->addData(array, sizeof(float)*16*particle_count, types2);
+/////    Log::getInfo().log("Ei koredumppaile3!");
+/////    bstate->setCount(16*particle_count);
+/////    Log::getInfo().log("Ei koredumppaile4!");
+/////    Log::getInfo().log("Ei koredumppaile5!");
 }
 
 // Initialize the marching cubes attributes.
