@@ -52,21 +52,23 @@ class ParticleBuffer : public Vertexbuffer
 
     void init() override;
     void addData(const void* data, unsigned int size, const std::vector<std::string>& types) const override;
-    void takeStep(float t);
 		virtual ~ParticleBuffer();
+    void novoeha(const void* data, const void* static_data, unsigned int size, const std::vector<std::string>& types) const;
+    void takeStep(float t);
 
   private:
 
 		ParticleBuffer();
-    GLuint* pTexture = new GLuint(6);
+//    GLuint* pTexture = new GLuint(6);
     int pMax_group_size_x = 0;
     int pMax_group_size_y = 0;
     int pMax_group_size_z = 0;
-//    GLuint pTemp1 = 0;
-//    GLuint pTemp2 = 0;
-//    GLuint pTemp3 = 0;
-//    GLuint pTemp4 = 0;
-
+    GLuint pTemp = 0;
+    GLuint pStatic_data = 0;
+    GLuint pK1 = 0;
+    GLuint pK2 = 0;
+    GLuint pK3 = 0;
+    GLuint pK4 = 0;
 };
 
 //class TransformBuffer : public Vertexbuffer

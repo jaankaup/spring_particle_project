@@ -1,8 +1,10 @@
 #version 430
 
 uniform float h = 0.1;
+uniform float k = 0.1;
 uniform vec4 gravity = vec4(0.0,-0.00981,0.0,0.0);
 uniform float phase = 1.0;
+uniform float rest = 1.414214; 
 
 struct PVdata
 {
@@ -10,134 +12,141 @@ struct PVdata
   vec4 vel;
 };
 
-// Local work group size.
-layout (local_size_x = 200,local_size_y=1,local_size_z=1) in;
-
-//                        0                                          1
-// +--------------------------------------------------------------------------------------------
-// | (posX,posY,posZ,posW,velX,velY,velZ,velW) | (posX,posY,posZ,posW,velX,velY,velZ,velW) | 
-// +--------------------------------------------------------------------------------------------
-
-layout (std430, binding = 0) buffer InBuf 
+struct StaticData
 {
-  PVdata input[];
+  vec4 some_data;
+  vec4 friends;
+  vec4 rest_forces;
 };
 
-//layout (rgba32f, binding = 1) uniform image2D temp;  // Jos kaytetaan tekstuuria.
+layout (local_size_x = 9,local_size_y=1,local_size_z=1) in;
 
-//        k1_0                    k2_0                     k3_0                  k3_0 
-// +----------------------+----------------------+----------------------+----------------------+---
-// | (v_x, v_y, v_z, v_w) | (v_x, v_y, v_z, v_w) | (v_x, v_y, v_z, v_w) | (v_x, v_y, v_z, v_w) |
-// +----------------------+----------------------+----------------------+----------------------+---
+layout (std430, binding = 0) buffer InitialBuf { PVdata initial[]; };
+layout (std430, binding = 1) buffer TempBuf { PVdata temp[]; };
+layout (std430, binding = 2) buffer StaticBuf { StaticData static_data[]; };
+layout (std430, binding = 3) buffer K1 { vec4 k1[]; };
+layout (std430, binding = 4) buffer K2 { vec4 k2[]; };
+layout (std430, binding = 5) buffer K3 { vec4 k3[]; };
+layout (std430, binding = 6) buffer K4 { vec4 k4[]; };
 
-layout (std430, binding = 1) buffer Temp1Buf 
-{
-  vec4 temp1[];
-};
+///////////////////////////////////////////////////////////////////////////
 
-vec4 evalF(PVdata pv)
-{
-  return (pv.vel + gravity); // * (1.0 + time);
+// TODO: lepopituudet.
+vec4 laske_voima(vec4 posA, vec4 posB, float r) {
+
+  vec3 d = posB.xyz - posA.xyz;
+  return 1.0 * k * (length(d) - rest) * vec4(normalize(d),0.0); // dist;  
 }
 
-// Tallennetaan alku-derivaatta temp[pos*4] kohtaan.
-void k1(uint pos)
-{
-  vec4 derivate_k1 = evalF(input[pos]); 
-  temp1[4*pos] = derivate_k1;
+///////////////////////////////////////////////////////////////////////////
+
+PVdata getParticle(uint index) {
+  if (phase == 1.0) return initial[index]; 
+  else return temp[index];
 }
 
-// Lasketaan mid point ja tallennetaan sen derivaatta temp[pos*4+1] kohtaan.
-void k2(uint pos)
-{
- // Haetaan derivaatta aloitus pisteessa.
- vec4 der = temp1[pos*4];
+///////////////////////////////////////////////////////////////////////////
 
- // Lasketaan "middle point".
- vec4 newPos = input[pos].pos + 0.5 * h * der;
+void evalF_flex(uint index) {
 
- // Luodaan middle pointille positio ja velocity.
- PVdata pv_middle_point;
- pv_middle_point.pos = newPos;
- pv_middle_point.vel = der;
+   // Haetaan partikkelin alkuperainen sijainti ja velocity.
+   PVdata pv_initial = initial[index];
+   PVdata pv_now = getParticle(index);
 
- // Lasketaan middle pointin derivaatta / 2.
- vec4 middle_point_der = evalF(pv_middle_point);
+   // k5.
+   if (phase == 5.0) {
+     PVdata final_data;
+     vec4 final_force = (1.0/6.0) * h * (k1[index] + 2*k2[index] + 2*k3[index] + k4[index]); 
+     final_data.pos = pv_initial.pos + final_force;  
+     final_data.vel = pv_initial.vel + final_force;  
+     initial[index] = final_data;
+     return;
+   }
 
- // Tallennetaan middle pointin derivaatta temp[pos*4+1].
- temp1[pos*4+1] = middle_point_der;
+   // kaverit, lepo-pituudet ym.
+   StaticData sd = static_data[index]; 
+
+   // Onko staattinen partikkeli; -1.0 staattinen.
+   float is_static = sd.some_data.x;
+
+   // Tahan voima.
+   vec4 force = vec4(0.0);
+
+   // Kaveri indeksit.
+   float friend0 = sd.friends[0]; 
+   float friend1 = sd.friends[1]; 
+   float friend2 = sd.friends[2]; 
+   float friend3 = sd.friends[3]; 
+
+   // Lepo-pituudet.
+   float rest0 = sd.rest_forces[0]; 
+   float rest1 = sd.rest_forces[1]; 
+   float rest2 = sd.rest_forces[2]; 
+   float rest3 = sd.rest_forces[3]; 
+
+   // Jos on kaveri olemassa, niin lasketaan voima.
+   if (friend0 != -1.0) {
+     force = force + laske_voima(pv_now.pos, getParticle(uint(friend0)).pos, rest0);
+   }
+
+   if (friend1 != -1.0) {
+     force = force + laske_voima(pv_now.pos, getParticle(uint(friend1)).pos, rest1);
+   }
+
+   if (friend2 != -1.0) {
+     force = force + laske_voima(pv_now.pos, getParticle(uint(friend2)).pos, rest2);
+   }
+
+   if (friend3 != -1.0) {
+     force = force + laske_voima(pv_now.pos, getParticle(uint(friend3)).pos, rest3);
+   }
+
+   if (is_static == -1.0) force = vec4(0.0);
+
+   // k1.
+   if (phase == 1.0) {
+     PVdata new_data;
+     new_data.pos = pv_initial.pos + pv_now.vel * 0.5 * h * force;  
+     new_data.vel = pv_now.vel + 0.5 * h * force;  
+     temp[index] = new_data;
+     //k1[index] = pv_now.vel + h * force;
+     k1[index] = pv_now.vel * h * force;
+   }
+
+   else if (phase == 2.0) {
+     PVdata new_data;
+     new_data.pos = pv_initial.pos + pv_now.vel * 0.5 * h * force;  
+     new_data.vel = pv_initial.vel + 0.5 * h * force;  
+     temp[index] = new_data;
+     //k2[index] = pv_now.vel + h * force;
+     k2[index] = pv_now.vel * h * force;
+   }
+
+   else if (phase == 3.0) {
+     PVdata new_data;
+     new_data.pos = pv_initial.pos + pv_now.vel * h * force;  
+     new_data.vel = pv_initial.vel + h * force;  
+     temp[index] = new_data;
+     //k3[index] = pv_now.vel + h * force;
+     k3[index] = pv_now.vel * h * force;
+   }
+
+   else if (phase == 4.0) {
+     //PVdata new_data;
+     //k4[index] = pv_now.vel + h * force;
+     k4[index] = pv_now.vel * h * force;
+   }
+
 }
 
-// Lasketaan k3.
-void k3(uint pos)
-{
- // Haetaan derivaatta k2:sta.
- vec4 der = temp1[pos*4+1];
-
- // Lasketaan k3 point (middle point k2:sta).
- vec4 newPos = input[pos].pos + 0.5 * h * der;
-
- // Luodaan k3:lle positio ja velocity.
- PVdata pv_k3;
- pv_k3.pos = newPos;
- pv_k3.vel = der;
-
- // Lasketaan derivaatta k3:lle.
- vec4 k3_der = evalF(pv_k3);
-
- // Tallennetaan k3:n derivaatta.
- temp1[pos*4+2] = k3_der;
-}
-
-// Lasketaan k4 derivaatta.
-void k4(uint pos)
-{
- // Haetaan derivaatta k3:sta.
- vec4 der = temp1[pos*4+2];
-
- // Lasketaan k4 point.
- vec4 newPos = input[pos].pos + h * der;
-
- // Luodaan k4:lle positio ja velocity.
- PVdata pv_k4;
- pv_k4.pos = newPos;
- pv_k4.vel = der;
-
- // Lasketaan k4:n derivaatta.
- vec4 k4_der = evalF(pv_k4);
-
- // Tallenetaan k4 derivaatta.
- temp1[pos*4+3] = k4_der;
-
- vec4 lopullinen_derivaatta = 1.0/6.0 * (temp1[pos*4]+2*temp1[pos*4+1]+2*temp1[pos*4+2]+temp1[pos*4+3]);
- input[pos].pos = input[pos].pos + lopullinen_derivaatta * h; 
- input[pos].vel = lopullinen_derivaatta;
-}
-
-void euler(uint pos)
-{
-  k1(pos);
-  vec4 der = temp1[pos*4];
-  vec4 newPos = input[pos].pos + h*der;
-  input[pos].pos = newPos;
-  input[pos].vel = der;
-}
-
-void copyToState(uint pos)
-{
-//    PVdata b;
-//    b.pos = vec4(pos,pos,pos,pos);
-//    b.vel = vec4(pos,pos,pos,pos);
-    input[pos].pos = temp1[4*pos];
-}
+///////////////////////////////////////////////////////////////////////////
 
 void main()
 {
   uint pos = gl_GlobalInvocationID.x;
-  if (phase == 1.0) k1(pos);
-  else if (phase == 2.0) k2(pos);
-  else if (phase == 3.0) k3(pos);
-  else if (phase == 4.0) k4(pos);
-  else if (phase == 5.0) euler(pos);
-//  else if (phase == 2.0) copyToState(pos);
+  //PVdata joo;
+  //joo.pos = vec4(pos);
+  //joo.vel = vec4(6.666);
+  //initial[pos] = joo;
+  evalF_flex(pos);
 }

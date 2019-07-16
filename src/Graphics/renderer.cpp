@@ -121,7 +121,7 @@ void Renderer::renderKipinat(const Camera& camera)
   //{
   //  Log::getInfo().log("EI NULLLLIIIIII");
   //}
-  vb->takeStep(0.005f);
+  vb->takeStep(0.05f);
   vb->bind();
   //Log::getInfo().log("BINDAUS ONNISTU");
 
@@ -151,6 +151,6 @@ void Renderer::renderKipinat(const Camera& camera)
   shader->setUniform("MVP", projection * viewMatrix * mx);
   //Log::getInfo().log("HIHHIIIIII 5");
   auto particleCount = ProgramState::getInstance().getParticleCount();
-  glDrawArrays(GL_POINTS, 0, particleCount);
+  glDrawArrays(GL_POINTS, 0, particleCount );
   //Log::getInfo().log("HIHHIIIIII");
 }

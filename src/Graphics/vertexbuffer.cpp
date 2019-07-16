@@ -293,9 +293,9 @@ void Vertexbuffer::setCount(const int count)
   
 ParticleBuffer::ParticleBuffer()
 {
-  for (int i=0 ; i<5 ; i++) {
-    pTexture[i] = 0;     
-  }
+//  for (int i=0 ; i<6 ; i++) {
+//    pTexture[i] = 0;     
+//  }
 }
 
 void ParticleBuffer::init()
@@ -310,6 +310,12 @@ void ParticleBuffer::init()
 //    glGenBuffers(1,&pTemp3);
 //    glGenBuffers(1,&pTemp4);
     //pTarget = GL_SHADER_STORAGE_BUFFER;
+    glGenBuffers(1,&pTemp);
+    glGenBuffers(1,&pStatic_data);
+    glGenBuffers(1,&pK1);
+    glGenBuffers(1,&pK2);
+    glGenBuffers(1,&pK3);
+    glGenBuffers(1,&pK4);
     pTarget = GL_ARRAY_BUFFER;
     pUsage = GL_DYNAMIC_DRAW;
 
@@ -339,22 +345,24 @@ void ParticleBuffer::init()
 ParticleBuffer::~ParticleBuffer()
 {
   //if (pId != 0) glDeleteBuffers(1,&pId);
-  bool destroy_textures = false;
-  for (int i=0 ; i<6 ; i++) {
-    if (pTexture[i] != 0) destroy_textures = true;     
-  }
-  if (destroy_textures) glDeleteTextures(6,pTexture);
-  delete[] pTexture;
-//  if (pTemp1 != 0) glDeleteBuffers(1,&pTemp1);
-//  if (pTemp2 != 0) glDeleteBuffers(1,&pTemp2);
-//  if (pTemp3 != 0) glDeleteBuffers(1,&pTemp3);
-//  if (pTemp4 != 0) glDeleteBuffers(1,&pTemp4);
+//  bool destroy_textures = false;
+//  for (int i=0 ; i<6 ; i++) {
+//    if (pTexture[i] != 0) destroy_textures = true;     
+//  }
+//  if (destroy_textures) glDeleteTextures(7,pTexture);
+//  delete[] pTexture;
+  if (pTemp != 0) glDeleteBuffers(1,&pTemp);
+  if (pStatic_data != 0) glDeleteBuffers(1,&pStatic_data);
+  if (pK1 != 0) glDeleteBuffers(1,&pK1);
+  if (pK2 != 0) glDeleteBuffers(1,&pK2);
+  if (pK3 != 0) glDeleteBuffers(1,&pK3);
+  if (pK4 != 0) glDeleteBuffers(1,&pK4);
 }
 
 void ParticleBuffer::takeStep(float h)
 {
-  float t = float(ProgramState::getInstance().getTimeDeltaMilliseconds())/500.0f;
-  float t_temp = h; 
+  //float t = float(ProgramState::getInstance().getTimeDeltaMilliseconds())/500.0f;
+  //float t_temp = h; 
 
 //  Log::getDebug().log("t = %",std::to_string(t));
 //  Log::getDebug().log("t_temp = %",std::to_string(t_temp));
@@ -366,19 +374,22 @@ void ParticleBuffer::takeStep(float h)
   Shader* compute = ShaderManager::getInstance().getByKey("particle1");
   compute->bind();
 
-  // Lets bind the ssbo to binding = 0.
-  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, pId);
-  //glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, pTemp1);
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, pId);
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, pTemp);
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, pStatic_data);
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, pK1);
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, pK2);
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, pK3);
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, pK4);
     
-  // Lets bind the texture to binding = 1.
 
-  /* Tekstruurin bindaus shaderiin "layout (rgba32f, binding = 1) uniform image2D temp;" */
-  glBindImageTexture(0, pTexture[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
-  glBindImageTexture(1, pTexture[1], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
-  glBindImageTexture(2, pTexture[2], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
-  glBindImageTexture(3, pTexture[3], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
-  glBindImageTexture(4, pTexture[4], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
-  glBindImageTexture(5, pTexture[5], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+//  /* Tekstruurin bindaus shaderiin "layout (rgba32f, binding = n) uniform image2D xxxx;" */
+//  glBindImageTexture(0, pTexture[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+//  glBindImageTexture(1, pTexture[1], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+//  glBindImageTexture(2, pTexture[2], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+//  glBindImageTexture(3, pTexture[3], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+//  glBindImageTexture(4, pTexture[4], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+//  glBindImageTexture(5, pTexture[5], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
   
 //  do {
     //glBindBuffer(GL_SHADER_STORAGE_BUFFER, pId);
@@ -402,42 +413,42 @@ void ParticleBuffer::takeStep(float h)
     glDispatchCompute(X,Y,1);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
-//    compute->setUniform("phase",2.0f);
-//    glDispatchCompute(X,Y,1);
-//    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-//
-//    compute->setUniform("phase",3.0f);
-//    glDispatchCompute(X,Y,1);
-//    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-//
-//    compute->setUniform("phase",4.0f);
-//    glDispatchCompute(X,Y,1);
-//    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-//
-//    compute->setUniform("phase",5.0f);
-//    glDispatchCompute(X,Y,1);
-//    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+    compute->setUniform("phase",2.0f);
+    glDispatchCompute(X,Y,1);
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+    compute->setUniform("phase",3.0f);
+    glDispatchCompute(X,Y,1);
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+    compute->setUniform("phase",4.0f);
+    glDispatchCompute(X,Y,1);
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+    compute->setUniform("phase",5.0f);
+    glDispatchCompute(X,Y,1);
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
 //    compute->setUniform("phase",6.0f);
 //    glDispatchCompute(X,1,1);
 //    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
     auto particle_count = ProgramState::getInstance().getParticleCount();
-    bool printJuttu = counter > 2 ? false : true;
-//    bool printJuttu = false;
+    //bool printJuttu = counter > 2 ? false : true;
+    bool printJuttu = false;
     if (printJuttu)
     {
-      GLfloat* feedback = new GLfloat[particle_count*4*4];
-////      GLfloat* textureData = new GLfloat[particle_count*64];
-      glGetNamedBufferSubData(pId, 0, sizeof(float)*4*4*particle_count, feedback);
-////      //glGetNamedBufferSubData(pTemp1, 0, sizeof(float)*64*particle_count, textureData);
+      GLfloat* feedback = new GLfloat[particle_count*8];
+      GLfloat* textureData = new GLfloat[particle_count*12];
+      glGetNamedBufferSubData(pId, 0, sizeof(float)*8*particle_count, feedback);
+      glGetNamedBufferSubData(pStatic_data, 0, sizeof(float)*12*particle_count, textureData);
 ////      //glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA,GL_FLOAT, pTexture[0]);
 ////
 ////
-      for (int i=0 ; i<particle_count*4 ; i++)
+      for (int i=0 ; i<particle_count ; i++)
       {
-        int j = i*4;
-////        int k = i*64;
+        int j = i*8;
+        int k = i*12;
 ////
         Log::getDebug().log("%.",std::to_string(i));
         Log::getDebug().log("%,%,%,%.",std::to_string(j),std::to_string(j+1),std::to_string(j+2),std::to_string(j+3));
@@ -445,8 +456,25 @@ void ParticleBuffer::takeStep(float h)
                                                     std::to_string(feedback[j+1]),
                                                     std::to_string(feedback[j+2]),
                                                     std::to_string(feedback[j+3]));
+        Log::getDebug().log("INPUT::vel (%,%,%,%)", std::to_string(feedback[j+4]),
+                                                    std::to_string(feedback[j+5]),
+                                                    std::to_string(feedback[j+6]),
+                                                    std::to_string(feedback[j+7]));
+        Log::getDebug().log("Static::other (%,%,%,%)", std::to_string(textureData[k]),
+                                                       std::to_string(textureData[k+1]),
+                                                       std::to_string(textureData[k+2]),
+                                                       std::to_string(textureData[k+3]));
+        Log::getDebug().log("Static::friends (%,%,%,%)", std::to_string(textureData[k+4]),
+                                                         std::to_string(textureData[k+5]),
+                                                         std::to_string(textureData[k+6]),
+                                                         std::to_string(textureData[k+7]));
+        Log::getDebug().log("Static::rest (%,%,%,%)", std::to_string(textureData[k+8]),
+                                                      std::to_string(textureData[k+9]),
+                                                      std::to_string(textureData[k+10]),
+                                                      std::to_string(textureData[k+11]));
       }
       delete[] feedback; 
+      delete[] textureData; 
     }
 ////        Log::getDebug().log("INPUT::vel (%,%,%,%)", std::to_string(feedback[j+4]),
 ////                                                    std::to_string(feedback[j+5]),
@@ -542,45 +570,100 @@ void ParticleBuffer::takeStep(float h)
 //    }
 }
 
+void ParticleBuffer::novoeha(const void* data, const void* static_data, unsigned int size, const std::vector<std::string>& types) const
+{
+  Log::getInfo().log("ParticleBuffer::addData2");
+  //auto particle_count = ProgramState::getInstance().getParticleCount();
+  bind();
+
+  // Luodaan piirto-purkuri (initial_data).
+  glBindBuffer(pTarget, pId);
+  glBufferData(pTarget,size*8, data, pUsage);
+
+  // Maaritellaan kuinka data piirretaan.
+  VertexAttributes vas;
+  vas.create_interleaved_attributes(types, false);
+  vas.registerAttributes();
+  glBindVertexArray(0);
+
+////  // Luodaan staattinen data.
+////  glBindBuffer(GL_SHADER_STORAGE_BUFFER, pStatic_data);
+////  glBufferData(GL_SHADER_STORAGE_BUFFER,size*12, static_data, GL_STATIC_READ);
+////
+////  // Luodaan temp puskuri.
+////  glBindBuffer(GL_SHADER_STORAGE_BUFFER, pTemp);
+////  glBufferData(GL_SHADER_STORAGE_BUFFER,size*8, NULL, pUsage);
+////
+////  // Luodaan k1 puskuri.
+////  glBindBuffer(GL_SHADER_STORAGE_BUFFER, pK1);
+////  glBufferData(GL_SHADER_STORAGE_BUFFER,size*4, NULL, pUsage);
+////
+////  // Luodaan k2 puskuri.
+////  glBindBuffer(GL_SHADER_STORAGE_BUFFER, pK2);
+////  glBufferData(GL_SHADER_STORAGE_BUFFER,size*4, NULL, pUsage);
+////
+////  // Luodaan k3 puskuri.
+////  glBindBuffer(GL_SHADER_STORAGE_BUFFER, pK3);
+////  glBufferData(GL_SHADER_STORAGE_BUFFER,size*4, NULL, pUsage);
+////
+////  // Luodaan k4 puskuri.
+////  glBindBuffer(GL_SHADER_STORAGE_BUFFER, pK4);
+////  glBufferData(GL_SHADER_STORAGE_BUFFER,size*4, NULL, pUsage);
+
+  glBindBuffer(GL_ARRAY_BUFFER, pStatic_data);
+  glBufferData(GL_ARRAY_BUFFER,size*12, static_data, GL_STATIC_READ);
+
+  // Luodaan temp puskuri.
+  glBindBuffer(GL_ARRAY_BUFFER, pTemp);
+  glBufferData(GL_ARRAY_BUFFER,size*8, NULL, pUsage);
+
+  // Luodaan k1 puskuri.
+  glBindBuffer(GL_ARRAY_BUFFER, pK1);
+  glBufferData(GL_ARRAY_BUFFER,size*4, NULL, pUsage);
+
+  // Luodaan k2 puskuri.
+  glBindBuffer(GL_ARRAY_BUFFER, pK2);
+  glBufferData(GL_ARRAY_BUFFER,size*4, NULL, pUsage);
+
+  // Luodaan k3 puskuri.
+  glBindBuffer(GL_ARRAY_BUFFER, pK3);
+  glBufferData(GL_ARRAY_BUFFER,size*4, NULL, pUsage);
+
+  // Luodaan k4 puskuri.
+  glBindBuffer(GL_ARRAY_BUFFER, pK4);
+  glBufferData(GL_ARRAY_BUFFER,size*4, NULL, pUsage);
+}
+
 inline void ParticleBuffer::addData(const void* data, unsigned int size, const std::vector<std::string>& types) const
 {
   //Log::getDebug().log("Vertexbuffer::addData: %", std::to_string(size));
   Log::getInfo().log("ParticleBuffer::addData");
   auto particle_count = ProgramState::getInstance().getParticleCount();
-  auto array = new GLfloat[4*4*particle_count];
-  for (int i=0 ; i<4*4*particle_count ; i++) {
-    array[i] = -77.0f;
-  }
+//  auto array = new GLfloat[4*4*particle_count];
+//  for (int i=0 ; i<4*4*particle_count ; i++) {
+//    array[i] = -77.0f;
+//  }
   bind();
   glBindBuffer(pTarget, pId);
   //glBufferData(pTarget,size, data, pUsage);
-  glBufferData(pTarget,sizeof(float)*particle_count*4*4, array, pUsage);
+  glBufferData(pTarget,size, NULL, pUsage);
   VertexAttributes vas;
   vas.create_interleaved_attributes(types, false);
   vas.registerAttributes();
-  //glBindBuffer(pTarget, pTemp1);
-  //glBufferData(pTarget, size, NULL, pTemp1);
-  //glBindBuffer(GL_SHADER_STORAGE_BUFFER, pTemp1);
-  //glBufferData(GL_SHADER_STORAGE_BUFFER, size*6, NULL, pUsage);
-  //glBindBuffer(GL_SHADER_STORAGE_BUFFER, pTemp2);
-  //glBufferData(GL_SHADER_STORAGE_BUFFER, size, NULL, pUsage);
-  //glBindBuffer(GL_SHADER_STORAGE_BUFFER, pTemp3);
-  //glBufferData(GL_SHADER_STORAGE_BUFFER, size, NULL, pUsage);
-  //glBindBuffer(GL_SHADER_STORAGE_BUFFER, pTemp4);
-  //glBufferData(GL_SHADER_STORAGE_BUFFER, size, NULL, pUsage);
   glBindVertexArray(0);
 
-  int t_w = ProgramState::getInstance().getParticlesWidth();
-  int t_h = ProgramState::getInstance().getParticlesHeight();
-  glGenTextures(6,pTexture);
-  for (int i=0; i<6 ; i++) {
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, pTexture[i]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    i != 0 ? glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, t_w, t_h, 0, GL_RGBA, GL_FLOAT, NULL) 
-           : glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, t_w, t_h, 0, GL_RGBA, GL_FLOAT, data); 
-  }
+//  int t_w = ProgramState::getInstance().getParticlesWidth();
+//  int t_h = ProgramState::getInstance().getParticlesHeight();
+//  glGenTextures(6,pTexture);
+//  for (int i=0; i<6 ; i++) {
+//    glActiveTexture(GL_TEXTURE0);
+//    glBindTexture(GL_TEXTURE_2D, pTexture[i]);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//    i != 0 ? glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, t_w, t_h, 0, GL_RGBA, GL_FLOAT, NULL) 
+//           : glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, t_w, t_h, 0, GL_RGBA, GL_FLOAT, data); 
+//  }
 }
+

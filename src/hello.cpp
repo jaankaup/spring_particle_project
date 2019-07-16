@@ -31,7 +31,6 @@
 #include "Utils/misc.h"
 //#include "Utils/myrandom.h"
 
-
 /**
  * Context structure that will be passed to the loop handler
  */
@@ -79,7 +78,7 @@ void createShaders()
     ProgramState::getInstance().getMetadata()->particle1 = PARTICLE1;
 //////
     Shader* sParticle1 = ShaderManager::getInstance().create(PARTICLE1);
-    std::vector<std::string> srcKipinat = {"shaders/kipinat2.comp"};
+    std::vector<std::string> srcKipinat = {"shaders/jouset.comp"};
     sParticle1->build(srcKipinat,false);
 
     // The shader for drawing the triangulated scene. The name is a bit
@@ -90,37 +89,6 @@ void createShaders()
     Shader* shaderCube = ShaderManager::getInstance().create(SCENE_SHADER);
     std::vector<std::string> shaderSourcesCube = {"shaders/defaultPoint.vert", "shaders/defaultPoint.frag"};
     shaderCube->build(shaderSourcesCube,false);
-
-    ProgramState::getInstance().getMetadata()->meshShader = SCENE_SHADER;
-    ProgramState::getInstance().getMetadata()->baseState = "BState";
-    ProgramState::getInstance().getMetadata()->T1 = "T1";
-    ProgramState::getInstance().getMetadata()->T2 = "T2";
-    ProgramState::getInstance().getMetadata()->T3 = "T3";
-    ProgramState::getInstance().getMetadata()->T4 = "T4";
-
-    const int width = 3;
-    const int height = 3;
-    int particle_count = width*height;
-    float offset = 1.0f;
-    glm::vec3 a = glm::vec3(0.0f);
-    glm::vec3 b = glm::vec3(offset,offset,0.0f);
-    float dist = glm::distance(a,b);
-    //float dist = 0.5f;
-    Shader* compute = ShaderManager::getInstance().getByKey("particle1");
-    compute->bind();
-    compute->setUniform("r",dist);
-    compute->setUniform("k",1.0f);
-
-    ProgramState::getInstance().setParticleCount(particle_count);
-    ProgramState::getInstance().setParticlesWidth(width);
-    ProgramState::getInstance().setParticlesHeight(height);
-
-    //Vertexbuffer* bstate = VertexBufferManager::getInstance().createParticleBuffer("BState");
-    ParticleBuffer* bstate = dynamic_cast<ParticleBuffer*>(VertexBufferManager::getInstance().createParticleBuffer("BState"));
-    bstate->init();
-//    std::vector<std::string> types = {"4f","4f","4f"}; // HUOM, "4f","4f","4f,"4f" ei toimi!!!!
-    //GLfloat* feedback = new GLfloat[8];
-    //auto array = new GLfloat[8]{0.0f,0.0f,0.0f,0.0f,0.0f,7.2f,0.0f,0.0f};
 
     const static auto getLeft = [](const int index, const int width, const int height)
     {
@@ -170,42 +138,122 @@ void createShaders()
       return index + width + 1;
     };
 
+    ProgramState::getInstance().getMetadata()->meshShader = SCENE_SHADER;
+    ProgramState::getInstance().getMetadata()->baseState = "BState";
+    ProgramState::getInstance().getMetadata()->T1 = "T1";
+    ProgramState::getInstance().getMetadata()->T2 = "T2";
+    ProgramState::getInstance().getMetadata()->T3 = "T3";
+    ProgramState::getInstance().getMetadata()->T4 = "T4";
 
-//    -1 -1 -1 -1 -1 -1 -1
-//    -1  0   1   2   3 -1
-//    -1  4   5   6   7 -1
-//    -1  8   9  10  11 -1
-//    -1 12  13  14  15 -1
-//    -1 -1 -1 -1 -1 -1 -1
-//
-//    0    1    2    3
-//             
-//    4    5    6    7
-//       
-//    8    9    10   11 
-//
-//    12   13   14   15 
+    const int width = 3;
+    const int height = 3;
+    int particle_count = width*height;
+    float offset = 1.0f;
+    glm::vec3 a = glm::vec3(0.0f);
+    glm::vec3 b = glm::vec3(offset,offset,0.0f);
+    float dist = glm::distance(a,b);
+    Log::getInfo().log("Distance = % ", std::to_string(dist));
+    //float dist = 0.5f;
+    Shader* compute = ShaderManager::getInstance().getByKey("particle1");
+    compute->bind();
+    compute->setUniform("r",dist);
+    compute->setUniform("k",1.0f);
 
-    auto array = new GLfloat[4*particle_count];
+    ProgramState::getInstance().setParticleCount(particle_count);
+    ProgramState::getInstance().setParticlesWidth(width);
+    ProgramState::getInstance().setParticlesHeight(height);
 
+    //Vertexbuffer* bstate = VertexBufferManager::getInstance().createParticleBuffer("BState");
+    ParticleBuffer* bstate = dynamic_cast<ParticleBuffer*>(VertexBufferManager::getInstance().createParticleBuffer("BState"));
+    bstate->init();
+//    std::vector<std::string> types = {"4f","4f","4f"}; // HUOM, "4f","4f","4f,"4f" ei toimi!!!!
+    //GLfloat* feedback = new GLfloat[8];
+    //auto array = new GLfloat[8]{0.0f,0.0f,0.0f,0.0f,0.0f,7.2f,0.0f,0.0f};
+
+    // pos-vel
+    auto array = new GLfloat[8*particle_count];
+
+    // other-friends-rest
+    auto static_data = new GLfloat[12*particle_count];
+
+    // Luodaan data.
     for (int j=0 ; j<width ; j++) {
     for (int i=0 ; i<height ; i++) {
       int position = i + width * j;
-      int pah = position*4; 
+      int pah = position*8; 
+      int static_pah = position*12; 
+
+
+      // Positio, tehdaan verho.
       array[pah] = (i%width)*offset; 
-      array[pah+1] = (-1.0f)*j*offset; 
-      array[pah+2] = 0.0f; // 0.0f; 
-      array[pah+3] = float(position); // getUp(position,width,height) == -1 ? -1.0f : 6.0f; 
-      Log::getInfo().log("Position = % ", std::to_string(position));
-      Log::getInfo().log("(%,%,%,%)", std::to_string(array[pah]),
-                                      std::to_string(array[pah+1]),
-                                      std::to_string(array[pah+2]),
-                                      std::to_string(array[pah+3]));
+      array[pah+1] = (-10.5f)*j*offset; 
+      array[pah+2] = 0.0f; 
+      array[pah+3] = 1.0f; 
+
+      // Alku velocity
+      array[pah+4] = 0.0f; 
+      array[pah+5] = 0.0f; 
+      array[pah+6] = 0.0f; 
+      array[pah+7] = 0.0f; 
+
+      Log::getInfo().log("(%) pos = (%,%,%,%)", std::to_string(position),
+                                                std::to_string(array[pah]),
+                                                std::to_string(array[pah+1]),
+                                                std::to_string(array[pah+2]),
+                                                std::to_string(array[pah+3]));
+      Log::getInfo().log("(%) vel = (%,%,%,%)", std::to_string(position),
+                                                std::to_string(array[pah+4]),
+                                                std::to_string(array[pah+5]),
+                                                std::to_string(array[pah+6]),
+                                                std::to_string(array[pah+7]));
+
+      // Muu data.
+
+      // Jos on ylhaalla, niin asetetaan arvoksi -1.0f, sovitaan etta on
+      // staatinen partikkeli. Debuggaus mielessa muuten 6.0f.
+      static_data[static_pah] = getUp(position,width,height) == -1 ? -1.0f : 6.0f; 
+      static_data[static_pah+1] = 0.0f; // Tanne jotain muuta informaatiota jos keksii.  
+      static_data[static_pah+2] = 0.0f; // Tanne jotain muuta informaatiota jos keksii.
+      static_data[static_pah+3] = 0.0f; // Tanne jotain muuta informaatiota jos keksii.
+
+      // Kavereiden indeksit. Flex-rakenne.
+      float ur = float(getUpRight(position,width,height)); 
+      float ul = float(getUpLeft(position,width,height)); 
+      float br = float(getBottomRight(position,width,height)); 
+      float bl = float(getBottomLeft(position,width,height)); 
+      static_data[static_pah+4] = ur; 
+      static_data[static_pah+5] = ul;  
+      static_data[static_pah+6] = br;
+      static_data[static_pah+7] = bl;
+
+      // Tanne lepoarvoja kavereihin. Nyt on kaikilla sama, mutta jos olisi
+      // erilainen jousirakenne, niin tanne voisi laittaa muitakin arvoja.
+      static_data[static_pah+8]  = dist;
+      static_data[static_pah+9] = dist;  
+      static_data[static_pah+10] = dist;
+      static_data[static_pah+11] = dist;
+      Log::getInfo().log("(%) other  = (%,%,%,%)", std::to_string(position),
+                                                   std::to_string(static_data[static_pah]),
+                                                   std::to_string(static_data[static_pah+1]),
+                                                   std::to_string(static_data[static_pah+2]),
+                                                   std::to_string(static_data[static_pah+3]));
+      Log::getInfo().log("(%) friends = (%,%,%,%)", std::to_string(position),
+                                                   std::to_string(static_data[static_pah+4]),
+                                                   std::to_string(static_data[static_pah+5]),
+                                                   std::to_string(static_data[static_pah+6]),
+                                                   std::to_string(static_data[static_pah+7]));
+      Log::getInfo().log("(%) rest_length = (%,%,%,%)", std::to_string(position),
+                                                   std::to_string(static_data[static_pah+8]),
+                                                   std::to_string(static_data[static_pah+9]),
+                                                   std::to_string(static_data[static_pah+10]),
+                                                   std::to_string(static_data[static_pah+11]));
     }}; 
-    std::vector<std::string> types2 = {"4f"};
-    bstate->addData(array, sizeof(float)*4*particle_count, types2);
-    bstate->setCount(4*particle_count);
+    std::vector<std::string> types2 = {"4f","4f"};
+    //bstate->addData(array, sizeof(float)*particle_count, types2);
+    bstate->novoeha(array, static_data, sizeof(float)*particle_count, types2);
+    bstate->setCount(particle_count);
     delete[] array;
+    delete[] static_data;
 /////      int position = i + width * j;
 ///////      Log::getInfo().log("Position = % ", std::to_string(position));
 /////      int pah = position*16; 
