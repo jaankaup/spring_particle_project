@@ -1,3 +1,4 @@
+#include <chrono>
 #include "vertexbuffer.h"
 #include "../Utils/log.h"
 
@@ -362,18 +363,37 @@ ParticleBuffer::~ParticleBuffer()
 void ParticleBuffer::takeStep(float h)
 {
   //float t = float(ProgramState::getInstance().getTimeDeltaMilliseconds())/500.0f;
-  //float t_temp = h; 
+//  float t_temp = h; 
+//
+    using namespace std;
+    auto microseconds_now = chrono::high_resolution_clock::now().time_since_epoch();
+    auto microseconds_now2 = chrono::duration_cast<chrono::microseconds>(microseconds_now).count();
+    const static auto since = microseconds_now2; 
+//    static auto sum;
+//    sum += h;
 
-//  Log::getDebug().log("t = %",std::to_string(t));
+
+
+    //static auto microseconds_before = std::high_resolution_clock::period::now();
+
 //  Log::getDebug().log("t_temp = %",std::to_string(t_temp));
 
-  static int counter = 0;
+//  static int counter = 0;
+//  counter++;
+//  Log::getDebug().log("counter = %",std::to_string(counter));
 //  glBindVertexArray(0);
   //bind();
 
   Shader* compute = ShaderManager::getInstance().getByKey("particle1");
   compute->bind();
 
+  auto metadata = ProgramState::getInstance().getMetadata();
+  Texture* texture = TextureManager::getInstance().getByKey(metadata->texture3Dname);
+  texture->use(0);
+  compute->setUniform("diffuse3DTexture",0);
+
+  compute->setUniform("time",(microseconds_now2-since)*0.0000001f);
+//  Log::getDebug().log("time = %.",std::to_string((microseconds_now2-since)*0.00000001f));
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, pId);
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, pTemp);
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, pStatic_data);
@@ -397,8 +417,9 @@ void ParticleBuffer::takeStep(float h)
 
     // The time.
     compute->setUniform("h",h);
+    compute->setUniform("time",h);
   
-    const static int X = 90;
+    const static int X = 100;
     const static int Y = 1;
 
 //    compute->setUniform("phase",5.0f);
@@ -611,7 +632,7 @@ void ParticleBuffer::novoeha(const void* data, const void* static_data, unsigned
 ////  glBufferData(GL_SHADER_STORAGE_BUFFER,size*4, NULL, pUsage);
 
   glBindBuffer(GL_ARRAY_BUFFER, pStatic_data);
-  glBufferData(GL_ARRAY_BUFFER,size*12, static_data, GL_STATIC_READ);
+  glBufferData(GL_ARRAY_BUFFER,size*20, static_data, GL_STATIC_READ);
 
   // Luodaan temp puskuri.
   glBindBuffer(GL_ARRAY_BUFFER, pTemp);

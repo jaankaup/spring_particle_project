@@ -104,9 +104,9 @@ TextureData createPerlin3D_rough(const int width, const int height, const int de
   for (int y = 0; y < height ; y++){
   for (int x = 0; x < width ; x++) {
 	  unsigned int position = x*xOffset + y*yOffset + z*zOffset;
-    data[position] = 123;
-    data[position+1] = 100;
-    data[position+2] = pn.octaveNoise0_1(x/fx, y/fy, z/fz, 2) * 255; 
+    data[position] = pn.octaveNoise0_1(x/fx, y/fy, z/fz, 3) * 255;
+    data[position+1] = pn.octaveNoise0_1(x/fx, y/fy, z/fz, 3) * 255;
+    data[position+2] = 128; // pn.octaveNoise0_1(x/fx, y/fy, z/fz, 3) * 255; 
     data[position+3] = pn.octaveNoise0_1(x / fx, y / fy, z / fz, 3) * 255;
 	lkm++;
   }}};

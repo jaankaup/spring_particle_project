@@ -37,7 +37,7 @@
 struct context
 {
     Renderer renderer;
-    Camera camera = Camera(glm::vec3(10.0f,10.0f,20.0f),glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f));
+    Camera camera = Camera(glm::vec3(4.0f,4.0f,4.0f),glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f));
 };
 
 void createShaders()
@@ -145,19 +145,22 @@ void createShaders()
     ProgramState::getInstance().getMetadata()->T3 = "T3";
     ProgramState::getInstance().getMetadata()->T4 = "T4";
 
-    const int width = 90;
-    const int height = 90;
+    const int width = 100;
+    const int height = 100;
     int particle_count = width*height;
-    float offset = 0.1f;
+    float offset = 0.01f;
     glm::vec3 a = glm::vec3(0.0f);
     glm::vec3 b = glm::vec3(offset,offset,0.0f);
+    glm::vec3 c = glm::vec3(offset,0.0f,0.0f);
     float dist = glm::distance(a,b);
+    float dist_horizontal = glm::distance(a,c);
     Log::getInfo().log("Distance = % ", std::to_string(dist));
+    Log::getInfo().log("Distance horizontal = % ", std::to_string(dist_horizontal));
     //float dist = 0.5f;
     Shader* compute = ShaderManager::getInstance().getByKey("particle1");
     compute->bind();
     compute->setUniform("r",dist);
-    compute->setUniform("k",100.0f);
+//    compute->setUniform("k",2000.0f);
 
     ProgramState::getInstance().setParticleCount(particle_count);
     ProgramState::getInstance().setParticlesWidth(width);
@@ -174,14 +177,14 @@ void createShaders()
     auto array = new GLfloat[8*particle_count];
 
     // other-friends-rest
-    auto static_data = new GLfloat[12*particle_count];
+    auto static_data = new GLfloat[20*particle_count];
 
     // Luodaan data.
     for (int j=0 ; j<width ; j++) {
     for (int i=0 ; i<height ; i++) {
       int position = i + width * j;
       int pah = position*8; 
-      int static_pah = position*12; 
+      int static_pah = position*20; 
 
 
       // Positio, tehdaan verho.
@@ -196,17 +199,17 @@ void createShaders()
       array[pah+6] = 0.0f; 
       array[pah+7] = 0.0f; 
 
-      Log::getInfo().log("(%) pos = (%,%,%,%)", std::to_string(position),
-                                                std::to_string(array[pah]),
-                                                std::to_string(array[pah+1]),
-                                                std::to_string(array[pah+2]),
-                                                std::to_string(array[pah+3]));
-      Log::getInfo().log("(%) vel = (%,%,%,%)", std::to_string(position),
-                                                std::to_string(array[pah+4]),
-                                                std::to_string(array[pah+5]),
-                                                std::to_string(array[pah+6]),
-                                                std::to_string(array[pah+7]));
-
+//      Log::getInfo().log("(%) pos = (%,%,%,%)", std::to_string(position),
+//                                                std::to_string(array[pah]),
+//                                                std::to_string(array[pah+1]),
+//                                                std::to_string(array[pah+2]),
+//                                                std::to_string(array[pah+3]));
+//      Log::getInfo().log("(%) vel = (%,%,%,%)", std::to_string(position),
+//                                                std::to_string(array[pah+4]),
+//                                                std::to_string(array[pah+5]),
+//                                                std::to_string(array[pah+6]),
+//                                                std::to_string(array[pah+7]));
+//
       // Muu data.
 
       // Jos on ylhaalla, niin asetetaan arvoksi -1.0f, sovitaan etta on
@@ -226,27 +229,40 @@ void createShaders()
       static_data[static_pah+6] = br;
       static_data[static_pah+7] = bl;
 
+      float u = float(getUp(position,width,height)); 
+      float l = float(getLeft(position,width,height)); 
+      float b = float(getBottom(position,width,height)); 
+      float r = float(getRight(position,width,height)); 
+      static_data[static_pah+8] = u; 
+      static_data[static_pah+9] = l;  
+      static_data[static_pah+10] = b;
+      static_data[static_pah+11] = r;
+
       // Tanne lepoarvoja kavereihin. Nyt on kaikilla sama, mutta jos olisi
       // erilainen jousirakenne, niin tanne voisi laittaa muitakin arvoja.
-      static_data[static_pah+8]  = dist;
-      static_data[static_pah+9] = dist;  
-      static_data[static_pah+10] = dist;
-      static_data[static_pah+11] = dist;
-      Log::getInfo().log("(%) other  = (%,%,%,%)", std::to_string(position),
-                                                   std::to_string(static_data[static_pah]),
-                                                   std::to_string(static_data[static_pah+1]),
-                                                   std::to_string(static_data[static_pah+2]),
-                                                   std::to_string(static_data[static_pah+3]));
-      Log::getInfo().log("(%) friends = (%,%,%,%)", std::to_string(position),
-                                                   std::to_string(static_data[static_pah+4]),
-                                                   std::to_string(static_data[static_pah+5]),
-                                                   std::to_string(static_data[static_pah+6]),
-                                                   std::to_string(static_data[static_pah+7]));
-      Log::getInfo().log("(%) rest_length = (%,%,%,%)", std::to_string(position),
-                                                   std::to_string(static_data[static_pah+8]),
-                                                   std::to_string(static_data[static_pah+9]),
-                                                   std::to_string(static_data[static_pah+10]),
-                                                   std::to_string(static_data[static_pah+11]));
+      static_data[static_pah+12]  = dist;
+      static_data[static_pah+13] = dist;  
+      static_data[static_pah+14] = dist;
+      static_data[static_pah+15] = dist;
+      static_data[static_pah+16]  = dist_horizontal;
+      static_data[static_pah+17] = dist_horizontal;  
+      static_data[static_pah+18] = dist_horizontal;
+      static_data[static_pah+19] = dist_horizontal;
+//      Log::getInfo().log("(%) other  = (%,%,%,%)", std::to_string(position),
+//                                                   std::to_string(static_data[static_pah]),
+//                                                   std::to_string(static_data[static_pah+1]),
+//                                                   std::to_string(static_data[static_pah+2]),
+//                                                   std::to_string(static_data[static_pah+3]));
+//      Log::getInfo().log("(%) friends = (%,%,%,%)", std::to_string(position),
+//                                                   std::to_string(static_data[static_pah+4]),
+//                                                   std::to_string(static_data[static_pah+5]),
+//                                                   std::to_string(static_data[static_pah+6]),
+//                                                   std::to_string(static_data[static_pah+7]));
+//      Log::getInfo().log("(%) rest_length = (%,%,%,%)", std::to_string(position),
+//                                                   std::to_string(static_data[static_pah+8]),
+//                                                   std::to_string(static_data[static_pah+9]),
+//                                                   std::to_string(static_data[static_pah+10]),
+//                                                   std::to_string(static_data[static_pah+11]));
     }}; 
     std::vector<std::string> types2 = {"4f","4f"};
     //bstate->addData(array, sizeof(float)*particle_count, types2);
@@ -332,7 +348,7 @@ void createtextures()
   // TODO::: MODIFY ::: TODO
   //Texture tex3D = TextureManager::getInstance().create3D(TEXTURE_NAME);
   Texture* tex3D = TextureManager::getInstance().create(TEXTURE_NAME,TextureType::d3);
-  auto tex3D_data = createPerlin3D(256,256,256);
+  auto tex3D_data = createPerlin3D_rough(256,256,256);
   tex3D->create3D(tex3D_data);
   metadata->texture3Dname = TEXTURE_NAME;
 
@@ -503,7 +519,7 @@ int main(int argc, char* argv[])
   Window window = Window::getInstance();
 
   // Create all textures.
-  //createtextures();
+  createtextures();
 
   // Creates a default texture for rendering the cube.
   // TODO::: MODIFY ::: TODO
