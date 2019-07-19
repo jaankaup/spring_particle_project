@@ -15,12 +15,16 @@
 #include "programstate.h"
 #include "../Utils/log.h"
 #include "../Utils/misc.h"
-
+#include "../Physics/ParticleSystem.h"
 
 /* Forward declarations. */
 class Shader;
 class Texture;
 class Vertexbuffer;
+class ParticleSystem;
+class VerhoSystem;
+
+enum class ParticleType { Verho };
 
 /***************************************************************************************** 
  *                                                                                       *  
@@ -101,6 +105,7 @@ inline T* Manager<T>::create(const std::string& key)
     // TODO: log to debug.
     //return nullptr; 
   }
+  Log::getInfo().log("Manager::create(%):: Luodaan resurssi. ", key);
 
   Element<T> e(key,std::unique_ptr<T>(new T()));
   auto ret_val = e.val.get();
@@ -120,7 +125,7 @@ inline T* Manager<T>::getByKey(const std::string& key) const
       return e.val.get();
     }
   }
-  Log::getInfo().log("Ei loytynyt resurssia %", key);
+  Log::getInfo().log("Manager::getByKey(%):: Ei loytynyt resurssia. ", key);
   return nullptr;
 }
 
@@ -200,16 +205,23 @@ class VertexBufferManager : public Manager<Vertexbuffer>
 
     Vertexbuffer* createParticleBuffer(const std::string& name);
 
-      //Log::getInfo().log("getByKey: %",key);
-    //Vertexbuffer* create(const std::string& key) override { Log::getInfo().log("TextureManager::create(): not implemented."); return nullptr; }
+};
 
-//    Texture* create(const std::string& key, const TextureType& type)
-//    {
-//      auto ret_val = Manager<Texture>::create(key); 
-//      ret_val->init(type);
-//      return ret_val;
-//    }
+/****************************************************************************************
+ *                                                                                      *  
+ * ParticleSystemManager                                                                *
+ *                                                                                      *  
+ ****************************************************************************************/
 
+class ParticleSystemManager : public Manager<ParticleSystem>
+{
+
+  public:
+
+    // Get the singleton instance of this class.
+    static auto& getInstance() { static ParticleSystemManager instance; return instance; }
+
+    ParticleSystem* create(const std::string& key, const ParticleType type); 
 };
 
 inline Texture* TextureManager::create(const std::string& key, const TextureType& type)
@@ -370,6 +382,24 @@ inline Vertexbuffer* VertexBufferManager::createParticleBuffer(const std::string
   auto ret_val = e.val.get();
   pData.push_back(std::move(e));
   return ret_val;
+}
+
+inline ParticleSystem* ParticleSystemManager::create(const std::string& key, const ParticleType type)
+{
+  if (getByKey(key) != nullptr) del(key);
+
+  if (type == ParticleType::Verho) {
+    Element<ParticleSystem> e(key,std::unique_ptr<ParticleSystem>(new VerhoSystem()));
+    auto ret_val = e.val.get();
+    pData.push_back(std::move(e));
+    return ret_val;
+  }
+  else {
+    Element<ParticleSystem> e(key,std::unique_ptr<ParticleSystem>(new ParticleSystem()));
+    auto ret_val = e.val.get();
+    pData.push_back(std::move(e));
+    return ret_val;
+  }
 }
 
 #endif // MODELMANAGER_H

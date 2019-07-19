@@ -36,4 +36,14 @@ extern TextureData createPerlin3D_rough(const int width, const int height, const
 extern void createBaseVertexBuffer();
 
 extern void changeScene(const char number);
+
+extern int getLeft(const int index, const int width, const int height);
+extern int getRight(const int index, const int width, const int height);
+extern int getUp(const int index, const int width, const int height);
+extern int getBottom(const int index, const int width, const int height);
+extern int getUpLeft(const int index, const int width, const int height);
+extern int getUpRight(const int index, const int width, const int height);
+extern int getBottomLeft(const int index, const int width, const int height);
+extern int getBottomRight(const int index, const int width, const int height);
+
 #endif //MISC_H

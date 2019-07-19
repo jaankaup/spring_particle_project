@@ -1,6 +1,8 @@
 #ifndef VERTEXBUFFER_H
 #define VERTEXBUFFER_H
 
+#include <memory>
+#include <tuple>
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -8,6 +10,7 @@
 #include "shader.h"
 
 
+// TODO: erillinen piirto-purkuri ja tavallinen data-puskuri periyttamalla.
 class Vertexbuffer
 {
   template <typename T> friend class Manager;
@@ -17,17 +20,42 @@ class Vertexbuffer
 	public:
 
     virtual void init();
+    void init_plain_buffer();
     void bind() const;
-    virtual void addData(const void* data, unsigned int size, const std::vector<std::string>& types) const;
-    void createExampleCube();
+
+    // Varaa bufferille kokoa @parametrin size verran ensimmaisella kerralla
+    // kutsuttuna. Taman jalkeen jos yritetaan laitttaa dataa enemmman kuin 
+    // ensimmaisella kerralla annettu size, niin heittaa poikkeuksen.
+    void populate_data(const void* data, unsigned int size);
+
+    // Asettaa datan piirrettavalle puskurille. taman jalkeen taytyy data
+    // lisata populate_data funktiolla tai heittaa poikkeuksen. Maarittaa 
+    // myos attribute-locatiot @types parametrin avulla. Esim. jos 
+    // types = {"3f","2f","3f"}, niin tulkitsee datan interleavedina 
+    // ja shaderissa taytyy olla
+    // layout(location = 0) in vec3 joku_nimi0;
+    // layout(location = 1) in vec2 joku_nimi1;
+    // layout(location = 2) in vec3 joku_nimi2;
+    virtual void addData(const void* data, unsigned int size, const std::vector<std::string>& types);
+
+    // Luo marching cubesille dimensioiden mukaan piste-datan.
     int createExamplePoints(const int dimensionX, const int dimensionY, const int dimensionZ);
+
+    // Palauttaa bufferin handlen.
     GLuint getHandle() const;
+
+    // Palauttaa vao:n handlen.
     GLuint getVAO() const;
-    //void init_transform_feedback(const GLuint id, GLuint count);
-    // TODO: change.
+
+    // Palauttaa piirrettavien elementtien lukumaaran.
     int getCount() const;
+
+    // Asettaa piirrettavien elementtien lukumaara.
     void setCount(const int count);
-    //void dispose() const;
+
+    // Palauttaa opengl puskurin datan. Tuplen ekassa elementissa on unique_ptr
+    // float taulukkoon. Toisessa elementissa on floatien lukumaara.
+    std::tuple<std::unique_ptr<float[]>,uint32_t> getBufferData() const;
 
 		virtual ~Vertexbuffer();
 
@@ -39,6 +67,7 @@ class Vertexbuffer
     std::vector<float> pData;
     int pDataCount = 0;
 		Vertexbuffer();
+    unsigned int pData_size = 0;
 
 	private:
 };
@@ -51,7 +80,7 @@ class ParticleBuffer : public Vertexbuffer
   public:
 
     void init() override;
-    void addData(const void* data, unsigned int size, const std::vector<std::string>& types) const override;
+    void addData(const void* data, unsigned int size, const std::vector<std::string>& types) override;
 		virtual ~ParticleBuffer();
     void novoeha(const void* data, const void* static_data, unsigned int size, const std::vector<std::string>& types) const;
     void takeStep(float t);

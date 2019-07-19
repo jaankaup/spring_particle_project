@@ -85,6 +85,11 @@ class ProgramState
     static ProgramState& getInstance();
 		~ProgramState();
 
+    ProgramState(const ProgramState&) = delete;
+    ProgramState(ProgramState&&) = delete;
+    ProgramState& operator=(const ProgramState&) = delete;
+    ProgramState& operator=(ProgramState&&) = delete;
+
     int getScreenWidth() const;
     int getScreenHeight() const;
     bool getAppRunning() const;
@@ -99,6 +104,8 @@ class ProgramState
     int getParticleCount() const;
     int getParticlesWidth() const;
     int getParticlesHeight() const;
+    float get_h_sum() const;
+    float getTimeStep() const;
 
     void setScreenWidth(const int width);
     void setScreenHeight(const int height);
@@ -112,6 +119,8 @@ class ProgramState
     void setParticleCount(const int particleCount);
     void setParticlesWidth(const int width);
     void setParticlesHeight(const int height);
+    void increase_h_sum(const float h);
+    void setTimeStep(const float h);
 
     void updateTick();
     float getTimeDelta() const;
@@ -137,6 +146,8 @@ class ProgramState
     uint32_t pDeltaMilliseconds = 0;
     int pParticlesWidth = 0;
     int pParticlesHeight = 0;
+    float pH = 0.0f;
+    float pTimeStep = 0.0f;
 };
 
 

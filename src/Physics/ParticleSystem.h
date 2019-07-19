@@ -2,36 +2,63 @@
 #define PARTICLESYSTEM_H
 
 #include <vector>
-#include <vecmath.h>
+#include <string>
 #include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/matrix_inverse.hpp>
+//#undef MANAGER_H
+//#include <glm/gtc/type_ptr.hpp>
+//#include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/transform.hpp>
+//#include <glm/gtx/transform.hpp>
+//
 
 class ParticleSystem
 {
-public:
+  template <typename T> friend class Manager;
+  friend class ParticleSystemManager;
 
-  ParticleSystem(int numParticles=0);
+  public:
 
-  int m_numParticles;
-  
-  // for a given state, evaluate derivative f(X,t)
-  virtual std::vector<glm::vec3> evalF(std::vector<glm::vec3> state) = 0;
-  
-  // getter method for the system's state
-  std::vector<glm::vec3> getState(){ return m_vVecState; };
-  
-  // setter method for the system's state
-  void setState(const std::vector<glm::vec3>  & newState) { m_vVecState = newState; };
-  
-  virtual void draw() = 0;
-  
-protected:
+    // Initialize particle system.
+    virtual void init();
 
-  std::vector<glm::vec3> m_vVecState;
+    // Take step.
+    virtual void takeStep(const float h) {}; 
+
+    // Draw particles.
+    virtual void draw(const glm::vec3& eyePosition, const glm::mat4& viewMatrix, const glm::mat4& projection) {}; 
+
+    virtual ~ParticleSystem() {};
+
+    uint32_t get_particle_count() const;
+    
+  protected:
   
+    uint32_t pParticleCount = 0;
+    ParticleSystem() {};
+    
+  private:
+};
+
+class VerhoSystem : public ParticleSystem
+{
+  template <typename T> friend class Manager;
+  friend class ParticleSystemManager;
+
+  public:
+    virtual void init() override;
+    virtual void takeStep(const float h) override;
+    virtual void draw(const glm::vec3& eyePosition, const glm::mat4& viewMatrix, const glm::mat4& projection) override;
+    virtual ~VerhoSystem() {};
+
+  private:
+    static const std::string INITIAL_BUFFER;
+    static const std::string STATIC_DATA_BUFFER;
+    static const std::string K1;
+    static const std::string K2;
+    static const std::string K3;
+    static const std::string K4;
+    static const std::string CS_NAME;
+
 };
 
 #endif

@@ -1,11 +1,13 @@
 #version 430
 
 uniform float h = 0.1;
-uniform float k = 16000;
+uniform float k = 2344000.0;
+//uniform float k = 2344000.0;
+//uniform float k = 10.0;
 uniform float time = 0.0;
 uniform vec4 gravity = vec4(0.0,-9.81,0.0,0.0);
 uniform float phase = 1.0;
-uniform float mass = 0.1;
+uniform float mass = 3.0;
 uniform float viskositeettiKerroin = 0.1;
 uniform sampler3D diffuse3DTexture;
 //uniform float rest = 1.414214; 
@@ -28,12 +30,11 @@ struct StaticData
 layout (local_size_x = 100,local_size_y=1,local_size_z=1) in;
 
 layout (std430, binding = 0) buffer InitialBuf { PVdata initial[]; };
-layout (std430, binding = 1) buffer TempBuf { PVdata temp[]; };
-layout (std430, binding = 2) buffer StaticBuf { StaticData static_data[]; };
-layout (std430, binding = 3) buffer K1 { vec4 k1[]; };
-layout (std430, binding = 4) buffer K2 { vec4 k2[]; };
-layout (std430, binding = 5) buffer K3 { vec4 k3[]; };
-layout (std430, binding = 6) buffer K4 { vec4 k4[]; };
+layout (std430, binding = 1) buffer StaticBuf { StaticData static_data[]; };
+layout (std430, binding = 2) buffer K1 { vec4 k1[]; };
+layout (std430, binding = 3) buffer K2 { vec4 k2[]; };
+layout (std430, binding = 4) buffer K3 { vec4 k3[]; };
+layout (std430, binding = 5) buffer K4 { vec4 k4[]; };
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -141,12 +142,15 @@ void evalF_flex(uint index) {
    force = force - pv_now.vel * viskositeettiKerroin;
 
    // Tuulen aiheuttama voima. Muutetaan niin etta kukin tuulen komponentti on valilla [-0.5,0.5].
-   vec3 wind = texture(diffuse3DTexture,pv_now.pos.xyz + vec3(time*100)).rgb;
-   vec4 wind_converted = vec4(wind,0.0-vec4(-0.5,-0.5,-0.5,0.0));
-   force += wind_converted*5.5;
+   //vec3 wind = texture(diffuse3DTexture,pv_now.pos.xyz + vec3(time)).rgb;
+   float time_delta = phase == 1.0 ? 0.0 : h;
+   vec3 wind = texture(diffuse3DTexture,pv_now.pos.xyz + vec3(time+h)).rgb;
+   vec4 wind_converted = (-1.0)*vec4(wind,0.0)-vec4(-0.5,-0.5,-0.5,0.0);
+   force += wind_converted*55.5;
 
    // Lasketaan inversio massalle. Mita se sitten tekeekaan. Ainakin pysyy mittayksikot kohdillaan.
    vec4 vel = force * 1.0/mass;
+   //vec4 vel = force;
 
    // Jos piste on staattinen, nollataa force.
    if (is_static == -1.0) vel = vec4(0.0);

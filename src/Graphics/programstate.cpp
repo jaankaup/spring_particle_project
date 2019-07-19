@@ -178,6 +178,27 @@ int ProgramState::getParticlesHeight() const
 {
   return pParticlesHeight;
 }
+
+void ProgramState::increase_h_sum(const float h)
+{
+  pH += h;
+}
+
+float ProgramState::get_h_sum() const
+{
+  return pH;
+}
+
+void ProgramState::setTimeStep(const float h)
+{
+  pTimeStep = h;
+}
+
+float ProgramState::getTimeStep() const
+{
+  return pTimeStep;
+}
+
 //std::string ProgramState::dimensionToString() const
 //{
 //  return "([" + std::to_string(pMetaData.dimensionX_min) + ","  + std::to_string(pMetaData.dimensionX_max) + "] , " +

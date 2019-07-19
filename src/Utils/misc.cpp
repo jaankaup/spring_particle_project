@@ -54,6 +54,8 @@ TextureData createPerlin3D(const int width, const int height, const int depth)
 
   siv::PerlinNoise pn(mr());
   siv::PerlinNoise pn2(mr());
+  siv::PerlinNoise pn3(mr());
+  siv::PerlinNoise pn4(mr());
 
   const double fx = width; 
   const double fy = height;
@@ -67,10 +69,10 @@ TextureData createPerlin3D(const int width, const int height, const int depth)
   for (int y = 0; y < height ; y++){
   for (int x = 0; x < width ; x++) {
 	unsigned int position = x*xOffset + y*yOffset + z*zOffset;
-    data[position] = 123;
-    data[position+1] = 100;
-    data[position+2] = pn2.noise0_1(x / fx, y / fy, z / fz) * 255; 
-    data[position+3] = pn.noise0_1(x / fx, y / fy, z / fz) * 255;
+    data[position] = pn.noise0_1(x / fx, y / fy, z / fz) * 255;
+    data[position+1] = pn2.noise0_1(x / fx, y / fy, z / fz) * 255;
+    data[position+2] = pn3.noise0_1(x / fx, y / fy, z / fz) * 255; 
+    data[position+3] = pn4.noise0_1(x / fx, y / fy, z / fz) * 255;
 	lkm++;
   }}};
 
@@ -138,3 +140,51 @@ void changeScene(const char number)
         Log::getInfo().log("Changing densityShader to % ...", newName);
         ModelManager::getInstance().createSceneObject();
 }
+
+int getLeft(const int index, const int width, const int height)
+{
+  if (index % width == 0) return -1;  
+  return index - 1;
+};
+
+int getRight(const int index, const int width, const int height)
+{
+  if (index % width == width-1) return -1;  
+  return index + 1;
+};
+
+int getUp(const int index, const int width, const int height)
+{
+  if (index - width < 0) return -1;  
+  return index - width;
+};
+
+int getBottom(const int index, const int width, const int height)
+{
+  if (index + width > width*height - 1) return -1;  
+  return index + width;
+};
+
+int getUpLeft(const int index, const int width, const int height)
+{
+  if (getLeft(index,width,height) == -1 || getUp(index,width,height) == -1) return -1;
+  return index - width - 1;
+};
+
+int getUpRight(const int index, const int width, const int height)
+{
+  if (getRight(index,width,height) == -1 || getUp(index,width,height) == -1) return -1;
+  return index - width + 1;
+};
+
+int getBottomLeft(const int index, const int width, const int height)
+{
+  if (getBottom(index,width,height) == -1 || getLeft(index,width,height) == -1) return -1;
+  return index + width - 1;
+};
+
+int getBottomRight(const int index, const int width, const int height)
+{
+  if (getBottom(index,width,height) == -1 || getRight(index,width,height) == -1) return -1;
+  return index + width + 1;
+};

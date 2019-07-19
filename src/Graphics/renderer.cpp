@@ -114,43 +114,12 @@ void Renderer::renderKipinat(const Camera& camera)
   auto render_shader_name = ProgramState::getInstance().getMetadata()->meshShader;
   auto bState_name = ProgramState::getInstance().getMetadata()->baseState;
   ParticleBuffer* vb = dynamic_cast<ParticleBuffer*>(VertexBufferManager::getInstance().getByKey(bState_name));
-  //if (vb == nullptr) {
-  //  Log::getInfo().log("NULLLLIIIIII");
-  //}
-  //else
-  //{
-  //  Log::getInfo().log("EI NULLLLIIIIII");
-  //}
-  vb->takeStep(0.0001f);
+  vb->takeStep(0.0005f);
   vb->bind();
-  //Log::getInfo().log("BINDAUS ONNISTU");
 
-///  //vb->bind();
-///  unsigned int euler;
-///  //unsigned int vao;
-///  glGenBuffers(1,&euler);
-///  //glVertexArrays(1,&vao);
-///  //glBindVertexArray(vao);
-///  glBindBuffer(GL_ARRAY_BUFFER, euler);
-///  //glBindBuffer(GL_ARRAY_BUFFER, vb-getHandle());
-///  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, euler); // TODO continue
-///  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, vb->getHandle()); // TODO continue
-///
-///  Shader* compute = ShaderManager::getInstance().getByKey("particle1");
-///  compute->bind();
-///
-///  glDispatchCompute(1,1,1);
-///
-///  glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-  
-  //Log::getInfo().log("HIHHIIIIII 2");
   Shader* shader = ShaderManager::getInstance().getByKey(render_shader_name);
-  //Log::getInfo().log("HIHHIIIIII 3");
   shader->bind();
-  //Log::getInfo().log("HIHHIIIIII 4");
   shader->setUniform("MVP", projection * viewMatrix * mx);
-  //Log::getInfo().log("HIHHIIIIII 5");
   auto particleCount = ProgramState::getInstance().getParticleCount();
   glDrawArrays(GL_POINTS, 0, particleCount );
-  //Log::getInfo().log("HIHHIIIIII");
 }
