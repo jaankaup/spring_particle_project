@@ -145,7 +145,7 @@ void evalF_flex(uint index) {
    //vec3 wind = texture(diffuse3DTexture,pv_now.pos.xyz + vec3(time)).rgb;
    float time_delta = phase == 1.0 ? 0.0 : h;
    vec3 wind = texture(diffuse3DTexture,pv_now.pos.xyz + vec3(time+h)).rgb;
-   vec4 wind_converted = (-1.0)*vec4(wind,0.0)-vec4(-0.5,-0.5,-0.5,0.0);
+   vec4 wind_converted = vec4(wind,0.0)-vec4(-0.5,-0.5,-0.5,0.0);
    force += wind_converted*55.5;
 
    // Lasketaan inversio massalle. Mita se sitten tekeekaan. Ainakin pysyy mittayksikot kohdillaan.

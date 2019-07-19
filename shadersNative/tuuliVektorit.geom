@@ -16,6 +16,7 @@ uniform float time = 0.0;
 void createArray() {
   vec4 pos =  gl_in[0].gl_Position;
   vec4 wind = vec4(texture(diffuse3DTexture,pos.xyz + vec3(time)).rgb,0.0);
+  wind = wind+vec4(-0.5,-0.5,-0.5,0.0);
 
   gl_Position = (MVP * pos);
   //fPosIn = (MVP * pos).xyz;

@@ -152,9 +152,9 @@ void loop_handler2(void *arg)
                       }
                       break;
                     }
-//                case SDLK_SPACE:
-//                    camera_.toggleMode();
-//                    break;
+                case SDLK_SPACE:
+                    ProgramState::getInstance().toggleWind();
+                    break;
 
                 case SDLK_q: 
                     ProgramState::getInstance().setAppRunning(false);

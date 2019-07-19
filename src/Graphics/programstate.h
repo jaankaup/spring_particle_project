@@ -106,6 +106,7 @@ class ProgramState
     int getParticlesHeight() const;
     float get_h_sum() const;
     float getTimeStep() const;
+    bool getShowWind() const;
 
     void setScreenWidth(const int width);
     void setScreenHeight(const int height);
@@ -121,6 +122,7 @@ class ProgramState
     void setParticlesHeight(const int height);
     void increase_h_sum(const float h);
     void setTimeStep(const float h);
+    void toggleWind();
 
     void updateTick();
     float getTimeDelta() const;
@@ -148,6 +150,7 @@ class ProgramState
     int pParticlesHeight = 0;
     float pH = 0.0f;
     float pTimeStep = 0.0f;
+    bool pShowWind = false;
 };
 
 

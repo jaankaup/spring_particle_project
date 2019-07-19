@@ -199,6 +199,15 @@ float ProgramState::getTimeStep() const
   return pTimeStep;
 }
 
+void ProgramState::toggleWind()
+{
+  pShowWind = !pShowWind;
+}
+
+bool ProgramState::getShowWind() const
+{
+  return pShowWind;
+}
 //std::string ProgramState::dimensionToString() const
 //{
 //  return "([" + std::to_string(pMetaData.dimensionX_min) + ","  + std::to_string(pMetaData.dimensionX_max) + "] , " +

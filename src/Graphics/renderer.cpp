@@ -37,23 +37,23 @@ void Renderer::render(const Camera& camera) {
 
   /* Tuuli vektorien piirto. */
   
+  if (ProgramState::getInstance().getShowWind()) {
+    auto tuuliShader = ShaderManager::getInstance().getByKey("tuulishader");
+    tuuliShader->bind();
 
-  auto tuuliShader = ShaderManager::getInstance().getByKey("tuulishader");
-  tuuliShader->bind();
+    tuuliShader->setUniform("MVP", MVP);
+    auto metadata = ProgramState::getInstance().getMetadata();
+    Texture* texture = TextureManager::getInstance().getByKey(metadata->texture3Dname);
+    texture->use(0);
+    tuuliShader->setUniform("diffuse3DTexture",0);
+    tuuliShader->setUniform("time",ProgramState::getInstance().get_h_sum());
 
-  tuuliShader->setUniform("MVP", MVP);
-  auto metadata = ProgramState::getInstance().getMetadata();
-  Texture* texture = TextureManager::getInstance().getByKey(metadata->texture3Dname);
-  texture->use(0);
-  tuuliShader->setUniform("diffuse3DTexture",0);
-  tuuliShader->setUniform("time",ProgramState::getInstance().get_h_sum());
+    auto tuuliPoints = VertexBufferManager::getInstance().getByKey("tuuli_pisteet");
+    tuuliPoints->bind();
+    auto tuuliCount = tuuliPoints->getCount();
 
-  auto tuuliPoints = VertexBufferManager::getInstance().getByKey("tuuli_pisteet");
-  tuuliPoints->bind();
-  auto tuuliCount = tuuliPoints->getCount();
-
-  //Log::getInfo().log("Tuulicount: %", std::to_string(tuuliCount));
-  glDrawArrays(GL_POINTS, 0, tuuliCount);
+    glDrawArrays(GL_POINTS, 0, tuuliCount);
+  }
 }
 
 void Renderer::renderModels(const Camera& camera)
