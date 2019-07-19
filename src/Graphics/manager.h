@@ -203,7 +203,7 @@ class VertexBufferManager : public Manager<Vertexbuffer>
     // TODO: shaderName is not used. Remove it.
     Vertexbuffer* optimize_vertex_buffer(const std::string& optimized_name, const std::string& shaderName);
 
-    Vertexbuffer* createParticleBuffer(const std::string& name);
+    //Vertexbuffer* createParticleBuffer(const std::string& name);
 
 };
 
@@ -370,19 +370,19 @@ inline Vertexbuffer* VertexBufferManager::optimize_vertex_buffer(const std::stri
   return result;
 }
 
-inline Vertexbuffer* VertexBufferManager::createParticleBuffer(const std::string& key)
-{
-  /* Check if the already existst. */
-  if (getByKey(key) != nullptr)
-  {
-    del(key);
-  }
-
-  Element<Vertexbuffer> e(key,std::unique_ptr<Vertexbuffer>(new ParticleBuffer()));
-  auto ret_val = e.val.get();
-  pData.push_back(std::move(e));
-  return ret_val;
-}
+//inline Vertexbuffer* VertexBufferManager::createParticleBuffer(const std::string& key)
+//{
+//  /* Check if the already existst. */
+//  if (getByKey(key) != nullptr)
+//  {
+//    del(key);
+//  }
+//
+//  Element<Vertexbuffer> e(key,std::unique_ptr<Vertexbuffer>(new ParticleBuffer()));
+//  auto ret_val = e.val.get();
+//  pData.push_back(std::move(e));
+//  return ret_val;
+//}
 
 inline ParticleSystem* ParticleSystemManager::create(const std::string& key, const ParticleType type)
 {

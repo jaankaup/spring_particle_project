@@ -101,25 +101,3 @@ void Renderer::renderModels(const Camera& camera)
     }
   }
 }
-
-void Renderer::renderKipinat(const Camera& camera)
-{
-  glClearColor(0.0f,0.0f,0.0f,1.0f);
-  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-  glm::vec3 eyePosition = camera.getPosition();
-  glm::mat4 viewMatrix = camera.getMatrix();
-  glm::mat4 projection = glm::perspective(glm::radians(45.0f), 16.0f / 9.0f, 0.001f, 1000.0f);
-  glm::mat4 mx = glm::mat4(1.0f);
-  auto render_shader_name = ProgramState::getInstance().getMetadata()->meshShader;
-  auto bState_name = ProgramState::getInstance().getMetadata()->baseState;
-  ParticleBuffer* vb = dynamic_cast<ParticleBuffer*>(VertexBufferManager::getInstance().getByKey(bState_name));
-  vb->takeStep(0.0005f);
-  vb->bind();
-
-  Shader* shader = ShaderManager::getInstance().getByKey(render_shader_name);
-  shader->bind();
-  shader->setUniform("MVP", projection * viewMatrix * mx);
-  auto particleCount = ProgramState::getInstance().getParticleCount();
-  glDrawArrays(GL_POINTS, 0, particleCount );
-}

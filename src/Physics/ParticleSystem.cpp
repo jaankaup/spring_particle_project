@@ -183,14 +183,6 @@ void VerhoSystem::takeStep(const float h)
   auto k3 = VertexBufferManager::getInstance().getByKey(VerhoSystem::K3);
   auto k4 = VertexBufferManager::getInstance().getByKey(VerhoSystem::K4);
 
-//  Log::getDebug().log("% : % : % : % : % : %", std::to_string(initial_data->getHandle()),
-//                                           std::to_string(static_data->getHandle()),
-//                                           std::to_string(k1->getHandle()),
-//                                           std::to_string(k2->getHandle()),
-//                                           std::to_string(k3->getHandle()),
-//                                           std::to_string(k4->getHandle()));
-
-  // TODO: poista temp shaderista.
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, initial_data->getHandle());
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, static_data->getHandle());
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, k1->getHandle());
@@ -229,7 +221,6 @@ void VerhoSystem::takeStep(const float h)
 
 void VerhoSystem::draw(const glm::vec3& eyePosition, const glm::mat4& viewMatrix, const glm::mat4& projection)
 {
-  //Log::getDebug().log("VerhoSystem::draw()");
   glClearColor(0.0f,0.0f,0.0f,1.0f);
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
@@ -237,39 +228,8 @@ void VerhoSystem::draw(const glm::vec3& eyePosition, const glm::mat4& viewMatrix
 
   auto drawBuffer = VertexBufferManager::getInstance().getByKey(VerhoSystem::INITIAL_BUFFER); 
 
-  //Log::getDebug().log("VerhoSystem::draw(): drawBuffer->bind()");
   drawBuffer->bind();
-  auto drawData = drawBuffer->getBufferData();
-  auto float_array = std::get<0>(drawData).get();
-  using namespace std;
-  static bool print = false;
-  if (print) {
 
-    //auto static_data_buffer = VertexBufferManager::getInstance().getByKey(VerhoSystem::STATIC_DATA_BUFFER);
-    //auto staticData = static_data_buffer->getBufferData();
-    //auto sa = std::get<0>(staticData).get();
-
-    //for (int i=0 ; i< 200 /*std::get<1>(drawData)/8 */ ; i++) {
-    //  int offset = i*20;
-    //  Log::getDebug().log("%. somedata == %,%,%,%",to_string(i),to_string(sa[offset]),to_string(sa[offset+1]),to_string(sa[offset+2]),to_string(sa[offset+3]));
-    //  Log::getDebug().log("%. friends1 == %,%,%,%",to_string(i),to_string(sa[offset+4]),to_string(sa[offset+5]),to_string(sa[offset+6]),to_string(sa[offset+7]));
-    //  Log::getDebug().log("%. friends2 == %,%,%,%",to_string(i),to_string(sa[offset+8]),to_string(sa[offset+9]),to_string(sa[offset+10]),to_string(sa[offset+11]));
-    //  Log::getDebug().log("%. rest1 == %,%,%,%",to_string(i),to_string(sa[offset+12]),to_string(sa[offset+13]),to_string(sa[offset+14]),to_string(sa[offset+15]));
-    //  Log::getDebug().log("%. rest2 == %,%,%,%",to_string(i),to_string(sa[offset+16]),to_string(sa[offset+17]),to_string(sa[offset+18]),to_string(sa[offset+19]));
-    //}
-
-
-
-    Log::getDebug().log("drawData_size == %", to_string(std::get<1>(drawData)));
-    for (int i=0 ; i< 200 /*std::get<1>(drawData)/8 */ ; i++) {
-      int offset = i*8;
-      Log::getDebug().log("%. pos == %,%,%,%",to_string(i),to_string(float_array[offset]),to_string(float_array[offset+1]),to_string(float_array[offset+2]),to_string(float_array[offset+3]));
-      Log::getDebug().log("%. vel == %,%,%,%",to_string(i),to_string(float_array[offset+4]),to_string(float_array[offset+5]),to_string(float_array[offset+6]),to_string(float_array[offset+7]));
-    }
-    print = false;
-  }
-
-  //Log::getDebug().log("VerhoSystem::draw(): haetaan meshShader");
   auto render_shader_name = ProgramState::getInstance().getMetadata()->meshShader;
   Shader* shader = ShaderManager::getInstance().getByKey(render_shader_name);
   shader->bind();

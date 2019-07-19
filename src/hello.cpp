@@ -14,22 +14,15 @@
 #include "Graphics/shader.h"
 #include "Graphics/model.h"
 #include "Graphics/vertexbuffer.h"
-//#include "Graphics/vertexAttributes.h"
 #include "Graphics/renderer.h"
 #include "Graphics/texture.h"
-//#include "Graphics/testData.h"
-//#include "Graphics/marchingCubes.h"
-//#include "Graphics/voxeldata.h"
 #include "Graphics/camera.h"
 #include "Graphics/manager.h"
 #include "Graphics/model.h"
 #include "Graphics/programstate.h"
-//#include "Graphics/timer.h"
-//#include "Graphics/vertexBufferManager.h"
 #include "Graphics/modelManager.h"
 #include "Utils/log.h"
 #include "Utils/misc.h"
-//#include "Utils/myrandom.h"
 
 /**
  * Context structure that will be passed to the loop handler
@@ -90,237 +83,7 @@ void createShaders()
     Shader* shaderCube = ShaderManager::getInstance().create(SCENE_SHADER);
     std::vector<std::string> shaderSourcesCube = {"shaders/defaultPoint.vert", "shaders/defaultPoint.frag"};
     shaderCube->build(shaderSourcesCube,false);
-//
-//  
-//
-//    const static auto getLeft = [](const int index, const int width, const int height)
-//    {
-//      if (index % width == 0) return -1;  
-//      return index - 1;
-//    };
-//
-//    const static auto getRight = [](const int index, const int width, const int height)
-//    {
-//      if (index % width == width-1) return -1;  
-//      return index + 1;
-//    };
-//
-//    const static auto getUp = [](const int index, const int width, const int height)
-//    {
-//      if (index - width < 0) return -1;  
-//      return index - width;
-//    };
-//    
-//    const static auto getBottom = [](const int index, const int width, const int height)
-//    {
-//      if (index + width > width*height - 1) return -1;  
-//      return index + width;
-//    };
-//
-//    const static auto getUpLeft = [](const int index, const int width, const int height)
-//    {
-//      if (getLeft(index,width,height) == -1 || getUp(index,width,height) == -1) return -1;
-//      return index - width - 1;
-//    };
-//
-//    const static auto getUpRight = [](const int index, const int width, const int height)
-//    {
-//      if (getRight(index,width,height) == -1 || getUp(index,width,height) == -1) return -1;
-//      return index - width + 1;
-//    };
-//
-//    const static auto getBottomLeft = [](const int index, const int width, const int height)
-//    {
-//      if (getBottom(index,width,height) == -1 || getLeft(index,width,height) == -1) return -1;
-//      return index + width - 1;
-//    };
-//
-//    const static auto getBottomRight = [](const int index, const int width, const int height)
-//    {
-//      if (getBottom(index,width,height) == -1 || getRight(index,width,height) == -1) return -1;
-//      return index + width + 1;
-//    };
-//
     ProgramState::getInstance().getMetadata()->meshShader = SCENE_SHADER;
-//    ProgramState::getInstance().getMetadata()->baseState = "BState";
-////    ProgramState::getInstance().getMetadata()->T1 = "T1";
-////    ProgramState::getInstance().getMetadata()->T2 = "T2";
-////    ProgramState::getInstance().getMetadata()->T3 = "T3";
-////    ProgramState::getInstance().getMetadata()->T4 = "T4";
-//
-//    const int width = 100;
-//    const int height = 100;
-//    int particle_count = width*height;
-//    float offset = 0.01f;
-//    glm::vec3 a = glm::vec3(0.0f);
-//    glm::vec3 b = glm::vec3(offset,offset,0.0f);
-//    glm::vec3 c = glm::vec3(offset,0.0f,0.0f);
-//    float dist = glm::distance(a,b);
-//    float dist_horizontal = glm::distance(a,c);
-//    Log::getInfo().log("Distance = % ", std::to_string(dist));
-//    Log::getInfo().log("Distance horizontal = % ", std::to_string(dist_horizontal));
-//    //float dist = 0.5f;
-//    Shader* compute = ShaderManager::getInstance().getByKey("particle1");
-//    compute->bind();
-//    compute->setUniform("r",dist);
-////    compute->setUniform("k",2000.0f);
-//
-//    ProgramState::getInstance().setParticleCount(particle_count);
-//    ProgramState::getInstance().setParticlesWidth(width);
-//    ProgramState::getInstance().setParticlesHeight(height);
-//
-//    //Vertexbuffer* bstate = VertexBufferManager::getInstance().createParticleBuffer("BState");
-//    ParticleBuffer* bstate = dynamic_cast<ParticleBuffer*>(VertexBufferManager::getInstance().createParticleBuffer("BState"));
-//    bstate->init();
-////    std::vector<std::string> types = {"4f","4f","4f"}; // HUOM, "4f","4f","4f,"4f" ei toimi!!!!
-//    //GLfloat* feedback = new GLfloat[8];
-//    //auto array = new GLfloat[8]{0.0f,0.0f,0.0f,0.0f,0.0f,7.2f,0.0f,0.0f};
-//
-//    // pos-vel
-//    auto array = new GLfloat[8*particle_count];
-//
-//    // other-friends-rest
-//    auto static_data = new GLfloat[20*particle_count];
-//
-//    // Luodaan data.
-//    for (int j=0 ; j<width ; j++) {
-//    for (int i=0 ; i<height ; i++) {
-//      int position = i + width * j;
-//      int pah = position*8; 
-//      int static_pah = position*20; 
-//
-//
-//      // Positio, tehdaan verho.
-//      array[pah] = (i%width)*offset; 
-//      array[pah+1] = (-1.0f)*j*offset; 
-//      array[pah+2] = 0.0f; 
-//      array[pah+3] = 1.0f; 
-//
-//      // Alku velocity
-//      array[pah+4] = 0.0f; 
-//      array[pah+5] = 0.0f; 
-//      array[pah+6] = 0.0f; 
-//      array[pah+7] = 0.0f; 
-//
-////      Log::getInfo().log("(%) pos = (%,%,%,%)", std::to_string(position),
-////                                                std::to_string(array[pah]),
-////                                                std::to_string(array[pah+1]),
-////                                                std::to_string(array[pah+2]),
-////                                                std::to_string(array[pah+3]));
-////      Log::getInfo().log("(%) vel = (%,%,%,%)", std::to_string(position),
-////                                                std::to_string(array[pah+4]),
-////                                                std::to_string(array[pah+5]),
-////                                                std::to_string(array[pah+6]),
-////                                                std::to_string(array[pah+7]));
-////
-//      // Muu data.
-//
-//      // Jos on ylhaalla, niin asetetaan arvoksi -1.0f, sovitaan etta on
-//      // staatinen partikkeli. Debuggaus mielessa muuten 6.0f.
-//      static_data[static_pah] = getUp(position,width,height) == -1 ? -1.0f : 6.0f; 
-//      static_data[static_pah+1] = 0.0f; // Tanne jotain muuta informaatiota jos keksii.  
-//      static_data[static_pah+2] = 0.0f; // Tanne jotain muuta informaatiota jos keksii.
-//      static_data[static_pah+3] = 0.0f; // Tanne jotain muuta informaatiota jos keksii.
-//
-//      // Kavereiden indeksit. Flex-rakenne.
-//      float ur = float(getUpRight(position,width,height)); 
-//      float ul = float(getUpLeft(position,width,height)); 
-//      float br = float(getBottomRight(position,width,height)); 
-//      float bl = float(getBottomLeft(position,width,height)); 
-//      static_data[static_pah+4] = ur; 
-//      static_data[static_pah+5] = ul;  
-//      static_data[static_pah+6] = br;
-//      static_data[static_pah+7] = bl;
-//
-//      float u = float(getUp(position,width,height)); 
-//      float l = float(getLeft(position,width,height)); 
-//      float b = float(getBottom(position,width,height)); 
-//      float r = float(getRight(position,width,height)); 
-//      static_data[static_pah+8] = u; 
-//      static_data[static_pah+9] = l;  
-//      static_data[static_pah+10] = b;
-//      static_data[static_pah+11] = r;
-//
-//      // Tanne lepoarvoja kavereihin. Nyt on kaikilla sama, mutta jos olisi
-//      // erilainen jousirakenne, niin tanne voisi laittaa muitakin arvoja.
-//      static_data[static_pah+12]  = dist;
-//      static_data[static_pah+13] = dist;  
-//      static_data[static_pah+14] = dist;
-//      static_data[static_pah+15] = dist;
-//      static_data[static_pah+16]  = dist_horizontal;
-//      static_data[static_pah+17] = dist_horizontal;  
-//      static_data[static_pah+18] = dist_horizontal;
-//      static_data[static_pah+19] = dist_horizontal;
-////      Log::getInfo().log("(%) other  = (%,%,%,%)", std::to_string(position),
-////                                                   std::to_string(static_data[static_pah]),
-////                                                   std::to_string(static_data[static_pah+1]),
-////                                                   std::to_string(static_data[static_pah+2]),
-////                                                   std::to_string(static_data[static_pah+3]));
-////      Log::getInfo().log("(%) friends = (%,%,%,%)", std::to_string(position),
-////                                                   std::to_string(static_data[static_pah+4]),
-////                                                   std::to_string(static_data[static_pah+5]),
-////                                                   std::to_string(static_data[static_pah+6]),
-////                                                   std::to_string(static_data[static_pah+7]));
-////      Log::getInfo().log("(%) rest_length = (%,%,%,%)", std::to_string(position),
-////                                                   std::to_string(static_data[static_pah+8]),
-////                                                   std::to_string(static_data[static_pah+9]),
-////                                                   std::to_string(static_data[static_pah+10]),
-////                                                   std::to_string(static_data[static_pah+11]));
-//    }}; 
-//    std::vector<std::string> types2 = {"4f","4f"};
-//    //bstate->addData(array, sizeof(float)*particle_count, types2);
-//    bstate->novoeha(array, static_data, sizeof(float)*particle_count, types2);
-//    bstate->setCount(particle_count);
-//    delete[] array;
-//    delete[] static_data;
-///////      int position = i + width * j;
-/////////      Log::getInfo().log("Position = % ", std::to_string(position));
-///////      int pah = position*16; 
-/////////      Log::getInfo().log("PAH = %", std::to_string(pah));
-///////      array[pah] = (i%width)*offset; 
-///////      array[pah+1] = (-1.0f)*j*offset; 
-///////      array[pah+2] = 0.0f; 
-///////      //array[pah+3] = getUp(position,width,height) == -1 ? 2.0f : 0.0f; 
-///////      array[pah+3] = position == 0 || position == width -1 ? 2.0f : 0.0f; 
-/////////      Log::getInfo().log("STATIC (%) = %", std::to_string(position), std::to_string(array[pah+3]));
-///////
-///////      array[pah+4] = 0.0f; 
-///////      array[pah+5] = 0.0f; 
-///////      array[pah+6] = 0.0f; 
-///////      array[pah+7] = 0.0f; 
-///////
-/////////      if (j == 0 && i == 0) array[i+8] = width + 1.0f;
-/////////      if (j == 0 && i == width - 1) array[i+8] = 2*width - 2.0f;
-/////////      if (j == height-1 && i == 0) array[i+8] = (j-1)*width + 1.0f;
-/////////      if (j == height-1 && i == width - 1) array[i+8] = j*width - 2.0f;
-/////////
-/////////      if (j == 0 && i == 0) array[i+8] = width + 1.0f;
-/////////      if (j == 0 && i == width - 1) array[i+8] = 2*width - 2.0f;
-///////      float ur = float(getUpRight(position,width,height)); 
-///////      float ul = float(getUpLeft(position,width,height)); 
-///////      float br = float(getBottomRight(position,width,height)); 
-///////      float bl = float(getBottomLeft(position,width,height)); 
-///////      array[pah+8] =  ur; 
-///////      array[pah+9] =  ul;  
-///////      array[pah+10] = br;
-///////      array[pah+11] = bl;
-/////////      Log::getInfo().log("(%) = (%,%,%,%)", std::to_string(position),
-/////////                                            std::to_string(ur),std::to_string(ul),
-/////////                                            std::to_string(br),std::to_string(bl));
-/////////      Log::getInfo().log("Dist = %", std::to_string(dist));
-///////      array[pah+12] = ur == -1.0 ? 0.0f : dist; 
-///////      array[pah+13] = ul == -1.0 ? 0.0f : dist; 
-///////      array[pah+14] = br == -1.0 ? 0.0f : dist; 
-///////      array[pah+15] = bl == -1.0 ? 0.0f : dist; 
-///////    }
-///////    Log::getInfo().log("Ei koredumppaile1!");
-///////    std::vector<std::string> types2 = {"4f","4f","4f","4f"};
-///////    Log::getInfo().log("Ei koredumppaile2!");
-///////    bstate->addData(array, sizeof(float)*16*particle_count, types2);
-///////    Log::getInfo().log("Ei koredumppaile3!");
-///////    bstate->setCount(16*particle_count);
-///////    Log::getInfo().log("Ei koredumppaile4!");
-///////    Log::getInfo().log("Ei koredumppaile5!");
 }
 
 // Initialize the marching cubes attributes.
@@ -347,18 +110,11 @@ void createtextures()
 
   auto metadata = ProgramState::getInstance().getMetadata();
 
-  // Create the 3D texture.
-  // TODO::: MODIFY ::: TODO
-  //Texture tex3D = TextureManager::getInstance().create3D(TEXTURE_NAME);
   Texture* tex3D = TextureManager::getInstance().create(TEXTURE_NAME,TextureType::d3);
-  //auto tex3D_data = createPerlin3D_rough(256,256,256);
   auto tex3D_data = createPerlin3D(512,512,512);
   tex3D->create3D(tex3D_data);
   metadata->texture3Dname = TEXTURE_NAME;
 
-  // Create the tri_table.
-  // TODO::: MODIFY ::: TODO
-  //Texture tritable = TextureManager::getInstance().create1D(TRITABLE_NAME);
   Texture* tritable = TextureManager::getInstance().create(TRITABLE_NAME,TextureType::d1);
   tritable->create_tritable_texture();
   metadata->tri_table_name = TRITABLE_NAME;
@@ -504,27 +260,21 @@ void loop_handler2(void *arg)
         }
     }
     c->camera.handleKeyInput();
-    //auto ps = ProgramState::getInstance();
     auto verho_particle_system = ParticleSystemManager::getInstance().getByKey("verho");
     verho_particle_system->takeStep(ProgramState::getInstance().getTimeStep());
     verho_particle_system->draw(c->camera.getPosition(),c->camera.getMatrix(),glm::perspective(glm::radians(45.0f), 16.0f / 9.0f, 0.001f, 1000.0f));
-//  glm::mat4 projection = glm::perspective(glm::radians(45.0f), 16.0f / 9.0f, 0.001f, 1000.0f);
-    //c->renderer.renderModels(c->camera);
-    //c->renderer.renderKipinat(c->camera);
     Window::getInstance().swapBuffers();
 
     // Kasvatetaan h laskuria.
     ProgramState::getInstance().increase_h_sum(ProgramState::getInstance().getTimeStep());
-//    Log::getInfo().log("time_step = % ", std::to_string(ProgramState::getInstance().get_h_sum()));
 }
 
-//int main()
 int main(int argc, char* argv[])
 {
 
   // The program state must be created first.
   // Laitetaan jo tassa time step.
-  ProgramState::getInstance().setTimeStep(0.0005f);
+  ProgramState::getInstance().setTimeStep(0.0004f);
   
   // Initialize the base information for the marching cubes.
   initializeCubeAttributes();
@@ -534,11 +284,6 @@ int main(int argc, char* argv[])
 
   // Create all textures.
   createtextures();
-
-  // Creates a default texture for rendering the cube.
-  // TODO::: MODIFY ::: TODO
-  //Texture textureCube = TextureManager::getInstance().create2D("cubeTexture");
-  //Texture* textureCube = TextureManager::getInstance().create("cubeTexture",TextureType::d2);
 
   // Context creation. (webassembly).
   context c;
@@ -553,10 +298,6 @@ int main(int argc, char* argv[])
 
   // Initialize the renderer.
   c.renderer.init();
-
-
-    //ModelManager::getInstance().createSceneObject();
-    //Timer::getInstance().reset();
 
     /**
      * Schedule the main loop handler to get 
@@ -576,4 +317,3 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-
