@@ -20,13 +20,13 @@ void createArray() {
 
   gl_Position = (MVP * pos);
   //fPosIn = (MVP * pos).xyz;
-  fColIn = wind.xyz;
+  fColIn = wind.xyz*2;
   EmitVertex();
 
   //fPosIn = pos + vec3(1.0,1.0,1.0); // wind;
   gl_Position = MVP * vec4(pos + wind*0.3); // wind;
   //fPosIn = (MVP * (pos + wind*0.3)).xyz;
-  fColIn = wind.xyz;
+  fColIn = wind.xyz*2;
   EmitVertex();
 
   EndPrimitive();
