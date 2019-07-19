@@ -7,8 +7,7 @@ out vec3 vFrag_in;
 
 uniform mat4 MVP;
 
-void main(){
-
-	gl_Position =  MVP * vec4(vert_in.xyz,1.0);
+void main() {
+  gl_Position =  MVP * vec4(vert_in.xyz,1.0);
   vFrag_in = vert_in.xyz;
 }

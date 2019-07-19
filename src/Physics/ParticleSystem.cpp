@@ -219,10 +219,10 @@ void VerhoSystem::takeStep(const float h)
   glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
-void VerhoSystem::draw(const glm::vec3& eyePosition, const glm::mat4& viewMatrix, const glm::mat4& projection)
+void VerhoSystem::draw(const glm::mat4& mvp)
 {
-  glClearColor(0.0f,0.0f,0.0f,1.0f);
-  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+  //glClearColor(0.0f,0.0f,0.0f,1.0f);
+  //glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
   glm::mat4 mx = glm::mat4(1.0f);
 
@@ -233,7 +233,7 @@ void VerhoSystem::draw(const glm::vec3& eyePosition, const glm::mat4& viewMatrix
   auto render_shader_name = ProgramState::getInstance().getMetadata()->meshShader;
   Shader* shader = ShaderManager::getInstance().getByKey(render_shader_name);
   shader->bind();
-  shader->setUniform("MVP", projection * viewMatrix * mx);
+  shader->setUniform("MVP", mvp);
 
   glDrawArrays(GL_POINTS, 0, pParticleCount);
 }

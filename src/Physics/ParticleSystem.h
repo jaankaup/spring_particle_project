@@ -25,7 +25,7 @@ class ParticleSystem
     virtual void takeStep(const float h) {}; 
 
     // Draw particles.
-    virtual void draw(const glm::vec3& eyePosition, const glm::mat4& viewMatrix, const glm::mat4& projection) {}; 
+    virtual void draw(const glm::mat4& mvp) {}; 
 
     virtual ~ParticleSystem() {};
 
@@ -47,7 +47,7 @@ class VerhoSystem : public ParticleSystem
   public:
     virtual void init() override;
     virtual void takeStep(const float h) override;
-    virtual void draw(const glm::vec3& eyePosition, const glm::mat4& viewMatrix, const glm::mat4& projection) override;
+    virtual void draw(const glm::mat4& mvp) override;
     virtual ~VerhoSystem() {};
 
   private:

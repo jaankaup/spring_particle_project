@@ -100,7 +100,6 @@ std::tuple<std::unique_ptr<float[]>,uint32_t> Vertexbuffer::getBufferData() cons
   auto result = std::unique_ptr<GLfloat[]>(new GLfloat[size_using_float]);
   glGetNamedBufferSubData(pId, 0, pData_size, result.get());
   return std::make_tuple(std::move(result), size_using_float);
-  //return std::move(result);
 }
 
 int Vertexbuffer::createExamplePoints(const int dimensionX, const int dimensionY, const int dimensionZ)

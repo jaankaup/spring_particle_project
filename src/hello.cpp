@@ -35,54 +35,19 @@ struct context
 
 void createShaders()
 {
-    
-// WE OMIT THE DEBUG SHADERS FOR NOW. 
-  
-//    const std::string MARCHING_CUBES_SHADER = "marchingShader_green"; 
-//    const std::string MARCHING_CUBES_WIREFRAME = "marchingShaderWire_green"; 
-    const std::string MARCHING_CUBES_TRIANGULATION = "triangulationShader"; 
     const std::string SCENE_SHADER = "cubeshader"; 
-    const std::string PARTICLE1 = "particle1"; 
+    const std::string TUULI_SHADER = "tuulishader"; 
 
-//    // The marching cubes shader.
-//    Shader* marchingShader = ShaderManager::getInstance().createShader(MARCHING_CUBES_SHADER);
-//    std::vector<std::string> marchingShader_src = {"shaders/marching.vert", "shaders/marching_green_thing.geom", "shaders/marching.frag"};
-//    marchingShader->build(marchingShader_src);
-//
-//    ProgramState::getInstance().getMetadata()->cubeMarchShader = MARCHING_CUBES_SHADER;
-//
-//    // The marching cubes wireframe shader.
-//    Shader* marchingShaderLine = ShaderManager::getInstance().createShader(MARCHING_CUBES_WIREFRAME);
-//    std::vector<std::string> marchingShaderLine_src = {"shaders/marching.vert", "shaders/marchingWireFrame_green.geom", "shaders/marchingLine2.frag"};
-//    marchingShaderLine->build(marchingShaderLine_src);
-//
-//    ProgramState::getInstance().getMetadata()->cubeMarchWireframe = MARCHING_CUBES_WIREFRAME;
-
-    // The triangulation shader with density function 0-9 .
-//////    for (int i=0 ; i < 10 ; i++)
-//////    {
-//////      Shader* triangulationShader = ShaderManager::getInstance().create(MARCHING_CUBES_TRIANGULATION + std::to_string(i));
-//////      std::vector<std::string> triangulate_src = {"shaders/triangulate.vert", "shaders/triangulate.geom", "shaders/densityFunction" + std::to_string(i) + ".df"};
-//////      triangulationShader->setFeedback(true,"outputCase");
-//////      triangulationShader->buildDensity(triangulate_src);
-//////    }
-//////
-//////    ProgramState::getInstance().getMetadata()->triangulationShader = MARCHING_CUBES_TRIANGULATION + std::to_string(1);
     ParticleSystemManager::getInstance().create("verho", ParticleType::Verho)->init(); 
-//    ProgramState::getInstance().getMetadata()->particle1 = PARTICLE1;
-////////
-//    Shader* sParticle1 = ShaderManager::getInstance().create(PARTICLE1);
-//    std::vector<std::string> srcKipinat = {"shaders/jouset.comp"};
-//    sParticle1->build(srcKipinat,false);
-//
-//    // The shader for drawing the triangulated scene. The name is a bit
-//    // misleading.
-//    //Shader* shaderCube = ShaderManager::getInstance().create(SCENE_SHADER);
-//    //std::vector<std::string> shaderSourcesCube = {"shaders/default_notex.vert", "shaders/default_notex.frag"};
-//    //shaderCube->build(shaderSourcesCube,false);
+
     Shader* shaderCube = ShaderManager::getInstance().create(SCENE_SHADER);
     std::vector<std::string> shaderSourcesCube = {"shaders/defaultPoint.vert", "shaders/defaultPoint.frag"};
     shaderCube->build(shaderSourcesCube,false);
+
+    Shader* tuulishader = ShaderManager::getInstance().create(TUULI_SHADER);
+    std::vector<std::string> tuuli_src = {"shaders/tuuliVektorit.vert", "shaders/tuuliVektorit.geom","shaders/tuuliVektorit.frag"};
+    tuulishader->build(tuuli_src,false);
+    
     ProgramState::getInstance().getMetadata()->meshShader = SCENE_SHADER;
 }
 
@@ -260,11 +225,8 @@ void loop_handler2(void *arg)
         }
     }
     c->camera.handleKeyInput();
-    auto verho_particle_system = ParticleSystemManager::getInstance().getByKey("verho");
-    verho_particle_system->takeStep(ProgramState::getInstance().getTimeStep());
-    verho_particle_system->draw(c->camera.getPosition(),c->camera.getMatrix(),glm::perspective(glm::radians(45.0f), 16.0f / 9.0f, 0.001f, 1000.0f));
     Window::getInstance().swapBuffers();
-
+    c->renderer.render(c->camera);
     // Kasvatetaan h laskuria.
     ProgramState::getInstance().increase_h_sum(ProgramState::getInstance().getTimeStep());
 }
@@ -294,6 +256,7 @@ int main(int argc, char* argv[])
 
   createShaders();
 
+  VertexBufferManager::getInstance().createExamplePoints(10, 10, 10,4.0, glm::vec3(-1.0f,-1.0f,-1.0f), "tuuli_pisteet");
   #endif
 
   // Initialize the renderer.

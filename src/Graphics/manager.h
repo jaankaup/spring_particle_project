@@ -203,7 +203,7 @@ class VertexBufferManager : public Manager<Vertexbuffer>
     // TODO: shaderName is not used. Remove it.
     Vertexbuffer* optimize_vertex_buffer(const std::string& optimized_name, const std::string& shaderName);
 
-    //Vertexbuffer* createParticleBuffer(const std::string& name);
+    Vertexbuffer* createExamplePoints(const int dimensionX, const int dimensionY, const int dimensionZ, float divider, const glm::vec3& offset, const std::string& name);
 
 };
 
@@ -229,6 +229,33 @@ inline Texture* TextureManager::create(const std::string& key, const TextureType
   auto ret_val = Manager<Texture>::create(key); 
   ret_val->init(type);
   return ret_val;
+}
+
+inline Vertexbuffer* VertexBufferManager::createExamplePoints(const int dimensionX, const int dimensionY, const int dimensionZ, float divider,const glm::vec3& offset,const std::string& name)
+{
+  Vertexbuffer* result = Manager<Vertexbuffer>::create(name);
+  result->init();
+  int size = dimensionX * dimensionY * dimensionZ;
+
+  std::vector<float> temp;
+  temp.reserve(size);
+
+  for (int i=0 ; i<dimensionX ; ++i) {
+  for (int j=0 ; j<dimensionY ; ++j) {
+  for (int k=0 ; k<dimensionZ ; ++k) {
+    //result->pData.push_back(float(i)/divider);
+    //result->pData.push_back(float(j)/divider);
+    //result->pData.push_back(float(k)/divider);
+    temp.push_back(float(i)/divider+offset.x);
+    temp.push_back(float(j)/divider+offset.y);
+    temp.push_back(float(k)/divider+offset.z);
+  }}};
+
+  std::vector<std::string> types = {"3f"};
+  result->addData(&temp[0], size * sizeof(GL_FLOAT)*3,types);
+  //int dataSize = result->pData.size();
+  result->pDataCount = size;
+  return result;
 }
 
 inline Vertexbuffer* VertexBufferManager::optimize_vertex_buffer(const std::string& optimized_name,

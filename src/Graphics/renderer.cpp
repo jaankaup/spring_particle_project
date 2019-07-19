@@ -21,16 +21,52 @@ void Renderer::init()
     glPointSize(1);
 }
 
+void Renderer::render(const Camera& camera) {
+  glClearColor(0.0f,0.0f,0.0f,1.0f);
+  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+  glm::mat4 projection = glm::perspective(glm::radians(45.0f), 16.0f / 9.0f, 0.001f, 1000.0f);
+
+  glm::mat4 MVP = projection * camera.getMatrix() * glm::mat4(1.0f);  
+
+  /* Verhon piirto. */
+
+  auto verho_particle_system = ParticleSystemManager::getInstance().getByKey("verho");
+  verho_particle_system->takeStep(ProgramState::getInstance().getTimeStep());
+  verho_particle_system->draw(MVP);
+
+  /* Tuuli vektorien piirto. */
+  
+
+  auto tuuliShader = ShaderManager::getInstance().getByKey("tuulishader");
+  tuuliShader->bind();
+
+  tuuliShader->setUniform("MVP", MVP);
+  auto metadata = ProgramState::getInstance().getMetadata();
+  Texture* texture = TextureManager::getInstance().getByKey(metadata->texture3Dname);
+  texture->use(0);
+  tuuliShader->setUniform("diffuse3DTexture",0);
+  tuuliShader->setUniform("time",ProgramState::getInstance().get_h_sum());
+
+  auto tuuliPoints = VertexBufferManager::getInstance().getByKey("tuuli_pisteet");
+  tuuliPoints->bind();
+  auto tuuliCount = tuuliPoints->getCount();
+
+  //Log::getInfo().log("Tuulicount: %", std::to_string(tuuliCount));
+  glDrawArrays(GL_POINTS, 0, tuuliCount);
+}
+
 void Renderer::renderModels(const Camera& camera)
 {
   glClearColor(0.0f,0.0f,0.0f,1.0f);
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
+  glm::mat4 projection = glm::perspective(glm::radians(45.0f), 16.0f / 9.0f, 0.001f, 1000.0f);
+
   glm::vec3 eyePosition = camera.getPosition();
   glm::mat4 viewMatrix = camera.getMatrix();
 
   auto models = ModelManager::getInstance().getModels();
-  glm::mat4 projection = glm::perspective(glm::radians(45.0f), 16.0f / 9.0f, 0.001f, 1000.0f);
   std::vector<Command> commands;
   for (const auto m : models)
   {
