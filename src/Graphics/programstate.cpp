@@ -208,6 +208,39 @@ bool ProgramState::getShowWind() const
 {
   return pShowWind;
 }
+
+void ProgramState::toggleLumi()
+{
+  pLumi = !pLumi;
+}
+
+void ProgramState::toggleVerho()
+{
+  pVerho = !pVerho;
+}
+
+bool ProgramState::getShowLumi() const
+{
+  return pLumi;
+}
+
+bool ProgramState::getShowVerho() const
+{
+  return pVerho;
+}
+
+float ProgramState::getWindStrength() const
+{
+   return pWindStength;
+}
+
+void ProgramState::increaseWindStrength(const float ws)
+{
+  auto temp = pWindStength = pWindStength + ws;
+  if (temp < 0.0) return;
+  pWindStength = temp;
+}
+
 //std::string ProgramState::dimensionToString() const
 //{
 //  return "([" + std::to_string(pMetaData.dimensionX_min) + ","  + std::to_string(pMetaData.dimensionX_max) + "] , " +

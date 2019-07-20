@@ -19,6 +19,7 @@ void Renderer::init()
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_PROGRAM_POINT_SIZE);
     glPointSize(1);
+    glLineWidth(3);
 }
 
 void Renderer::render(const Camera& camera) {
@@ -31,9 +32,19 @@ void Renderer::render(const Camera& camera) {
 
   /* Verhon piirto. */
 
-  auto verho_particle_system = ParticleSystemManager::getInstance().getByKey("verho");
-  verho_particle_system->takeStep(ProgramState::getInstance().getTimeStep());
-  verho_particle_system->draw(MVP);
+  if (ProgramState::getInstance().getShowVerho()) {
+    auto verho_particle_system = ParticleSystemManager::getInstance().getByKey("verho");
+    verho_particle_system->takeStep(ProgramState::getInstance().getTimeStep());
+    verho_particle_system->draw(MVP);
+  }
+
+  /* Lumen piirto. */
+
+  if (ProgramState::getInstance().getShowLumi()) {
+    auto lumi_particle_system = ParticleSystemManager::getInstance().getByKey("lumi");
+    lumi_particle_system->takeStep(ProgramState::getInstance().getTimeStep());
+    lumi_particle_system->draw(MVP);
+  }
 
   /* Tuuli vektorien piirto. */
   

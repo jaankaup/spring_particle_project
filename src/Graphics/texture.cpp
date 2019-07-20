@@ -11,7 +11,6 @@ Texture::~Texture()
 
 void Texture::init(const TextureType t)
 {
-
     GLuint i = 0;
     glGenTextures(1,&i);
     pType = t;
@@ -27,7 +26,18 @@ void Texture::create3D(const TextureData& td)
   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
   glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA8, td.getWidth(), td.getHeight(), td.getDepth(), 0, GL_RGBA, GL_UNSIGNED_BYTE, td.getData());
+  pTextureSize = td.getDataSize()*sizeof(uint8_t); // Onkohan oikein?
 }
+
+std::tuple<std::unique_ptr<float[]>,unsigned int> Texture::getTextureData()
+{
+  auto result = std::unique_ptr<GLfloat[]>(new GLfloat[pTextureSize]);
+  glGetTexImage(GL_TEXTURE_3D, 0, GL_RGBA, GL_FLOAT, result.get());
+//  glGetNamedBufferSubData(pId, 0, pData_size, result.get());
+//        unsigned int pTextureSize = 0;
+  return std::make_tuple(std::move(result), pTextureSize);
+}
+
 
 /* For more information: https://open.gl/textures */
 void Texture::create(const std::string& fileloc)

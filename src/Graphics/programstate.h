@@ -107,6 +107,9 @@ class ProgramState
     float get_h_sum() const;
     float getTimeStep() const;
     bool getShowWind() const;
+    bool getShowLumi() const;
+    bool getShowVerho() const;
+    float getWindStrength() const;
 
     void setScreenWidth(const int width);
     void setScreenHeight(const int height);
@@ -123,6 +126,9 @@ class ProgramState
     void increase_h_sum(const float h);
     void setTimeStep(const float h);
     void toggleWind();
+    void toggleLumi();
+    void toggleVerho();
+    void increaseWindStrength(const float ws);
 
     void updateTick();
     float getTimeDelta() const;
@@ -151,6 +157,9 @@ class ProgramState
     float pH = 0.0f;
     float pTimeStep = 0.0f;
     bool pShowWind = false;
+    bool pLumi = false;
+    bool pVerho = true;
+    float pWindStength = 1.0;
 };
 
 

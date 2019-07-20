@@ -3,6 +3,8 @@
 layout(points) in;
 
 uniform mat4 MVP;
+uniform float arrayOffset = 0.1;
+uniform float windLenght_factor = 0.3;
 
 //layout(triangle_strip, max_vertices = 3) out;
 layout(line_strip, max_vertices = 15) out;
@@ -15,8 +17,7 @@ uniform float time = 0.0;
 
 void createArray() {
 
-  float arrayOffset = 0.1;
-  float windLenght_factor = 0.3;
+  // TODO: uniformiksi.
   
   vec4 pos =  gl_in[0].gl_Position;
   vec4 wind = vec4(texture(diffuse3DTexture,pos.xyz + vec3(time)).rgb,0.0);
@@ -31,7 +32,6 @@ void createArray() {
 
   vec4 rightPos = MVP * (pos + wind*(1.0-arrayOffset) + arrayOffset*right);
   vec4 leftPos = MVP * (pos + wind*(1.0-arrayOffset) - arrayOffset*right);
-  //vec4 left = MVP * (pos + wind*0.2 + vec4(-0.1,0.0,0.0,0.0));
 
   vec3 color = wind.xyz*2;
   

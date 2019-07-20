@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <vector>
+#include <memory>
+#include <tuple>
 #include <GL/glew.h>
 #include <SOIL.h>
 //#include "textureManager.h"
@@ -32,6 +34,7 @@ class Texture
         void create3D(const TextureData& td);
         void createExample2D();
         void create_tritable_texture();
+        std::tuple<std::unique_ptr<float[]>,unsigned int> getTextureData();
 
         /// The destructor doesn't release the texture. Use dispose()
         /// memberfuction to destory texture object.
@@ -51,6 +54,7 @@ class Texture
         /// Default constructors.
         Texture();
 
+        unsigned int pTextureSize = 0;
 
         /// Initializes the texture object.
         void init(const TextureType t);

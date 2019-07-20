@@ -39,6 +39,7 @@ void createShaders()
     const std::string TUULI_SHADER = "tuulishader"; 
 
     ParticleSystemManager::getInstance().create("verho", ParticleType::Verho)->init(); 
+    ParticleSystemManager::getInstance().create("lumi", ParticleType::Lumi)->init(); 
 
     Shader* shaderCube = ShaderManager::getInstance().create(SCENE_SHADER);
     std::vector<std::string> shaderSourcesCube = {"shaders/defaultPoint.vert", "shaders/defaultPoint.frag"};
@@ -79,6 +80,13 @@ void createtextures()
   auto tex3D_data = createPerlin3D(512,512,512);
   tex3D->create3D(tex3D_data);
   metadata->texture3Dname = TEXTURE_NAME;
+//  auto texData = tex3D->getTextureData();
+//  auto ptr = std::get<0>(texData).get();
+//  for (int i=0; i<1300 ; i++)
+//  {
+//    int iterator = i*4;
+//    Log::getInfo().log("tex %: (%,%,%,%)", std::to_string(i),std::to_string(ptr[iterator]),std::to_string(ptr[iterator+1]),std::to_string(ptr[iterator+2]),std::to_string(ptr[iterator+3]));
+//  }
 
   Texture* tritable = TextureManager::getInstance().create(TRITABLE_NAME,TextureType::d1);
   tritable->create_tritable_texture();
@@ -103,10 +111,10 @@ void loop_handler2(void *arg)
             switch (e.key.keysym.sym)
             {
                 case SDLK_1:
-                    changeScene(1);
+                    ProgramState::getInstance().toggleVerho();
                     break;
                 case SDLK_2:
-                    changeScene(2);
+                    ProgramState::getInstance().toggleLumi();
                     break;
                 case SDLK_3:
                     changeScene(3);
@@ -134,22 +142,16 @@ void loop_handler2(void *arg)
                     break;
                 case SDLK_KP_PLUS:
                     {
-                      auto blockSize = ProgramState::getInstance().getMetadata()->block_size;
-                      if (blockSize != 66)
-                      {
-                        ProgramState::getInstance().getMetadata()->block_size = blockSize + 2;
-                        Log::getInfo().log("Block size: %", std::to_string(blockSize + 2));
-                      }
-                    break;
+                      ProgramState::getInstance().increaseWindStrength(0.5f);
+                      auto strength = ProgramState::getInstance().getWindStrength();
+                      Log::getInfo().log("Wind stength: %", std::to_string(strength));
+                      break;
                     }
                 case SDLK_KP_MINUS:
                     {
-                      auto blockSize = ProgramState::getInstance().getMetadata()->block_size;
-                      if (blockSize != 2)
-                      {
-                        ProgramState::getInstance().getMetadata()->block_size = blockSize - 2;
-                        Log::getInfo().log("Block size: %", std::to_string(blockSize - 2));
-                      }
+                      ProgramState::getInstance().increaseWindStrength(-0.5f);
+                      auto strength = ProgramState::getInstance().getWindStrength();
+                      Log::getInfo().log("Wind stength: %", std::to_string(strength));
                       break;
                     }
                 case SDLK_SPACE:
@@ -256,7 +258,7 @@ int main(int argc, char* argv[])
 
   createShaders();
 
-  VertexBufferManager::getInstance().createExamplePoints(10, 10, 10,4.0, glm::vec3(-1.0f,-1.0f,-1.0f), "tuuli_pisteet");
+  VertexBufferManager::getInstance().createExamplePoints(30, 30, 30,5.0, glm::vec3(-3.0f,-3.0f,-3.0f), "tuuli_pisteet");
   #endif
 
   // Initialize the renderer.

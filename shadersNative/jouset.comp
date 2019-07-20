@@ -2,14 +2,13 @@
 
 uniform float h = 0.1;
 uniform float k = 2344000.0;
-//uniform float k = 2344000.0;
-//uniform float k = 10.0;
 uniform float time = 0.0;
 uniform vec4 gravity = vec4(0.0,-9.81,0.0,0.0);
 uniform float phase = 1.0;
 uniform float mass = 20.0;
 uniform float viskositeettiKerroin = 0.1;
 uniform sampler3D diffuse3DTexture;
+uniform float wind_strength = 1.0;
 //uniform float rest = 1.414214; 
 
 struct PVdata
@@ -46,11 +45,6 @@ vec4 laske_voima(vec4 posA, vec4 posB, float r) {
 }
 
 ///////////////////////////////////////////////////////////////////////////
-
-//   if (phase == 1.0) k1[index] = pv_initial.vel + force;
-//   else if (phase == 2.0) k2[index] = pv_now.vel + force; // h * force;
-//   else if (phase == 3.0) k3[index] = pv_now.vel + force; // h * force;
-//   else if (phase == 4.0) k4[index] = pv_now.vel + force; // h * force;
 
 PVdata getParticle(uint index) {
   PVdata initial = initial[index];
@@ -146,7 +140,7 @@ void evalF_flex(uint index) {
    float time_delta = phase == 1.0 ? 0.0 : h;
    vec3 wind = texture(diffuse3DTexture,pv_now.pos.xyz + vec3(time+h)).rgb;
    vec4 wind_converted = vec4(wind,0.0)-vec4(-0.5,-0.5,-0.5,0.0);
-   force += wind_converted*55.5;
+   force += wind_converted*wind_strength;
 
    // Lasketaan inversio massalle. Mita se sitten tekeekaan. Ainakin pysyy mittayksikot kohdillaan.
    vec4 vel = force * 1.0/mass;

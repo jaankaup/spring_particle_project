@@ -4,6 +4,7 @@
 #include "../Graphics/manager.h"
 #include "../Utils/misc.h"
 #include "../Utils/log.h"
+#include "../Utils/myrandom.h"
 
 const std::string VerhoSystem::INITIAL_BUFFER = "verho_initial";
 const std::string VerhoSystem::STATIC_DATA_BUFFER = "verho_static";
@@ -13,11 +14,18 @@ const std::string VerhoSystem::K3 = "verho_k3";
 const std::string VerhoSystem::K4 = "verho_k4";
 const std::string VerhoSystem::CS_NAME = "verho_shader";
 
+const std::string LumihiutaleSystem::INITIAL_BUFFER = "lumi_initial";
+const std::string LumihiutaleSystem::STATIC_DATA_BUFFER = "lumi_static";
+const std::string LumihiutaleSystem::K1 = "lumi_k1";
+const std::string LumihiutaleSystem::K2 = "lumi_k2";
+const std::string LumihiutaleSystem::K3 = "lumi_k3";
+const std::string LumihiutaleSystem::K4 = "lumi_k4";
+const std::string LumihiutaleSystem::CS_NAME = "lumi_shader";
+
 uint32_t ParticleSystem::get_particle_count() const
 {
   return pParticleCount;
 }
-
 
 void ParticleSystem::init()
 {
@@ -70,20 +78,8 @@ void VerhoSystem::init()
   float dist = glm::distance(a,b);
   float dist_horizontal = glm::distance(a,c);
 
-  // jouset.comp shaderissa:
-  // PVdata == struct { vec4 pos; vec4 vel; }
   auto array = new GLfloat[8*pParticleCount];
 
-  // jouset.comp shaderissa:
-  //
-  // struct StaticData
-  // {
-  //   vec4 some_data;
-  //   vec4 friends;
-  //   vec4 friends2;
-  //   vec4 rest_forces;
-  //   vec4 rest_forces2;
-  // };
   auto static_data_array = new GLfloat[20*pParticleCount];
 
   // Luodaan data.
@@ -163,8 +159,6 @@ void VerhoSystem::init()
 
 void VerhoSystem::takeStep(const float h)
 {
-  //Log::getDebug().log("VerhoSystem::takeStep(%)",std::to_string(h));
-  //auto ps = ProgramState::getInstance(); 
   auto cs = ShaderManager::getInstance().getByKey(VerhoSystem::CS_NAME);
   cs->bind();
 
@@ -173,8 +167,11 @@ void VerhoSystem::takeStep(const float h)
   texture->use(0);
   cs->setUniform("diffuse3DTexture",0);
 
+  auto wind_strength = ProgramState::getInstance().getWindStrength();
+
   cs->setUniform("h",ProgramState::getInstance().getTimeStep());
   cs->setUniform("time",ProgramState::getInstance().get_h_sum());
+  cs->setUniform("wind_strength", wind_strength);
 
   auto initial_data = VertexBufferManager::getInstance().getByKey(VerhoSystem::INITIAL_BUFFER);
   auto static_data = VertexBufferManager::getInstance().getByKey(VerhoSystem::STATIC_DATA_BUFFER);
@@ -221,12 +218,175 @@ void VerhoSystem::takeStep(const float h)
 
 void VerhoSystem::draw(const glm::mat4& mvp)
 {
-  //glClearColor(0.0f,0.0f,0.0f,1.0f);
-  //glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
   glm::mat4 mx = glm::mat4(1.0f);
 
   auto drawBuffer = VertexBufferManager::getInstance().getByKey(VerhoSystem::INITIAL_BUFFER); 
+
+  drawBuffer->bind();
+
+
+  auto render_shader_name = ProgramState::getInstance().getMetadata()->meshShader;
+  Shader* shader = ShaderManager::getInstance().getByKey(render_shader_name);
+  shader->bind();
+  shader->setUniform("MVP", mvp);
+
+  glDrawArrays(GL_POINTS, 0, pParticleCount);
+}
+
+void LumihiutaleSystem::init()
+{
+  Log::getDebug().log("LumihiutaleSystem::init");
+  //auto ps = ProgramState::getInstance(); 
+
+  // Luodaan tarvittavat puskurit.
+
+  // Piirrettava data.
+  auto initial_data = VertexBufferManager::getInstance().create(LumihiutaleSystem::INITIAL_BUFFER);
+  initial_data->init();
+
+  // Staattinen data. Nyt ei ole viela keksitty mita tanne laittaa.
+  auto static_data = VertexBufferManager::getInstance().create(LumihiutaleSystem::STATIC_DATA_BUFFER);
+  static_data->init_plain_buffer();
+
+  // k1-k4 valiaikaispuskurit RK4:sta varten.
+  auto k1 = VertexBufferManager::getInstance().create(LumihiutaleSystem::K1);
+  k1->init_plain_buffer();
+
+  auto k2 = VertexBufferManager::getInstance().create(LumihiutaleSystem::K2);
+  k2->init_plain_buffer();
+
+  auto k3 = VertexBufferManager::getInstance().create(LumihiutaleSystem::K3);
+  k3->init_plain_buffer();
+
+  auto k4 = VertexBufferManager::getInstance().create(LumihiutaleSystem::K4);
+  k4->init_plain_buffer();
+
+  // Luodaan compute shader, jos sita ei ole entuudestaan luotu.
+  auto compute_shader = ShaderManager::getInstance().getByKey(LumihiutaleSystem::CS_NAME);
+  if (compute_shader == nullptr) compute_shader = ShaderManager::getInstance().create(LumihiutaleSystem::CS_NAME);
+  std::vector<std::string> src = {"shaders/lumi.comp"};
+  compute_shader->build(src,false);
+
+  const int width = 30;
+  const int height = 30;
+  pParticleCount = width*height;
+
+  auto array = new GLfloat[8*pParticleCount];
+
+  auto static_data_array = new GLfloat[4*pParticleCount];
+
+  // Luodaan data.
+  for (int j=0 ; j<width ; j++) {
+  for (int i=0 ; i<height ; i++) {
+    int position = i + width * j;
+    int pah = position*8; 
+    int static_pah = position*4; 
+
+    // Arvotaan lumihiutaleiden alkupaikat.
+    MyRandom<float> mr;
+    mr.setDistribution(-3.0f,3.0f);
+
+    // Partikkelin positio.
+    array[pah] = mr(); 
+    array[pah+1] = mr(); 
+    array[pah+2] = mr(); 
+    array[pah+3] = 1.0f; 
+
+    // Alku velocity partikkelille.
+    array[pah+4] = 0.0f; 
+    array[pah+5] = 0.0f; 
+    array[pah+6] = 0.0f; 
+    array[pah+7] = 0.0f; 
+
+    // Staattinen data lumihiutaleelle. Tanne jotain jos keksii.
+    static_data_array[static_pah] = 0.0f; 
+    static_data_array[static_pah+1] = 0.0f; 
+    static_data_array[static_pah+2] = 0.0f; 
+    static_data_array[static_pah+3] = 0.0f; 
+  }}; 
+
+  // Taytetaan puskurit. Piirtopuskuri, on samalla partikkeleiden tila.
+  std::vector<std::string> types = {"4f","4f"};
+  initial_data->addData(array,sizeof(float)*pParticleCount*8,types);
+  initial_data->setCount(pParticleCount);
+
+  // Staattisen datan puskuri.
+  static_data->populate_data(static_data_array,sizeof(float)*pParticleCount*4);
+
+  // k1-k4 puskurit. Varataan vain tila. Ei tarvitse siirtaa dataa.
+  k1->populate_data(nullptr,sizeof(float)*pParticleCount*4);
+  k2->populate_data(nullptr,sizeof(float)*pParticleCount*4);
+  k3->populate_data(nullptr,sizeof(float)*pParticleCount*4);
+  k4->populate_data(nullptr,sizeof(float)*pParticleCount*4);
+  delete[] array;
+  delete[] static_data_array;
+}
+
+void LumihiutaleSystem::takeStep(const float h)
+{
+  auto cs = ShaderManager::getInstance().getByKey(LumihiutaleSystem::CS_NAME);
+  cs->bind();
+
+  auto metadata = ProgramState::getInstance().getMetadata();
+  Texture* texture = TextureManager::getInstance().getByKey(metadata->texture3Dname);
+  texture->use(0);
+  cs->setUniform("diffuse3DTexture",0);
+
+  auto wind_strength = ProgramState::getInstance().getWindStrength();
+
+  cs->setUniform("h",ProgramState::getInstance().getTimeStep());
+  cs->setUniform("time",ProgramState::getInstance().get_h_sum());
+  cs->setUniform("wind_strength", wind_strength);
+
+  auto initial_data = VertexBufferManager::getInstance().getByKey(LumihiutaleSystem::INITIAL_BUFFER);
+  auto static_data = VertexBufferManager::getInstance().getByKey(LumihiutaleSystem::STATIC_DATA_BUFFER);
+  auto k1 = VertexBufferManager::getInstance().getByKey(LumihiutaleSystem::K1);
+  auto k2 = VertexBufferManager::getInstance().getByKey(LumihiutaleSystem::K2);
+  auto k3 = VertexBufferManager::getInstance().getByKey(LumihiutaleSystem::K3);
+  auto k4 = VertexBufferManager::getInstance().getByKey(LumihiutaleSystem::K4);
+
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, initial_data->getHandle());
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, static_data->getHandle());
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, k1->getHandle());
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, k2->getHandle());
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, k3->getHandle());
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, k4->getHandle());
+
+  const static int X = 30;
+  const static int Y = 1;
+
+  // K1
+  cs->setUniform("phase",1.0f);
+  glDispatchCompute(X,Y,1);
+  glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+  // K2
+  cs->setUniform("phase",2.0f);
+  glDispatchCompute(X,Y,1);
+  glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+  // K3
+  cs->setUniform("phase",3.0f);
+  glDispatchCompute(X,Y,1);
+  glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+  // K4
+  cs->setUniform("phase",4.0f);
+  glDispatchCompute(X,Y,1);
+  glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+  // Lopullinen tulos.
+  cs->setUniform("phase",5.0f);
+  glDispatchCompute(X,Y,1);
+  glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+}
+
+void LumihiutaleSystem::draw(const glm::mat4& mvp)
+{
+  glm::mat4 mx = glm::mat4(1.0f);
+
+  auto drawBuffer = VertexBufferManager::getInstance().getByKey(LumihiutaleSystem::INITIAL_BUFFER); 
 
   drawBuffer->bind();
 
@@ -237,4 +397,3 @@ void VerhoSystem::draw(const glm::mat4& mvp)
 
   glDrawArrays(GL_POINTS, 0, pParticleCount);
 }
-

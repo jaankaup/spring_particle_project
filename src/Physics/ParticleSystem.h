@@ -4,12 +4,7 @@
 #include <vector>
 #include <string>
 #include <glm/glm.hpp>
-//#undef MANAGER_H
-//#include <glm/gtc/type_ptr.hpp>
-//#include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-//#include <glm/gtx/transform.hpp>
-//
 
 class ParticleSystem
 {
@@ -58,7 +53,27 @@ class VerhoSystem : public ParticleSystem
     static const std::string K3;
     static const std::string K4;
     static const std::string CS_NAME;
+};
 
+class LumihiutaleSystem : public ParticleSystem
+{
+  template <typename T> friend class Manager;
+  friend class ParticleSystemManager;
+
+  public:
+    virtual void init() override;
+    virtual void takeStep(const float h) override;
+    virtual void draw(const glm::mat4& mvp) override;
+    virtual ~LumihiutaleSystem() {};
+
+  private:
+    static const std::string INITIAL_BUFFER;
+    static const std::string STATIC_DATA_BUFFER;
+    static const std::string K1;
+    static const std::string K2;
+    static const std::string K3;
+    static const std::string K4;
+    static const std::string CS_NAME;
 };
 
 #endif

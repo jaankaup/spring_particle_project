@@ -24,7 +24,7 @@ class Vertexbuffer;
 class ParticleSystem;
 class VerhoSystem;
 
-enum class ParticleType { Verho };
+enum class ParticleType { Verho, Lumi };
 
 /***************************************************************************************** 
  *                                                                                       *  
@@ -415,8 +415,15 @@ inline ParticleSystem* ParticleSystemManager::create(const std::string& key, con
 {
   if (getByKey(key) != nullptr) del(key);
 
+  // TODO: Tyhmaa copy pastea. Muuta.
   if (type == ParticleType::Verho) {
     Element<ParticleSystem> e(key,std::unique_ptr<ParticleSystem>(new VerhoSystem()));
+    auto ret_val = e.val.get();
+    pData.push_back(std::move(e));
+    return ret_val;
+  }
+  if (type == ParticleType::Lumi) {
+    Element<ParticleSystem> e(key,std::unique_ptr<ParticleSystem>(new LumihiutaleSystem()));
     auto ret_val = e.val.get();
     pData.push_back(std::move(e));
     return ret_val;

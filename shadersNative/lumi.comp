@@ -1,0 +1,106 @@
+#version 430
+
+uniform float time = 0.0;
+uniform float h = 0.0;
+uniform vec4 gravity = vec4(0.0,-9.81,0.0,0.0);
+uniform float phase = 1.0;
+uniform float mass = 5.0;
+uniform float viskositeettiKerroin = 25.9;
+uniform sampler3D diffuse3DTexture;
+uniform float wind_strength = 1.0;
+
+struct PVdata
+{
+  vec4 pos;
+  vec4 vel;
+};
+
+layout (local_size_x = 30,local_size_y=1,local_size_z=1) in;
+
+layout (std430, binding = 0) buffer InitialBuf { PVdata initial[]; };
+layout (std430, binding = 1) buffer StaticBuf { vec4 static_data[]; };
+layout (std430, binding = 2) buffer K1 { vec4 k1[]; };
+layout (std430, binding = 3) buffer K2 { vec4 k2[]; };
+layout (std430, binding = 4) buffer K3 { vec4 k3[]; };
+layout (std430, binding = 5) buffer K4 { vec4 k4[]; };
+
+///////////////////////////////////////////////////////////////////////////
+
+PVdata getParticle(uint index) {
+  PVdata initial = initial[index];
+  vec4 k;
+
+  if (phase == 1.0) return initial; 
+  else if (phase == 2.0) {
+    k = k1[index]; 
+    initial.pos = initial.pos + 0.5 * h * k; 
+    initial.vel = k;  
+  } 
+  else if (phase == 3.0) {
+    k = k2[index]; 
+    initial.pos = initial.pos + 0.5 * h * k; 
+    initial.vel = k;  
+  } 
+  else if (phase == 4.0) {
+    k = k3[index]; 
+    initial.pos = initial.pos + h * k; 
+    initial.vel = k;  
+  } 
+  return initial;
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+void evalF(uint index) {
+
+   // Haetaan partikkelin alkuperainen sijainti ja velocity.
+   PVdata pv_initial = initial[index];
+   
+   // Sijainti ja velocity, joka riippuu nyt phasesta. 
+   PVdata pv_now = getParticle(index);
+
+   // k5.
+   if (phase == 5.0) {
+     PVdata final_data;
+     vec4 final_velocity = (1.0/6.0) * (k1[index] + 2*k2[index] + 2*k3[index] + k4[index]); 
+     vec4 fPos = pv_initial.pos + h*final_velocity; 
+     fPos = vec4(fPos.x < -3.0 ? 3.0 : fPos.x, fPos.y < -3.0 ? 3.0 : fPos.y, fPos.z < -3.0 ? 3.0 : fPos.z, 1.0);
+     fPos = vec4(fPos.x > 3.0 ? -3.0 : fPos.x, fPos.y, fPos.z > 3.0 ? -3.0 : fPos.z, 1.0);
+     final_data.pos = fPos;  
+     final_data.vel = final_velocity;  
+     initial[index] = final_data;
+     return;
+   }
+
+   // Tahan voima.
+   // Lasketaan ensin painovoima. force $m/s^2$
+   vec4 force = gravity * mass;  // kg*m/s^2 * kg
+
+   // Lasketaan tassa viskositeetti. Olisi ehka fiksumpi tehda tama jousi-laskuissa.
+
+   float time_delta = phase == 1.0 ? 0.0 : h;
+   vec3 wind = texture(diffuse3DTexture,pv_now.pos.xyz + vec3(time+h)).rgb;
+   vec4 wind_converted = vec4(wind,0.0)+vec4(-0.5,-0.5,-0.5,0.0);
+   force += wind_converted*wind_strength;
+;
+   force = force - pv_now.vel * viskositeettiKerroin;
+
+   // Lasketaan inversio massalle. Mita se sitten tekeekaan. Ainakin pysyy mittayksikot kohdillaan.
+   //vec4 vel = force * 1.0/mass;
+   vec4 vel = force;
+
+   // Muutetaan forcet vauhdiksi ja tallennetaan.
+   if      (phase == 1.0) k1[index] = pv_initial.vel + h*vel;
+   else if (phase == 2.0) k2[index] = pv_now.vel + h*vel; // h * force;
+   else if (phase == 3.0) k3[index] = pv_now.vel + h*vel; // h * force;
+   else if (phase == 4.0) k4[index] = pv_now.vel + h*vel; // h * force;
+
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+void main()
+{
+  uint pos = gl_GlobalInvocationID.x;
+  evalF(pos);
+}
