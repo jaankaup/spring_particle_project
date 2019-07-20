@@ -109,6 +109,7 @@ class ProgramState
     bool getShowWind() const;
     bool getShowLumi() const;
     bool getShowVerho() const;
+    bool getStopWind() const;
     float getWindStrength() const;
 
     void setScreenWidth(const int width);
@@ -128,6 +129,7 @@ class ProgramState
     void toggleWind();
     void toggleLumi();
     void toggleVerho();
+    void toggleStopWind();
     void increaseWindStrength(const float ws);
 
     void updateTick();
@@ -159,7 +161,8 @@ class ProgramState
     bool pShowWind = false;
     bool pLumi = false;
     bool pVerho = true;
-    float pWindStength = 1.0;
+    float pWindStength = 0.0;
+    bool pStopWind = false;
 };
 
 

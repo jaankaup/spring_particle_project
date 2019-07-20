@@ -237,8 +237,18 @@ float ProgramState::getWindStrength() const
 void ProgramState::increaseWindStrength(const float ws)
 {
   auto temp = pWindStength = pWindStength + ws;
-  if (temp < 0.0) return;
-  pWindStength = temp;
+  if (temp < 0.0) pWindStength = 0.0f;
+  else pWindStength = temp;
+}
+
+void ProgramState::toggleStopWind()
+{
+  pStopWind = !pStopWind;
+}
+
+bool ProgramState::getStopWind() const
+{
+  return pStopWind;
 }
 
 //std::string ProgramState::dimensionToString() const

@@ -7,7 +7,7 @@ uniform float phase = 1.0;
 uniform float mass = 5.0;
 uniform float viskositeettiKerroin = 25.9;
 uniform sampler3D diffuse3DTexture;
-uniform float wind_strength = 1.0;
+uniform float wind_strength = 0.0;
 
 struct PVdata
 {

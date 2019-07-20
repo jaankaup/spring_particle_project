@@ -155,8 +155,16 @@ void loop_handler2(void *arg)
                       break;
                     }
                 case SDLK_SPACE:
+                    {
                     ProgramState::getInstance().toggleWind();
                     break;
+                    }
+                case SDLK_RETURN:
+                    {
+                    ProgramState::getInstance().toggleStopWind();
+                    Log::getInfo().log("Wind stopped: %", ProgramState::getInstance().getStopWind() ? "True" : "False");
+                    break;
+                    }
 
                 case SDLK_q: 
                     ProgramState::getInstance().setAppRunning(false);

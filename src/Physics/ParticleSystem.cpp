@@ -171,7 +171,7 @@ void VerhoSystem::takeStep(const float h)
 
   cs->setUniform("h",ProgramState::getInstance().getTimeStep());
   cs->setUniform("time",ProgramState::getInstance().get_h_sum());
-  cs->setUniform("wind_strength", wind_strength);
+  cs->setUniform("wind_strength", ProgramState::getInstance().getStopWind() ? 0.0f : wind_strength);
 
   auto initial_data = VertexBufferManager::getInstance().getByKey(VerhoSystem::INITIAL_BUFFER);
   auto static_data = VertexBufferManager::getInstance().getByKey(VerhoSystem::STATIC_DATA_BUFFER);
@@ -337,7 +337,7 @@ void LumihiutaleSystem::takeStep(const float h)
 
   cs->setUniform("h",ProgramState::getInstance().getTimeStep());
   cs->setUniform("time",ProgramState::getInstance().get_h_sum());
-  cs->setUniform("wind_strength", wind_strength);
+  cs->setUniform("wind_strength", ProgramState::getInstance().getStopWind() ? 0.0f : wind_strength);
 
   auto initial_data = VertexBufferManager::getInstance().getByKey(LumihiutaleSystem::INITIAL_BUFFER);
   auto static_data = VertexBufferManager::getInstance().getByKey(LumihiutaleSystem::STATIC_DATA_BUFFER);
