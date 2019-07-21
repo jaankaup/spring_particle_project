@@ -46,6 +46,7 @@ set(util_src
 
 set(physics_src 
   ${physics_dir}/ParticleSystem.cpp
+  ${physics_dir}/ParticleGenerator.cpp
       )
 
 set (soil_src

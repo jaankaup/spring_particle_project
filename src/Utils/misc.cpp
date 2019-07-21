@@ -22,7 +22,7 @@ void logGLM(const std::string& name, const glm::vec3& object)
 
 void logGLM(const std::string& name, const glm::vec4& object)
 {
-  Log::getDebug().log("% = (%,%,%,%)",name,std::to_string(object.x),std::to_string(object.y),std::to_string(object.w));
+  Log::getDebug().log("% = (%,%,%,%)",name,std::to_string(object.x),std::to_string(object.y),std::to_string(object.z),std::to_string(object.w));
 }
 
 void logGLM(const std::string& name, const glm::mat3& object)

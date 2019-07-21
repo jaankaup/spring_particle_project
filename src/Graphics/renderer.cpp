@@ -46,6 +46,14 @@ void Renderer::render(const Camera& camera) {
     lumi_particle_system->draw(MVP);
   }
 
+  /* Ruohikon piirto. */
+
+  if (ProgramState::getInstance().getShowRuohikko()) {
+    auto ruohikko_particle_system = ParticleSystemManager::getInstance().getByKey("ruohikko");
+    ruohikko_particle_system->takeStep(ProgramState::getInstance().getTimeStep());
+    ruohikko_particle_system->draw(MVP);
+  }
+
   /* Tuuli vektorien piirto. */
   
   if (ProgramState::getInstance().getShowWind()) {

@@ -1,0 +1,225 @@
+#version 430
+
+uniform float h = 0.1;
+uniform float k = 160000.0;
+uniform float time = 0.0;
+uniform vec4 gravity = vec4(0.0,9.81,0.0,0.0);
+uniform float phase = 1.0;
+uniform float mass = 5.0;
+uniform float viskositeettiKerroin = 15.1;
+uniform sampler3D diffuse3DTexture;
+uniform float wind_strength = 0.0;
+//uniform float rest = 1.414214; 
+
+struct PVdata
+{
+  vec4 pos;
+  vec4 vel;
+};
+
+struct StaticData
+{
+  vec4 some_data;
+  vec4 friends;
+  vec4 friends2;
+  vec4 friends3;
+  vec4 rest_forces;
+  vec4 rest_forces2;
+  vec4 rest_forces3;
+};
+
+layout (local_size_x = 1,local_size_y=1,local_size_z=1) in;
+
+layout (std430, binding = 0) buffer InitialBuf { PVdata initial[]; };
+layout (std430, binding = 1) buffer StaticBuf { StaticData static_data[]; };
+layout (std430, binding = 2) buffer K1 { vec4 k1[]; };
+layout (std430, binding = 3) buffer K2 { vec4 k2[]; };
+layout (std430, binding = 4) buffer K3 { vec4 k3[]; };
+layout (std430, binding = 5) buffer K4 { vec4 k4[]; };
+
+///////////////////////////////////////////////////////////////////////////
+
+// Laskee jousen aiheuttaman voiman.
+vec4 laske_voima(vec4 posA, vec4 posB, float r) {
+
+  vec3 d = posB.xyz - posA.xyz;
+  return 1.0 * k * (length(d) - r) * vec4(normalize(d),0.0); // dist;  
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+PVdata getParticle(uint index) {
+  PVdata initial = initial[index];
+  vec4 k;
+
+  if (phase == 1.0) return initial; 
+  else if (phase == 2.0) {
+    k = k1[index]; 
+    initial.pos = initial.pos + 0.5 * h * k; 
+    initial.vel = k; // + 0.5 * k; 
+  } 
+  else if (phase == 3.0) {
+    k = k2[index]; 
+    initial.pos = initial.pos + 0.5 * h * k; 
+    initial.vel = k; // + 0.5 * k; 
+  } 
+  else if (phase == 4.0) {
+    k = k3[index]; 
+    initial.pos = initial.pos + h * k; 
+    initial.vel = k; // + h * k; 
+  } 
+  return initial;
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+void evalF_flex(uint index) {
+
+   // Haetaan partikkelin alkuperainen sijainti ja velocity.
+   PVdata pv_initial = initial[index];
+   
+   // Sijainti ja velocity, joka riippuu nyt phasesta. 
+   PVdata pv_now = getParticle(index);
+
+   // k5.
+   if (phase == 5.0) {
+     PVdata final_data;
+     vec4 final_velocity = (1.0/6.0) * (k1[index] + 2*k2[index] + 2*k3[index] + k4[index]); 
+     final_data.pos = pv_initial.pos + h*final_velocity;  
+     final_data.vel = final_velocity;  
+     initial[index] = final_data;
+     return;
+   }
+
+   // kaverit, lepo-pituudet ym. Ei valttamaton nyt, mutta jos 
+   // jousi systeemi olisi monimutkaisempi, niin sitten.
+   StaticData sd = static_data[index]; 
+
+   // Onko staattinen partikkeli; Sovitaan, etta on -1.0 staattinen.
+   float is_static = sd.some_data.x;
+
+   // Tahan voima.
+   // Lasketaan ensin painovoima. force $m/s^2$
+   vec4 force = gravity * mass;  // kg*m/s^2 * kg
+
+   // Kaveri indeksit.
+   float friend0 = sd.friends[0]; 
+   float friend1 = sd.friends[1]; 
+   float friend2 = sd.friends[2]; 
+   float friend3 = sd.friends[3]; 
+
+   float friend4 = sd.friends2[0]; 
+   float friend5 = sd.friends2[1]; 
+   float friend6 = sd.friends2[2]; 
+   float friend7 = sd.friends2[3]; 
+
+   float friend8 = sd.friends3[0]; 
+   float friend9 = sd.friends3[1]; 
+   float friend10 = sd.friends3[2]; 
+   float friend11 = sd.friends3[3]; 
+
+   // Lepo-pituudet.
+   float rest0 = sd.rest_forces[0]; 
+   float rest1 = sd.rest_forces[1]; 
+   float rest2 = sd.rest_forces[2]; 
+   float rest3 = sd.rest_forces[3]; 
+
+   float rest4 = sd.rest_forces2[0]; 
+   float rest5 = sd.rest_forces2[1]; 
+   float rest6 = sd.rest_forces2[2]; 
+   float rest7 = sd.rest_forces2[3]; 
+
+   float rest8 = sd.rest_forces3[0]; 
+   float rest9 = sd.rest_forces3[1]; 
+   float rest10 = sd.rest_forces3[2]; 
+   float rest11 = sd.rest_forces3[3]; 
+
+   // Jos on kaveri olemassa, niin lasketaan jousen aiheuttama voima.
+   if (friend0 != -1.0) force += laske_voima(pv_now.pos, getParticle(uint(friend0)).pos, rest0);
+   if (friend1 != -1.0) force += laske_voima(pv_now.pos, getParticle(uint(friend1)).pos, rest1);
+   if (friend2 != -1.0) force += laske_voima(pv_now.pos, getParticle(uint(friend2)).pos, rest2);
+   if (friend3 != -1.0) force += laske_voima(pv_now.pos, getParticle(uint(friend3)).pos, rest3);
+   if (friend4 != -1.0) force += laske_voima(pv_now.pos, getParticle(uint(friend4)).pos, rest4);
+   if (friend5 != -1.0) force += laske_voima(pv_now.pos, getParticle(uint(friend5)).pos, rest5);
+   if (friend6 != -1.0) force += laske_voima(pv_now.pos, getParticle(uint(friend6)).pos, rest6);
+   if (friend7 != -1.0) force += laske_voima(pv_now.pos, getParticle(uint(friend7)).pos, rest7);
+   if (friend8 != -1.0) force += laske_voima(pv_now.pos, getParticle(uint(friend8)).pos, rest8);
+   if (friend9 != -1.0) force += laske_voima(pv_now.pos, getParticle(uint(friend9)).pos, rest9);
+   if (friend10 != -1.0) force += laske_voima(pv_now.pos, getParticle(uint(friend10)).pos, rest10);
+   if (friend11 != -1.0) force += laske_voima(pv_now.pos, getParticle(uint(friend11)).pos, rest11);
+
+   // Lasketaan tassa viskositeetti. Olisi ehka fiksumpi tehda tama jousi-laskuissa.
+   force = force - pv_now.vel * viskositeettiKerroin;
+
+   // Tuulen aiheuttama voima. Muutetaan niin etta kukin tuulen komponentti on valilla [-0.5,0.5].
+   //vec3 wind = texture(diffuse3DTexture,pv_now.pos.xyz + vec3(time)).rgb;
+   float time_delta = phase == 1.0 ? 0.0 : h;
+   vec3 wind = texture(diffuse3DTexture,pv_now.pos.xyz + vec3(time+h)).rgb;
+   vec4 wind_converted = vec4(wind,0.0)+vec4(-0.5,-0.5,-0.5,0.0);
+   force += wind_converted*wind_strength;
+
+   // Lasketaan inversio massalle. Mita se sitten tekeekaan. Ainakin pysyy mittayksikot kohdillaan.
+   //vec4 vel = force * 1.0/mass;
+   vec4 vel = force;
+
+   // Jos piste on staattinen, nollataa force.
+   if (is_static == -1.0) vel = vec4(0.0);
+
+   // Muutetaan forcet vauhdiksi ja tallennetaan.
+   if      (phase == 1.0) k1[index] = pv_initial.vel + h*vel;
+   else if (phase == 2.0) k2[index] = pv_now.vel + h*vel; // h * force;
+   else if (phase == 3.0) k3[index] = pv_now.vel + h*vel; // h * force;
+   else if (phase == 4.0) k4[index] = pv_now.vel + h*vel; // h * force;
+//   if (phase == 1.0) k1[index] = h*pv_initial.vel +  h*force;
+//   else if (phase == 2.0) k2[index] = h*pv_now.vel +  h*force; // h * force;
+//   else if (phase == 3.0) k3[index] = h*pv_now.vel +   h*force; // h * force;
+//   else if (phase == 4.0) k4[index] = h*pv_now.vel +  h*force; // h * force;
+   
+
+   // k1.
+//   if (phase == 1.0) {
+//     PVdata new_data;
+//     new_data.pos = pv_initial.pos + pv_now.vel * 0.5 * h * force;  
+//     new_data.vel = pv_now.vel + 0.5 * h * force;  
+//     temp[index] = new_data;
+//     //k1[index] = pv_now.vel + h * force;
+//     k1[index] = pv_now.vel * h * force;
+//   }
+//
+//   else if (phase == 2.0) {
+//     PVdata new_data;
+//     new_data.pos = pv_initial.pos + pv_now.vel * 0.5 * h * force;  
+//     new_data.vel = pv_initial.vel + 0.5 * h * force;  
+//     temp[index] = new_data;
+//     //k2[index] = pv_now.vel + h * force;
+//     k2[index] = pv_now.vel * h * force;
+//   }
+//
+//   else if (phase == 3.0) {
+//     PVdata new_data;
+//     new_data.pos = pv_initial.pos + pv_now.vel * h * force;  
+//     new_data.vel = pv_initial.vel + h * force;  
+//     temp[index] = new_data;
+//     //k3[index] = pv_now.vel + h * force;
+//     k3[index] = pv_now.vel * h * force;
+//   }
+//
+//   else if (phase == 4.0) {
+//     //PVdata new_data;
+//     //k4[index] = pv_now.vel + h * force;
+//     k4[index] = pv_now.vel * h * force;
+//   }
+
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+void main()
+{
+  uint pos = gl_GlobalInvocationID.x;
+  //PVdata joo;
+  //joo.pos = vec4(pos);
+  //joo.vel = vec4(6.666);
+  //initial[pos] = joo;
+  evalF_flex(pos);
+}

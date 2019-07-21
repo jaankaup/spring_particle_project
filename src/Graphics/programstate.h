@@ -108,6 +108,7 @@ class ProgramState
     float getTimeStep() const;
     bool getShowWind() const;
     bool getShowLumi() const;
+    bool getShowRuohikko() const;
     bool getShowVerho() const;
     bool getStopWind() const;
     float getWindStrength() const;
@@ -129,6 +130,7 @@ class ProgramState
     void toggleWind();
     void toggleLumi();
     void toggleVerho();
+    void toggleRuohikko();
     void toggleStopWind();
     void increaseWindStrength(const float ws);
 
@@ -161,6 +163,7 @@ class ProgramState
     bool pShowWind = false;
     bool pLumi = false;
     bool pVerho = true;
+    bool pRuohikko = true;
     float pWindStength = 0.0;
     bool pStopWind = false;
 };

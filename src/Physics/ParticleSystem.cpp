@@ -5,6 +5,7 @@
 #include "../Utils/misc.h"
 #include "../Utils/log.h"
 #include "../Utils/myrandom.h"
+#include "ParticleGenerator.h"
 
 const std::string VerhoSystem::INITIAL_BUFFER = "verho_initial";
 const std::string VerhoSystem::STATIC_DATA_BUFFER = "verho_static";
@@ -22,6 +23,14 @@ const std::string LumihiutaleSystem::K3 = "lumi_k3";
 const std::string LumihiutaleSystem::K4 = "lumi_k4";
 const std::string LumihiutaleSystem::CS_NAME = "lumi_shader";
 
+const std::string RuohikkoSystem::INITIAL_BUFFER = "ruohikko_initial";
+const std::string RuohikkoSystem::STATIC_DATA_BUFFER = "ruohikko_static";
+const std::string RuohikkoSystem::K1 = "ruohikko_k1";
+const std::string RuohikkoSystem::K2 = "ruohikko_k2";
+const std::string RuohikkoSystem::K3 = "ruohikko_k3";
+const std::string RuohikkoSystem::K4 = "ruohikko_k4";
+const std::string RuohikkoSystem::CS_NAME = "ruohikko_shader";
+
 uint32_t ParticleSystem::get_particle_count() const
 {
   return pParticleCount;
@@ -31,6 +40,12 @@ void ParticleSystem::init()
 {
   Log::getDebug().log("ParticleSystem::init");
 }
+
+/************************************************************
+ *
+ *  VerhoSystem
+ *
+ ***********************************************************/
 
 void VerhoSystem::init()
 {
@@ -230,9 +245,16 @@ void VerhoSystem::draw(const glm::mat4& mvp)
   Shader* shader = ShaderManager::getInstance().getByKey(render_shader_name);
   shader->bind();
   shader->setUniform("MVP", mvp);
+  shader->setUniform("input_color", glm::vec3(0.2f,0.0f,1.0f));
 
   glDrawArrays(GL_POINTS, 0, pParticleCount);
 }
+
+/************************************************************
+ *
+ *  LumihiutaleSystem
+ *
+ ***********************************************************/
 
 void LumihiutaleSystem::init()
 {
@@ -394,6 +416,99 @@ void LumihiutaleSystem::draw(const glm::mat4& mvp)
   Shader* shader = ShaderManager::getInstance().getByKey(render_shader_name);
   shader->bind();
   shader->setUniform("MVP", mvp);
+  shader->setUniform("input_color", glm::vec3(1.0f,1.0f,1.0f));
+
+  glDrawArrays(GL_POINTS, 0, pParticleCount);
+}
+
+/************************************************************
+ *
+ *  RuohikkoSystem
+ *
+ ***********************************************************/
+
+void RuohikkoSystem::init()
+{
+  Log::getDebug().log("RuohikkoSystem::init");
+
+  auto pgen = ParticleGenerator();
+  pParticleCount = pgen.generateGrass("ruohikko",10,3,3,3);
+}
+
+void RuohikkoSystem::takeStep(const float h)
+{
+  auto cs = ShaderManager::getInstance().getByKey(RuohikkoSystem::CS_NAME);
+  cs->bind();
+
+  auto metadata = ProgramState::getInstance().getMetadata();
+  Texture* texture = TextureManager::getInstance().getByKey(metadata->texture3Dname);
+  texture->use(0);
+  cs->setUniform("diffuse3DTexture",0);
+
+  auto wind_strength = ProgramState::getInstance().getWindStrength();
+
+  cs->setUniform("h",ProgramState::getInstance().getTimeStep());
+  cs->setUniform("time",ProgramState::getInstance().get_h_sum());
+  cs->setUniform("wind_strength", ProgramState::getInstance().getStopWind() ? 0.0f : wind_strength);
+
+  auto initial_data = VertexBufferManager::getInstance().getByKey(RuohikkoSystem::INITIAL_BUFFER);
+  auto static_data = VertexBufferManager::getInstance().getByKey(RuohikkoSystem::STATIC_DATA_BUFFER);
+  auto k1 = VertexBufferManager::getInstance().getByKey(RuohikkoSystem::K1);
+  auto k2 = VertexBufferManager::getInstance().getByKey(RuohikkoSystem::K2);
+  auto k3 = VertexBufferManager::getInstance().getByKey(RuohikkoSystem::K3);
+  auto k4 = VertexBufferManager::getInstance().getByKey(RuohikkoSystem::K4);
+
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, initial_data->getHandle());
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, static_data->getHandle());
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, k1->getHandle());
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, k2->getHandle());
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, k3->getHandle());
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, k4->getHandle());
+
+  const static int X = pParticleCount;
+  const static int Y = 1;
+
+  //Log::getDebug().log("Particle_count::%",std::to_string(pParticleCount));
+
+  // K1
+  cs->setUniform("phase",1.0f);
+  glDispatchCompute(X,Y,1);
+  glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+  // K2
+  cs->setUniform("phase",2.0f);
+  glDispatchCompute(X,Y,1);
+  glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+  // K3
+  cs->setUniform("phase",3.0f);
+  glDispatchCompute(X,Y,1);
+  glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+  // K4
+  cs->setUniform("phase",4.0f);
+  glDispatchCompute(X,Y,1);
+  glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+  // Lopullinen tulos.
+  cs->setUniform("phase",5.0f);
+  glDispatchCompute(X,Y,1);
+  glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+}
+
+void RuohikkoSystem::draw(const glm::mat4& mvp)
+{
+  glm::mat4 mx = glm::mat4(1.0f);
+
+  auto drawBuffer = VertexBufferManager::getInstance().getByKey(RuohikkoSystem::INITIAL_BUFFER); 
+
+  drawBuffer->bind();
+
+  auto render_shader_name = ProgramState::getInstance().getMetadata()->meshShader;
+  Shader* shader = ShaderManager::getInstance().getByKey(render_shader_name);
+  shader->bind();
+  shader->setUniform("MVP", mvp);
+  shader->setUniform("input_color", glm::vec3(0.0f,0.4f,0.0));
 
   glDrawArrays(GL_POINTS, 0, pParticleCount);
 }

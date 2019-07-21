@@ -21,6 +21,7 @@
 #include "Graphics/model.h"
 #include "Graphics/programstate.h"
 #include "Graphics/modelManager.h"
+#include "Physics/ParticleGenerator.h"
 #include "Utils/log.h"
 #include "Utils/misc.h"
 
@@ -40,6 +41,7 @@ void createShaders()
 
     ParticleSystemManager::getInstance().create("verho", ParticleType::Verho)->init(); 
     ParticleSystemManager::getInstance().create("lumi", ParticleType::Lumi)->init(); 
+    ParticleSystemManager::getInstance().create("ruohikko", ParticleType::Ruohikko)->init(); 
 
     Shader* shaderCube = ShaderManager::getInstance().create(SCENE_SHADER);
     std::vector<std::string> shaderSourcesCube = {"shaders/defaultPoint.vert", "shaders/defaultPoint.frag"};
@@ -243,10 +245,12 @@ void loop_handler2(void *arg)
 
 int main(int argc, char* argv[])
 {
+  ParticleGenerator r;
 
   // The program state must be created first.
   // Laitetaan jo tassa time step.
-  ProgramState::getInstance().setTimeStep(0.0004f);
+  //ProgramState::getInstance().setTimeStep(0.0004f);
+  ProgramState::getInstance().setTimeStep(0.0001f);
   
   // Initialize the base information for the marching cubes.
   initializeCubeAttributes();
@@ -281,6 +285,7 @@ int main(int argc, char* argv[])
     emscripten_set_main_loop_arg(loop_handler2, &c, -1, 1);
     #endif
 
+//    void generateGrass(const uint32_t grassCount, const uint32_t grassHeight, const uint32_t areaWidth, const uint32_t areaheight);
     #ifndef EMSCRIPTEN
     while (ProgramState::getInstance().getAppRunning())
     {

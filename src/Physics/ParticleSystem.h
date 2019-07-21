@@ -76,4 +76,25 @@ class LumihiutaleSystem : public ParticleSystem
     static const std::string CS_NAME;
 };
 
+class RuohikkoSystem : public ParticleSystem
+{
+  template <typename T> friend class Manager;
+  friend class ParticleSystemManager;
+
+  public:
+    virtual void init() override;
+    virtual void takeStep(const float h) override;
+    virtual void draw(const glm::mat4& mvp) override;
+    virtual ~RuohikkoSystem() {};
+
+  private:
+    static const std::string INITIAL_BUFFER;
+    static const std::string STATIC_DATA_BUFFER;
+    static const std::string K1;
+    static const std::string K2;
+    static const std::string K3;
+    static const std::string K4;
+    static const std::string CS_NAME;
+};
+
 #endif
