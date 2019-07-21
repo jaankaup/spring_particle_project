@@ -19,11 +19,10 @@ int ParticleGenerator::generateGrass(const std::string& name_prefix, const uint3
     // The dimensions for a single grass.
     static const float rectangle3D_width = 0.01;
     static const float rectangle3D_depth = 0.0;
-    static const float rectangle3D_height = 0.08;
+    static const float rectangle3D_height = 0.18;
     static const int number_of_points = 1000;
-    static const int levels = 40;
-    static const int maximum_vertical_particle_count = ceil(log(levels));
-    static const float radius = float(rectangle3D_width) / float(maximum_vertical_particle_count);
+    static const int max_levels = 20;
+    static const int max_friends = 10;
 
     static const int maxHeight = 0.5;
     static const int maxWidth = 0.5;
@@ -37,17 +36,17 @@ int ParticleGenerator::generateGrass(const std::string& name_prefix, const uint3
 
     /* A single Grass. */
     
-//    MyRandom<int> number_of_points;
-//    number_of_points.setDistribution(100,500);
+    MyRandom<int> r_level;
+    r_level.setDistribution(10,max_levels);
 
     MyRandom<float> next_x;
-    next_x.setDistribution(0.0,areaWidth);
+    next_x.setDistribution(0.0,areaWidth*0.5f);
 
     MyRandom<float> next_y;
-    next_y.setDistribution(0.0,rectangle3D_height);
+    next_y.setDistribution(0.0,rectangle3D_height*0.5f);
 
     MyRandom<float> next_z;
-    next_z.setDistribution(0.0,areaHeight);
+    next_z.setDistribution(0.0,areaHeight*0.5f);
 
     /*
      *
@@ -78,7 +77,9 @@ int ParticleGenerator::generateGrass(const std::string& name_prefix, const uint3
 
     for (int b=0; b<grassCount; b++){
 
-      Log::getInfo().log("b == ", std::to_string(b));
+      int levels = r_level();
+      int maximum_vertical_particle_count = ceil(log(levels));
+      float radius = float(rectangle3D_width) / float(maximum_vertical_particle_count);
 
       std::vector<GrassParticle> temp;
       temp.reserve(500);
@@ -131,7 +132,7 @@ int ParticleGenerator::generateGrass(const std::string& name_prefix, const uint3
 
         float temp_radius = radius;
         // Friends;
-        while (friends.size() < 10 )
+        while (friends.size() < max_friends )
         {
           for (const auto& x : particle_positions)
           {

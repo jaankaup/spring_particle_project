@@ -432,7 +432,7 @@ void RuohikkoSystem::init()
   Log::getDebug().log("RuohikkoSystem::init");
 
   auto pgen = ParticleGenerator();
-  pParticleCount = pgen.generateGrass("ruohikko",10,3,3,3);
+  pParticleCount = pgen.generateGrass("ruohikko",800,1,1,1);
 }
 
 void RuohikkoSystem::takeStep(const float h)

@@ -33,6 +33,7 @@ void Renderer::render(const Camera& camera) {
   /* Verhon piirto. */
 
   if (ProgramState::getInstance().getShowVerho()) {
+    ProgramState::getInstance().setTimeStep(0.0008f);
     auto verho_particle_system = ParticleSystemManager::getInstance().getByKey("verho");
     verho_particle_system->takeStep(ProgramState::getInstance().getTimeStep());
     verho_particle_system->draw(MVP);
@@ -46,12 +47,25 @@ void Renderer::render(const Camera& camera) {
     lumi_particle_system->draw(MVP);
   }
 
+
   /* Ruohikon piirto. */
 
   if (ProgramState::getInstance().getShowRuohikko()) {
+
+    auto render_shader_name = ProgramState::getInstance().getMetadata()->meshShader;
+    Shader* shader = ShaderManager::getInstance().getByKey(render_shader_name);
+    shader->bind();
+    shader->setUniform("MVP", MVP);
+    shader->setUniform("input_color", glm::vec3(0.7f,0.3f,1.0f));
+    auto mua = VertexBufferManager::getInstance().getByKey("maa_pisteet");
+    mua->bind();
+    glDrawArrays(GL_POINTS, 0, 30*30);
+
+    ProgramState::getInstance().setTimeStep(0.0012f);
     auto ruohikko_particle_system = ParticleSystemManager::getInstance().getByKey("ruohikko");
     ruohikko_particle_system->takeStep(ProgramState::getInstance().getTimeStep());
     ruohikko_particle_system->draw(MVP);
+
   }
 
   /* Tuuli vektorien piirto. */

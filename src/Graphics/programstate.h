@@ -162,7 +162,7 @@ class ProgramState
     float pTimeStep = 0.0f;
     bool pShowWind = false;
     bool pLumi = false;
-    bool pVerho = true;
+    bool pVerho = false;
     bool pRuohikko = true;
     float pWindStength = 0.0;
     bool pStopWind = false;

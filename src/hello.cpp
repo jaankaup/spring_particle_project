@@ -31,7 +31,7 @@
 struct context
 {
     Renderer renderer;
-    Camera camera = Camera(glm::vec3(5.0f,5.0f,5.0f),glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f));
+    Camera camera = Camera(glm::vec3(0.0f,0.5f,1.0f),glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f));
 };
 
 void createShaders()
@@ -114,12 +114,12 @@ void loop_handler2(void *arg)
             {
                 case SDLK_1:
                     ProgramState::getInstance().toggleVerho();
+                    ProgramState::getInstance().toggleRuohikko();
                     break;
                 case SDLK_2:
                     ProgramState::getInstance().toggleLumi();
                     break;
                 case SDLK_3:
-                    changeScene(3);
                     break;
                 case SDLK_4:
                     changeScene(4);
@@ -250,7 +250,8 @@ int main(int argc, char* argv[])
   // The program state must be created first.
   // Laitetaan jo tassa time step.
   //ProgramState::getInstance().setTimeStep(0.0004f);
-  ProgramState::getInstance().setTimeStep(0.0001f);
+  //ProgramState::getInstance().setTimeStep(0.0008f);
+  ProgramState::getInstance().setTimeStep(0.0012f);
   
   // Initialize the base information for the marching cubes.
   initializeCubeAttributes();
@@ -271,6 +272,7 @@ int main(int argc, char* argv[])
   createShaders();
 
   VertexBufferManager::getInstance().createExamplePoints(30, 30, 30,5.0, glm::vec3(-3.0f,-3.0f,-3.0f), "tuuli_pisteet");
+  VertexBufferManager::getInstance().createExamplePoints(30, 1, 30,40.0, glm::vec3(-0.1f,0.0f,-0.1f), "maa_pisteet");
   #endif
 
   // Initialize the renderer.

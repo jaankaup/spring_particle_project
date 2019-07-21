@@ -1,7 +1,8 @@
 #version 430
 
 uniform float h = 0.1;
-uniform float k = 160000.0;
+uniform float k = 860000.0;
+//uniform float k = 160000.0;
 uniform float time = 0.0;
 uniform vec4 gravity = vec4(0.0,9.81,0.0,0.0);
 uniform float phase = 1.0;
@@ -159,8 +160,8 @@ void evalF_flex(uint index) {
    force += wind_converted*wind_strength;
 
    // Lasketaan inversio massalle. Mita se sitten tekeekaan. Ainakin pysyy mittayksikot kohdillaan.
-   //vec4 vel = force * 1.0/mass;
-   vec4 vel = force;
+   vec4 vel = force * 1.0/mass;
+   //vec4 vel = force;
 
    // Jos piste on staattinen, nollataa force.
    if (is_static == -1.0) vel = vec4(0.0);
