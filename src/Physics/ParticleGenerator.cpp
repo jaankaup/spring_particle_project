@@ -32,28 +32,42 @@ int ParticleGenerator::generateGrass(const std::string& name_prefix, const uint3
     static const int maxHeight = 0.5;
     static const int maxWidth = 0.5;
 
+    /* Seed generator */
+    MyRandom<int> next_seed;
+    next_seed.setDistribution(0,5000000);
+
     /* Large area. */
-    MyRandom<float> x_pos;
+    MyRandom<float> x_pos(std::to_string(next_seed()));
     x_pos.setDistribution(0.0f,float(areaWidth));
 
-    MyRandom<float> z_pos;
+    MyRandom<float> z_pos(std::to_string(next_seed()));
     z_pos.setDistribution(0.0f,float(areaHeight));
+
+    /* Color. */
+    MyRandom<float> next_green_color(std::to_string(next_seed()));
+    next_green_color.setDistribution(0.4f,0.5f);
+
+    MyRandom<float> next_red_color(std::to_string(next_seed()));
+    next_red_color.setDistribution(0.0f,0.1f);
+
+    MyRandom<float> next_blue_color(std::to_string(next_seed()));
+    next_blue_color.setDistribution(0.0f,0.1f);
 
     /* A single Grass. */
     
-    MyRandom<int> r_level;
+    MyRandom<int> r_level(std::to_string(next_seed()));
     r_level.setDistribution(10,max_levels);
 
-    MyRandom<float> next_x;
+    MyRandom<float> next_x(std::to_string(next_seed()));
     next_x.setDistribution(0.0,areaWidth*0.2f);
 
     //MyRandom<float> next_y;
     //next_y.setDistribution(0.0,rectangle3D_height*0.5f);
 
-    MyRandom<float> next_z;
+    MyRandom<float> next_z(std::to_string(next_seed()));
     next_z.setDistribution(0.0,areaHeight*0.2f);
 
-    MyRandom<float> next_rotation;;
+    MyRandom<float> next_rotation(std::to_string(next_seed()));;
     next_rotation.setDistribution(0.0f,6.0f);
     /*
      *
@@ -81,13 +95,15 @@ int ParticleGenerator::generateGrass(const std::string& name_prefix, const uint3
 
     int particles_per_level_counter = 0;
 
-    MyRandom<float> next_width;
+    MyRandom<float> next_width(std::to_string(next_seed()));
     next_width.setDistribution(rectangle3D_width_min,rectangle3D_width_max);
 
-    MyRandom<float> next_height;
+    MyRandom<float> next_height(std::to_string(next_seed()));
     next_height.setDistribution(rectangle3D_height_min,rectangle3D_height_max);
 
     for (int b=0; b<grassCount; b++){
+
+      glm::vec4 random_color = glm::vec4(next_red_color(),next_green_color(), next_blue_color(),0.0f);
 
       float rectangle3D_width = next_width();
       //float rectangle3D_depth = 0.0;
@@ -180,8 +196,13 @@ int ParticleGenerator::generateGrass(const std::string& name_prefix, const uint3
         // No friends. Ignore this particle.
         if (friends.size() == 0) continue;
 
-        // Is this particle static. TODOOO
+        // Is this particle static.
         gp.other.x = p_pos.particle_index < maximum_vertical_particle_count + particle_index_sofar? -1.0f : 6.0f;
+        // The color of the grass.
+        gp.other.y = random_color.x;
+        gp.other.z = random_color.y;
+        gp.other.w = random_color.z;
+
         //gp.other.x = -1.0f;
         gp.vel = glm::vec4(0.0f);
 

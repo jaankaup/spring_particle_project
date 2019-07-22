@@ -25,7 +25,7 @@ layout (std430, binding = 0) buffer InitialBuf { PVdata initial[]; };
 layout (std430, binding = 1) buffer StaticBuf { StaticData static_data[]; };
 
 //layout(triangle_strip, max_vertices = 3) out;
-layout(line_strip, max_vertices = 24) out;
+layout(line_strip, max_vertices = 16) out;
 
 //out vec3 fColIn;
 

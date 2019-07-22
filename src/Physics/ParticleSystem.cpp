@@ -171,19 +171,19 @@ void VerhoSystem::init()
   delete[] array;
   delete[] static_data_array;
 
-  // Luodaan data verhon piirtoa varten.
-  auto piirto_indeksit = VertexBufferManager::getInstance().create("piirto_indeksit_verho");
-  piirto_indeksit->init();
-  std::vector<std::string> types_indeksit = {"1f"};
-
-  auto array_ind = new GLfloat[pParticleCount];
-  for (int i=0; i<pParticleCount; i++)
-  {
-    array_ind[i] = float(i);
-  }
-  piirto_indeksit->addData(array_ind,sizeof(float)*(pParticleCount),types_indeksit);
-  piirto_indeksit->setCount(pParticleCount);
-  delete[] array_ind;
+//  // Luodaan data verhon piirtoa varten.
+//  auto piirto_indeksit = VertexBufferManager::getInstance().create("piirto_indeksit_verho");
+//  piirto_indeksit->init();
+//  std::vector<std::string> types_indeksit = {"1f"};
+//
+//  auto array_ind = new GLfloat[pParticleCount];
+//  for (int i=0; i<pParticleCount; i++)
+//  {
+//    array_ind[i] = float(i);
+//  }
+//  piirto_indeksit->addData(array_ind,sizeof(float)*(pParticleCount),types_indeksit);
+//  piirto_indeksit->setCount(pParticleCount);
+//  delete[] array_ind;
 }
 
 void VerhoSystem::takeStep(const float h)
@@ -248,45 +248,44 @@ void VerhoSystem::takeStep(const float h)
 void VerhoSystem::draw(const glm::mat4& mvp)
 {
 
-  glm::mat4 mx = glm::mat4(1.0f);
-
-  auto drawBuffer = VertexBufferManager::getInstance().getByKey("piirto_indeksit_verho"); 
-
-  glLineWidth(1);
-  drawBuffer->bind();
-
-  Shader* shader = ShaderManager::getInstance().getByKey("jousi_particle_render");
-  shader->bind();
-  shader->setUniform("MVP", mvp);
-  shader->setUniform("input_color", glm::vec3(0.2f,0.0f,1.0));
-
-  auto initial_data = VertexBufferManager::getInstance().getByKey(VerhoSystem::INITIAL_BUFFER);
-  auto static_data = VertexBufferManager::getInstance().getByKey(VerhoSystem::STATIC_DATA_BUFFER);
-
-  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, initial_data->getHandle());
-  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, static_data->getHandle());
-
-//  auto render_shader_name = ProgramState::getInstance().getMetadata()->meshShader;
-//  Shader* shader = ShaderManager::getInstance().getByKey(render_shader_name);
-//  shader->bind();
-//  shader->setUniform("MVP", mvp);
-//  shader->setUniform("input_color", glm::vec3(0.0f,0.4f,0.0));
-
-  glDrawArrays(GL_POINTS, 0, pParticleCount);
-  glLineWidth(3);
-
-//  auto drawBuffer = VertexBufferManager::getInstance().getByKey(VerhoSystem::INITIAL_BUFFER); 
+//  glm::mat4 mx = glm::mat4(1.0f);
 //
+//  auto drawBuffer = VertexBufferManager::getInstance().getByKey("piirto_indeksit_verho"); 
+//
+//  glLineWidth(1);
 //  drawBuffer->bind();
 //
-//
-//  auto render_shader_name = ProgramState::getInstance().getMetadata()->meshShader;
-//  Shader* shader = ShaderManager::getInstance().getByKey(render_shader_name);
+//  Shader* shader = ShaderManager::getInstance().getByKey("jousi_particle_render");
 //  shader->bind();
 //  shader->setUniform("MVP", mvp);
-//  shader->setUniform("input_color", glm::vec3(0.2f,0.0f,1.0f));
+//  shader->setUniform("input_color", glm::vec3(0.2f,0.0f,1.0));
+//
+//  auto initial_data = VertexBufferManager::getInstance().getByKey(VerhoSystem::INITIAL_BUFFER);
+//  auto static_data = VertexBufferManager::getInstance().getByKey(VerhoSystem::STATIC_DATA_BUFFER);
+//
+//  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, initial_data->getHandle());
+//  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, static_data->getHandle());
+//
+////  auto render_shader_name = ProgramState::getInstance().getMetadata()->meshShader;
+////  Shader* shader = ShaderManager::getInstance().getByKey(render_shader_name);
+////  shader->bind();
+////  shader->setUniform("MVP", mvp);
+////  shader->setUniform("input_color", glm::vec3(0.0f,0.4f,0.0));
 //
 //  glDrawArrays(GL_POINTS, 0, pParticleCount);
+//  glLineWidth(3);
+
+  auto drawBuffer = VertexBufferManager::getInstance().getByKey(VerhoSystem::INITIAL_BUFFER); 
+
+  drawBuffer->bind();
+
+  auto render_shader_name = ProgramState::getInstance().getMetadata()->meshShader;
+  Shader* shader = ShaderManager::getInstance().getByKey(render_shader_name);
+  shader->bind();
+  shader->setUniform("MVP", mvp);
+  shader->setUniform("input_color", glm::vec3(0.2f,0.0f,1.0f));
+
+  glDrawArrays(GL_POINTS, 0, pParticleCount);
 }
 
 /************************************************************
