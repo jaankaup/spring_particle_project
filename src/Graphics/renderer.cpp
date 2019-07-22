@@ -85,7 +85,9 @@ void Renderer::render(const Camera& camera) {
     tuuliPoints->bind();
     auto tuuliCount = tuuliPoints->getCount();
 
+    glDisable(GL_CULL_FACE);
     glDrawArrays(GL_POINTS, 0, tuuliCount);
+    glEnable(GL_CULL_FACE);
   }
 }
 
