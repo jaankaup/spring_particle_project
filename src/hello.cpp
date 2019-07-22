@@ -283,7 +283,7 @@ int main(int argc, char* argv[])
   createShaders();
 
   VertexBufferManager::getInstance().createExamplePoints(30, 30, 30,10.0, glm::vec3(-1.0f,-1.0f,-1.0f), "tuuli_pisteet");
-  VertexBufferManager::getInstance().createExamplePoints(30, 1, 30,60.0, glm::vec3(-0.2f,0.0f,-0.2f), "maa_pisteet");
+  VertexBufferManager::getInstance().createExamplePoints(40, 1, 40,50.0, glm::vec3(-0.2f,0.0f,-0.2f), "maa_pisteet");
   #endif
 
   // Initialize the renderer.
