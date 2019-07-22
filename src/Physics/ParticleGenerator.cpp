@@ -1,5 +1,8 @@
+#define GLM_ENABLE_EXPERIMENTAL
 #include <math.h>
 #include <memory>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
 #include "ParticleGenerator.h"
 #include "../Utils/log.h"
 #include "../Utils/misc.h"
@@ -42,14 +45,16 @@ int ParticleGenerator::generateGrass(const std::string& name_prefix, const uint3
     r_level.setDistribution(10,max_levels);
 
     MyRandom<float> next_x;
-    next_x.setDistribution(0.0,areaWidth*0.5f);
+    next_x.setDistribution(0.0,areaWidth*0.2f);
 
     //MyRandom<float> next_y;
     //next_y.setDistribution(0.0,rectangle3D_height*0.5f);
 
     MyRandom<float> next_z;
-    next_z.setDistribution(0.0,areaHeight*0.5f);
+    next_z.setDistribution(0.0,areaHeight*0.2f);
 
+    MyRandom<float> next_rotation;;
+    next_rotation.setDistribution(0.0f,6.0f);
     /*
      *
      *  level=n                p
@@ -87,6 +92,7 @@ int ParticleGenerator::generateGrass(const std::string& name_prefix, const uint3
       float rectangle3D_width = next_width();
       //float rectangle3D_depth = 0.0;
       float rectangle3D_height = next_height();
+      float rotation_angle = next_rotation();
 
       int levels = r_level();
       int maximum_vertical_particle_count = ceil(log(levels));
@@ -131,6 +137,10 @@ int ParticleGenerator::generateGrass(const std::string& name_prefix, const uint3
 //      }
 
       glm::vec4 base_position = glm::vec4(next_x(), 0.0f, next_z(), 0.0f); 
+      glm::vec3 base_position_3d = glm::vec3(base_position.x,base_position.y,base_position.z); 
+      glm::mat4 unit = glm::mat4(1.0f);
+      glm::mat4 translate = glm::translate(unit,base_position_3d);//TODO 
+      glm::mat4 rotation = glm::rotate(translate,rotation_angle, glm::vec3(0.0f,1.0f,0.0f));//TODO 
       // Create actual particle.
       for (const auto& p_pos : particle_positions)
       {
@@ -263,7 +273,11 @@ int ParticleGenerator::generateGrass(const std::string& name_prefix, const uint3
         {
           Log::getInfo().log("Friend count ==  %", std::to_string(friends.size()));
         }
-        gp.pos = gp.pos + base_position;
+        glm::vec4 new_position = gp.pos + base_position;
+        //glm::vec3 to_3d = glm::vec3(new_position.x,new_position.y,new_position.z);
+        gp.pos = rotation * (new_position);
+        //gp.pos = gp.pos + base_position;
+        //gp.pos = gp.pos + base_position;
         temp.push_back(gp);
       } // for i=0
       particle_index_sofar += temp.size();

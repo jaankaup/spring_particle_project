@@ -105,7 +105,7 @@ inline T* Manager<T>::create(const std::string& key)
     // TODO: log to debug.
     //return nullptr; 
   }
-  Log::getInfo().log("Manager::create(%):: Luodaan resurssi. ", key);
+  //Log::getInfo().log("Manager::create(%):: Luodaan resurssi. ", key);
 
   Element<T> e(key,std::unique_ptr<T>(new T()));
   auto ret_val = e.val.get();
@@ -125,7 +125,7 @@ inline T* Manager<T>::getByKey(const std::string& key) const
       return e.val.get();
     }
   }
-  Log::getInfo().log("Manager::getByKey(%):: Ei loytynyt resurssia. ", key);
+  //Log::getInfo().log("Manager::getByKey(%):: Ei loytynyt resurssia. ", key);
   return nullptr;
 }
 

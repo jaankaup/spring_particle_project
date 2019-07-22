@@ -44,18 +44,18 @@ GLuint Vertexbuffer::getHandle() const
 
 void Vertexbuffer::populate_data(const void* data, unsigned int size)
 {
-  Log::getDebug().log("Vertexbuffer::populate_data: size == %.",std::to_string(size));
+//  Log::getDebug().log("Vertexbuffer::populate_data: size == %.",std::to_string(size));
 
   // Eka kerta kun puskuriin laitetaan tavaraa. Luodaan tilaa puskuriin sizen
   // verran.
   glBindBuffer(GL_ARRAY_BUFFER, pId);
   if (pData_size == 0) {
     if (data == nullptr) {
-      Log::getDebug().log("Vertexbuffer::populate_data: creating empty data.");
+      //Log::getDebug().log("Vertexbuffer::populate_data: creating empty data.");
       glBufferData(GL_ARRAY_BUFFER,size, NULL, pUsage);
     }
     else {
-      Log::getDebug().log("Vertexbuffer::populate_data: populating data.");
+      //Log::getDebug().log("Vertexbuffer::populate_data: populating data.");
       glBufferData(GL_ARRAY_BUFFER,size, data, pUsage);
     }
     pData_size = size;
@@ -72,7 +72,7 @@ void Vertexbuffer::populate_data(const void* data, unsigned int size)
 
 void Vertexbuffer::addData(const void* data, unsigned int size, const std::vector<std::string>& types)
 {
-  Log::getDebug().log("Vertexbuffer::addData");
+  //Log::getDebug().log("Vertexbuffer::addData");
 
   assert(size == 0); 
   assert(pData_size > 0); 
