@@ -502,15 +502,28 @@ void RuohikkoSystem::draw(const glm::mat4& mvp)
 {
   glm::mat4 mx = glm::mat4(1.0f);
 
-  auto drawBuffer = VertexBufferManager::getInstance().getByKey(RuohikkoSystem::INITIAL_BUFFER); 
+  auto drawBuffer = VertexBufferManager::getInstance().getByKey("piirto_indeksit"); 
 
+  glLineWidth(1);
   drawBuffer->bind();
 
-  auto render_shader_name = ProgramState::getInstance().getMetadata()->meshShader;
-  Shader* shader = ShaderManager::getInstance().getByKey(render_shader_name);
+  Shader* shader = ShaderManager::getInstance().getByKey("jousi_particle_render");
   shader->bind();
   shader->setUniform("MVP", mvp);
   shader->setUniform("input_color", glm::vec3(0.0f,0.4f,0.0));
 
-  glDrawArrays(GL_POINTS, 0, pParticleCount);
+  auto initial_data = VertexBufferManager::getInstance().getByKey(RuohikkoSystem::INITIAL_BUFFER);
+  auto static_data = VertexBufferManager::getInstance().getByKey(RuohikkoSystem::STATIC_DATA_BUFFER);
+
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, initial_data->getHandle());
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, static_data->getHandle());
+
+//  auto render_shader_name = ProgramState::getInstance().getMetadata()->meshShader;
+//  Shader* shader = ShaderManager::getInstance().getByKey(render_shader_name);
+//  shader->bind();
+//  shader->setUniform("MVP", mvp);
+//  shader->setUniform("input_color", glm::vec3(0.0f,0.4f,0.0));
+
+  glDrawArrays(GL_POINTS, 0, pParticleCount-1);
+  glLineWidth(3);
 }

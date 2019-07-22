@@ -47,6 +47,10 @@ void createShaders()
     std::vector<std::string> shaderSourcesCube = {"shaders/defaultPoint.vert", "shaders/defaultPoint.frag"};
     shaderCube->build(shaderSourcesCube,false);
 
+    Shader* shader_viivat = ShaderManager::getInstance().create("jousi_particle_render");
+    std::vector<std::string> shader_viivat_src = {"shaders/jousi_particle.vert", "shaders/defaultPoint.geom", "shaders/defaultPoint.frag"};
+    shader_viivat->build(shader_viivat_src,false);
+
     Shader* tuulishader = ShaderManager::getInstance().create(TUULI_SHADER);
     std::vector<std::string> tuuli_src = {"shaders/tuuliVektorit.vert", "shaders/tuuliVektorit.geom","shaders/tuuliVektorit.frag"};
     tuulishader->build(tuuli_src,false);

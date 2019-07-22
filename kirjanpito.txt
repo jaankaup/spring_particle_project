@@ -39,6 +39,108 @@ Janne Kauppinen
 |               |                                 | Mutta onko se oikein?    |             |
 +---------------+---------------------------------+--------------------------+-------------+
 
+-------------------------------------------------------------------------------------------
+11.7.2019 (7h)  (67h)                                                                           
+
+Mitä tein:
+
+Katselin RK4 vidota (https://youtu.be/hGCP6I2WisM?t=1126).
+Luin mit kurssin task3 matskua runge kuttaa wikipediasta. Luin lisäksi kurssisivulta siggraphin 
+matskuja. Yritin vielä hahmottaa tuota RK4 menetelmää. Jotenkin tuntuu siltä että toteutan 
+sen väärin.  
+
+Mitä jäi epäselväksi:
+
+Edelleenkin mietityttää se mikä mättää tuossa RK4:ssa. Tässä vaikeuttaa se, että nyt fysiikka 
+pyörii shaderissa ja debuggaus on hieman vaikeaa.
+
+-------------------------------------------------------------------------------------------
+12.7.2019 (9h)  (75h)                                                                           
+
+Mitä tein:
+
+Yritän toteuttaa verhorakennetta shearin rakenteella. Pyrkimyksenä on luoda algoritmi joka 
+tuottaa n*n kokoisen verhon. Joudun nyt luomaan 6 erilaista puskuria opengl:ssa. Piirtopuskuri, 
+joka on samalla piirtopuskuri. Sitten puskuri partikkeleiden staattista tietoa varten, eli 
+se onko partikkeli staattinen, partikkelin liittyvien toisten partikkeleiden indeksit sekä 
+niitä vastaavat lepopituudet. Lisäksi on tilapäispuskurit k1-k4, jonne tallensin vain väliaikaiset
+velocityt. Tähän turhaantui paljon aikaa ja virheitä tuli tehtyä. Luovuin tekstuureihin piirtämisestä, 
+puskureiden indeksointi tuntui helpommalta. 
+
+Paljon indeksikikkailua josta en tähän viitsi sen määräänsä enempää rapostoida.
+
+Mitä jäi epäselväksi:
+
+Edelleenkin on epäselvää moni asia. Esimerkiksi se pitääkö partikkelilla olla massa ja se 
+toimiiko toteutukseni RK4:sta. Verho edelleenkin keskeneräinen.
+
+-------------------------------------------------------------------------------------------
+13.7.2019 (8h)  (83h)                                                                           
+
+Mitä tein:
+
+Indeksikikkailu jatkuu. Algoritmi naapuripartikkeleiden indeksointi diagonaalisesti toimii. 
+Edelleenkin suurta debuggausta ja opengl puskureiden sisällön tulkitsemista. 
+
+Ḱasasin hyödyllisiä opengl compute shaderiin liityvää matskua.
+
+https://community.khronos.org/t/compute-shader-output/75199
+https://www.geeks3d.com/20140704/tutorial-introduction-to-opengl-4-3-shader-storage-buffers-objects-ssbo-demo/
+https://community.arm.com/developer/tools-software/graphics/b/blog/posts/get-started-with-compute-shaders
+http://developer.download.nvidia.com/GTC/PDF/GTC2012/PresentationPDF/SS104-Open-GPU-Utility-ToolkitGL.pdf
+
+Varsinkin nvidian matsku oli erityisen hyvä. Nyt alkaa olla jo melko hyvä tuntuma siihen miten compute shadereita 
+voisi hyödyntää jousifysiikassa.
+
+Mitä jäi epäselväksi:
+
+Toimiiko RK4? Verho räjähtelee kokoajan ja muljuilee pelottavasti. Jotain on pielessä ja pahasti.
+
+-------------------------------------------------------------------------------------------
+13.7.2019 (5h)  (88h)                                                                           
+
+Mitä tein:
+
+Etsin netistä olisiko joku jo tehnyt opengl computeshaderilla verhoa. Yksi tulos löytyi:
+
+  * https://github.com/daw42/glslcookbook/tree/master/chapter10/shader
+
+Tuo on ilmeisesti jonkun kaupallisen opengl kirjan lähdekoodia. En päässyt lukemaan itse kirjaa, mutta 
+näin hieman miten joku oli tuon verhon totettanut. Itse olin jo tehnyt melkolailla eri tavalla kuin 
+tuo ihminen, mutta yksi asia selvisi: verhon rakenne oli itselläni liian harva. Kirjan tekijä oli 
+tehnyt niin että jokaisella partikkelilla on diagonaalisen suunnan lisäksi myös horisontaaliset ja 
+vertikaaliset kaverit.   
+
+Muutin verhon rakenetta, ja lopputulos on jo parempi. Verho ei karkaa eikä räjähtele, mutta venyy 
+loputtomiin painovoiman suuntaan. Lisäsin nyt myös partikkeleille massa ja huomasin että jousien 
+välinen voimakerroin saa olla todella suuri.
+
+Mitä jäi epäselväksi:
+
+Verho ei edelleenkään toimi ihan niin kuin pitäisi. Missähän vika.
+
+-------------------------------------------------------------------------------------------
+14.7.2019 (4h)  (92h)                                                                           
+
+Mitä tein:
+
+Etsin netistä olisiko joku jo tehnyt opengl computeshaderilla verhoa. Yksi tulos löytyi:
+
+  * https://github.com/daw42/glslcookbook/tree/master/chapter10/shader
+
+Tuo on ilmeisesti jonkun kaupallisen opengl kirjan lähdekoodia. En päässyt lukemaan itse kirjaa, mutta 
+näin hieman miten joku oli tuon verhon totettanut. Itse olin jo tehnyt melkolailla eri tavalla kuin 
+tuo ihminen, mutta yksi asia selvisi: verhon rakenne oli itselläni liian harva. Kirjan tekijä oli 
+tehnyt niin että jokaisella partikkelilla on diagonaalisen suunnan lisäksi myös horisontaaliset ja 
+vertikaaliset kaverit.   
+
+Muutin verhon rakenetta, ja lopputulos on jo parempi. Verho ei karkaa eikä räjähtele, mutta venyy 
+loputtomiin painovoiman suuntaan. Lisäsin nyt myös partikkeleille massa ja huomasin että jousien 
+välinen voimakerroin saa olla todella suuri.
+
+Mitä jäi epäselväksi:
+
+Verho ei edelleenkään toimi ihan niin kuin pitäisi. Missähän vika.
 
 
 

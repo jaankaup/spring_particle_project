@@ -377,5 +377,19 @@ int ParticleGenerator::generateGrass(const std::string& name_prefix, const uint3
   k3->populate_data(nullptr,sizeof(float)*(particle_index+1)*4);
   k4->populate_data(nullptr,sizeof(float)*(particle_index+1)*4);
 
+  // Luodaan data ruohikon piirtoa varten.
+  auto piirto_indeksit = VertexBufferManager::getInstance().create("piirto_indeksit");
+  piirto_indeksit->init();
+  std::vector<std::string> types_indeksit = {"1f"};
+
+  auto array_ind = new GLfloat[particle_index+1];
+  for (int i=0; i<particle_index+1; i++)
+  {
+    array_ind[i] = float(i);
+  }
+  piirto_indeksit->addData(array_ind,sizeof(float)*(particle_index+1),types_indeksit);
+  piirto_indeksit->setCount(particle_index+1);
+  delete[] array_ind;
+
   return particle_index+1;
 }
