@@ -3,9 +3,13 @@
 layout(points) in;
 
 uniform mat4 MVP;
-uniform float arrayOffset = 0.1;
-uniform float arrayOffset_inner = 0.01;
-uniform float windLenght_factor = 0.3;
+uniform float arrayOffset = 0.15;
+uniform float arrayOffset_inner = 0.05;
+uniform float windLenght_factor = 0.2;
+
+//uniform float arrayOffset = 0.1;
+//uniform float arrayOffset_inner = 0.01;
+//uniform float windLenght_factor = 0.3;
 
 layout(triangle_strip, max_vertices = 15) out;
 //layout(line_strip, max_vertices = 15) out;
@@ -65,12 +69,6 @@ void createArray() {
   fColIn = color*2;
   EmitVertex();
 
-//  fColIn = color*2;
-//  EmitVertex();
-//
-//  gl_Position = basePos; 
-//  fColIn = color*2;
-//  EmitVertex();
 
   EndPrimitive();
 
