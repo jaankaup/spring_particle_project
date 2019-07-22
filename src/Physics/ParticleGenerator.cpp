@@ -17,9 +17,11 @@ int ParticleGenerator::generateGrass(const std::string& name_prefix, const uint3
 
 
     // The dimensions for a single grass.
-    static const float rectangle3D_width = 0.01;
+    static const float rectangle3D_width_min = 0.005;
+    static const float rectangle3D_width_max = 0.01;
     static const float rectangle3D_depth = 0.0;
-    static const float rectangle3D_height = 0.18;
+    static const float rectangle3D_height_min = 0.08;
+    static const float rectangle3D_height_max = 0.18;
     static const int number_of_points = 1000;
     static const int max_levels = 20;
     static const int max_friends = 10;
@@ -42,8 +44,8 @@ int ParticleGenerator::generateGrass(const std::string& name_prefix, const uint3
     MyRandom<float> next_x;
     next_x.setDistribution(0.0,areaWidth*0.5f);
 
-    MyRandom<float> next_y;
-    next_y.setDistribution(0.0,rectangle3D_height*0.5f);
+    //MyRandom<float> next_y;
+    //next_y.setDistribution(0.0,rectangle3D_height*0.5f);
 
     MyRandom<float> next_z;
     next_z.setDistribution(0.0,areaHeight*0.5f);
@@ -74,8 +76,17 @@ int ParticleGenerator::generateGrass(const std::string& name_prefix, const uint3
 
     int particles_per_level_counter = 0;
 
+    MyRandom<float> next_width;
+    next_width.setDistribution(rectangle3D_width_min,rectangle3D_width_max);
+
+    MyRandom<float> next_height;
+    next_height.setDistribution(rectangle3D_height_min,rectangle3D_height_max);
 
     for (int b=0; b<grassCount; b++){
+
+      float rectangle3D_width = next_width();
+      //float rectangle3D_depth = 0.0;
+      float rectangle3D_height = next_height();
 
       int levels = r_level();
       int maximum_vertical_particle_count = ceil(log(levels));

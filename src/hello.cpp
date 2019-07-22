@@ -79,7 +79,7 @@ void createtextures()
   auto metadata = ProgramState::getInstance().getMetadata();
 
   Texture* tex3D = TextureManager::getInstance().create(TEXTURE_NAME,TextureType::d3);
-  auto tex3D_data = createPerlin3D(512,512,512);
+  auto tex3D_data = createPerlin3D(256,256,256);
   tex3D->create3D(tex3D_data);
   metadata->texture3Dname = TEXTURE_NAME;
 //  auto texData = tex3D->getTextureData();
@@ -190,7 +190,7 @@ void loop_handler2(void *arg)
                     Log::getInfo().log("Creating a new 3D texture...");
                     // Recreate scene model.
                     Log::getInfo().log("Rebuilding scene...");
-                    ModelManager::getInstance().createSceneObject();
+                    //ModelManager::getInstance().createSceneObject();
                     break;
                     }
                 case SDLK_y: 
@@ -209,7 +209,7 @@ void loop_handler2(void *arg)
                     Log::getInfo().log("Creating a new 3D texture with more rought noise...");
                     // Recreate scene model.
                     Log::getInfo().log("Rebuilding scene...");
-                    ModelManager::getInstance().createSceneObject();
+                    //ModelManager::getInstance().createSceneObject();
                     break;
                     }
             }
