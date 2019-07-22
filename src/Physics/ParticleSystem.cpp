@@ -56,24 +56,24 @@ void VerhoSystem::init()
 
   // Piirrettava data.
   auto initial_data = VertexBufferManager::getInstance().create(VerhoSystem::INITIAL_BUFFER);
-  initial_data->init();
+  initial_data->init(GL_ARRAY_BUFFER,GL_DYNAMIC_DRAW);
 
   // Staattinen data, partikkelin kaveri-idt, lepopituudet ym.
   auto static_data = VertexBufferManager::getInstance().create(VerhoSystem::STATIC_DATA_BUFFER);
-  static_data->init_plain_buffer();
+  static_data->init_plain_buffer(GL_ARRAY_BUFFER,GL_STATIC_DRAW);
 
   // k1-k4 valiaikaispuskurit RK4:sta varten.
   auto k1 = VertexBufferManager::getInstance().create(VerhoSystem::K1);
-  k1->init_plain_buffer();
+  k1->init_plain_buffer(GL_ARRAY_BUFFER,GL_DYNAMIC_DRAW);
 
   auto k2 = VertexBufferManager::getInstance().create(VerhoSystem::K2);
-  k2->init_plain_buffer();
+  k2->init_plain_buffer(GL_ARRAY_BUFFER,GL_DYNAMIC_DRAW);
 
   auto k3 = VertexBufferManager::getInstance().create(VerhoSystem::K3);
-  k3->init_plain_buffer();
+  k3->init_plain_buffer(GL_ARRAY_BUFFER,GL_DYNAMIC_DRAW);
 
   auto k4 = VertexBufferManager::getInstance().create(VerhoSystem::K4);
-  k4->init_plain_buffer();
+  k4->init_plain_buffer(GL_ARRAY_BUFFER,GL_DYNAMIC_DRAW);
 
   // Luodaan compute shader, jos sita ei ole entuudestaan luotu.
   auto compute_shader = ShaderManager::getInstance().getByKey(VerhoSystem::CS_NAME);
@@ -303,24 +303,24 @@ void LumihiutaleSystem::init()
 
   // Piirrettava data.
   auto initial_data = VertexBufferManager::getInstance().create(LumihiutaleSystem::INITIAL_BUFFER);
-  initial_data->init();
+  initial_data->init(GL_ARRAY_BUFFER,GL_DYNAMIC_DRAW);
 
   // Staattinen data. Nyt ei ole viela keksitty mita tanne laittaa.
   auto static_data = VertexBufferManager::getInstance().create(LumihiutaleSystem::STATIC_DATA_BUFFER);
-  static_data->init_plain_buffer();
+  static_data->init_plain_buffer(GL_ARRAY_BUFFER,GL_STATIC_DRAW);
 
   // k1-k4 valiaikaispuskurit RK4:sta varten.
   auto k1 = VertexBufferManager::getInstance().create(LumihiutaleSystem::K1);
-  k1->init_plain_buffer();
+  k1->init_plain_buffer(GL_ARRAY_BUFFER,GL_DYNAMIC_DRAW);
 
   auto k2 = VertexBufferManager::getInstance().create(LumihiutaleSystem::K2);
-  k2->init_plain_buffer();
+  k2->init_plain_buffer(GL_ARRAY_BUFFER,GL_DYNAMIC_DRAW);
 
   auto k3 = VertexBufferManager::getInstance().create(LumihiutaleSystem::K3);
-  k3->init_plain_buffer();
+  k3->init_plain_buffer(GL_ARRAY_BUFFER,GL_DYNAMIC_DRAW);
 
   auto k4 = VertexBufferManager::getInstance().create(LumihiutaleSystem::K4);
-  k4->init_plain_buffer();
+  k4->init_plain_buffer(GL_ARRAY_BUFFER,GL_DYNAMIC_DRAW);
 
   // Luodaan compute shader, jos sita ei ole entuudestaan luotu.
   auto compute_shader = ShaderManager::getInstance().getByKey(LumihiutaleSystem::CS_NAME);

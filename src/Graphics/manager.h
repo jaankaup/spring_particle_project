@@ -234,7 +234,7 @@ inline Texture* TextureManager::create(const std::string& key, const TextureType
 inline Vertexbuffer* VertexBufferManager::createExamplePoints(const int dimensionX, const int dimensionY, const int dimensionZ, float divider,const glm::vec3& offset,const std::string& name)
 {
   Vertexbuffer* result = Manager<Vertexbuffer>::create(name);
-  result->init();
+  result->init(GL_ARRAY_BUFFER,GL_STATIC_DRAW);
   int size = dimensionX * dimensionY * dimensionZ;
 
   std::vector<float> temp;
@@ -388,7 +388,7 @@ inline Vertexbuffer* VertexBufferManager::optimize_vertex_buffer(const std::stri
 
   // Create the vertexbuffer from the geometry shader output data.
   Vertexbuffer* result = Manager<Vertexbuffer>::create(optimized_name);
-  result->init();
+  result->init(GL_ARRAY_BUFFER,GL_STATIC_DRAW);
   std::vector<std::string> types = {"3f","3f"};
   result->addData(feedback, actual_data_size, types);
   result->pDataCount = primitiveCount*6;

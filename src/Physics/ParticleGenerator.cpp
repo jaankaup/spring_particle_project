@@ -362,22 +362,22 @@ int ParticleGenerator::generateGrass(const std::string& name_prefix, const uint3
     std::string k4_s = name_prefix + "_k4";
 
     auto idata = VertexBufferManager::getInstance().create(initial_buffer);
-    idata->init();
+    idata->init(GL_ARRAY_BUFFER,GL_DYNAMIC_DRAW);
 
     auto sdata = VertexBufferManager::getInstance().create(static_data_buffer);
-    sdata->init_plain_buffer();
+    sdata->init_plain_buffer(GL_ARRAY_BUFFER,GL_STATIC_DRAW);
 
     auto k1 = VertexBufferManager::getInstance().create(k1_s);
-    k1->init_plain_buffer();
+    k1->init_plain_buffer(GL_ARRAY_BUFFER,GL_DYNAMIC_DRAW);
 
     auto k2 = VertexBufferManager::getInstance().create(k2_s);
-    k2->init_plain_buffer();
+    k2->init_plain_buffer(GL_ARRAY_BUFFER,GL_DYNAMIC_DRAW);
 
     auto k3 = VertexBufferManager::getInstance().create(k3_s);
-    k3->init_plain_buffer();
+    k3->init_plain_buffer(GL_ARRAY_BUFFER,GL_DYNAMIC_DRAW);
 
     auto k4 = VertexBufferManager::getInstance().create(k4_s);
-    k4->init_plain_buffer();
+    k4->init_plain_buffer(GL_ARRAY_BUFFER,GL_DYNAMIC_DRAW);
 
   auto compute_shader = ShaderManager::getInstance().getByKey(name_prefix + "_shader");
   if (compute_shader == nullptr) compute_shader = ShaderManager::getInstance().create(name_prefix + "_shader");
@@ -400,7 +400,7 @@ int ParticleGenerator::generateGrass(const std::string& name_prefix, const uint3
 
   // Luodaan data ruohikon piirtoa varten.
   auto piirto_indeksit = VertexBufferManager::getInstance().create("piirto_indeksit");
-  piirto_indeksit->init();
+  piirto_indeksit->init(GL_ARRAY_BUFFER,GL_STATIC_DRAW);
   std::vector<std::string> types_indeksit = {"1f"};
 
   auto array_ind = new GLfloat[particle_index+1];

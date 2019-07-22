@@ -22,15 +22,16 @@ void Vertexbuffer::bind() const
   if (pVAO != 0) glBindVertexArray(pVAO);
 }
 
-void Vertexbuffer::init()
+
+void Vertexbuffer::init(const GLenum target,const GLenum usage)
 {
     glGenVertexArrays(1, &pVAO);
     glGenBuffers(1,&pId);
-    pTarget = GL_ARRAY_BUFFER;
-    pUsage = GL_DYNAMIC_DRAW;
+    pTarget = target;
+    pUsage = usage;
 }
 
-void Vertexbuffer::init_plain_buffer()
+void Vertexbuffer::init_plain_buffer(const GLenum target,const GLenum usage)
 {
     glGenBuffers(1,&pId);
     pTarget = GL_ARRAY_BUFFER;

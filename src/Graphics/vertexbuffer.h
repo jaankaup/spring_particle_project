@@ -19,8 +19,8 @@ class Vertexbuffer
 
 	public:
 
-    virtual void init();
-    void init_plain_buffer();
+    virtual void init(const GLenum target,const GLenum usage);
+    void init_plain_buffer(const GLenum target,const GLenum usage);
     void bind() const;
 
     // Varaa bufferille kokoa @parametrin size verran ensimmaisella kerralla
