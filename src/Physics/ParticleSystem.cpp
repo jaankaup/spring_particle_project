@@ -450,8 +450,8 @@ void LumihiutaleSystem::draw(const glm::mat4& mvp)
 
   drawBuffer->bind();
 
-  auto render_shader_name = ProgramState::getInstance().getMetadata()->meshShader;
-  Shader* shader = ShaderManager::getInstance().getByKey(render_shader_name);
+  //auto render_shader_name = ProgramState::getInstance().getMetadata()->meshShader;
+  Shader* shader = ShaderManager::getInstance().getByKey("lumi_render");
   shader->bind();
   shader->setUniform("MVP", mvp);
   shader->setUniform("input_color", glm::vec3(1.0f,1.0f,1.0f));

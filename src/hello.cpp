@@ -51,6 +51,9 @@ void createShaders()
     std::vector<std::string> shader_viivat_src = {"shaders/jousi_particle.vert", "shaders/defaultPoint.geom", "shaders/defaultPoint2.frag"};
     shader_viivat->build(shader_viivat_src,false);
 
+    Shader* lumi = ShaderManager::getInstance().create("lumi_render");
+    std::vector<std::string> lumi_src = {"shaders/lumi.vert", "shaders/lumi.geom", "shaders/defaultPoint.frag"};
+    lumi->build(lumi_src,false);
 //    Shader* shader_viivat_verho = ShaderManager::getInstance().create("verho_render");
 //    std::vector<std::string> shader_viivat_verho_src = {"shaders/jousi_particle.vert", "shaders/default_verho.geom", "shaders/defaultPoint.frag"};
 //    shader_viivat_verho->build(shader_viivat_verho_src,false);
