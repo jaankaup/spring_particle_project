@@ -5,7 +5,7 @@ layout(points) in;
 uniform mat4 MVP;
 uniform float arrayOffset = 0.15;
 uniform float arrayOffset_inner = 0.03;
-uniform float windLenght_factor = 0.05;
+uniform float windLenght_factor = 0.1;
 
 //uniform float arrayOffset = 0.1;
 //uniform float arrayOffset_inner = 0.01;

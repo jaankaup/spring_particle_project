@@ -155,14 +155,14 @@ void loop_handler2(void *arg)
                     break;
                 case SDLK_KP_PLUS:
                     {
-                      ProgramState::getInstance().increaseWindStrength(0.5f);
+                      ProgramState::getInstance().increaseWindStrength(2.0f);
                       auto strength = ProgramState::getInstance().getWindStrength();
                       Log::getInfo().log("Wind stength: %", std::to_string(strength));
                       break;
                     }
                 case SDLK_KP_MINUS:
                     {
-                      ProgramState::getInstance().increaseWindStrength(-0.5f);
+                      ProgramState::getInstance().increaseWindStrength(-2.0f);
                       auto strength = ProgramState::getInstance().getWindStrength();
                       Log::getInfo().log("Wind stength: %", std::to_string(strength));
                       break;
@@ -282,7 +282,7 @@ int main(int argc, char* argv[])
 
   createShaders();
 
-  VertexBufferManager::getInstance().createExamplePoints(30, 30, 30,30.0, glm::vec3(-0.5f,0.0f,-0.5f), "tuuli_pisteet");
+  VertexBufferManager::getInstance().createExamplePoints(30, 30, 30,30.0, glm::vec3(-0.2f,-0.1f,-0.4f), "tuuli_pisteet");
   VertexBufferManager::getInstance().createExamplePoints(40, 1, 40,50.0, glm::vec3(-0.2f,0.0f,-0.2f), "maa_pisteet");
   #endif
 
