@@ -133,6 +133,7 @@ class ProgramState
     void toggleRuohikko();
     void toggleStopWind();
     void increaseWindStrength(const float ws);
+    void resetWind();
 
     void updateTick();
     float getTimeDelta() const;
@@ -163,7 +164,7 @@ class ProgramState
     bool pShowWind = false;
     bool pLumi = false;
     bool pVerho = false;
-    bool pRuohikko = true;
+    bool pRuohikko = false;
     float pWindStength = 0.0;
     bool pStopWind = false;
 };

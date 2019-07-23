@@ -261,6 +261,11 @@ bool ProgramState::getShowRuohikko() const
   return pRuohikko;
 }
 
+void ProgramState::resetWind()
+{
+
+   pWindStength = 0.0f;
+}
 //std::string ProgramState::dimensionToString() const
 //{
 //  return "([" + std::to_string(pMetaData.dimensionX_min) + ","  + std::to_string(pMetaData.dimensionX_max) + "] , " +

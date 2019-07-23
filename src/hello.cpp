@@ -151,7 +151,7 @@ void loop_handler2(void *arg)
                     changeScene(9);
                     break;
                 case SDLK_0:
-                    changeScene(0);
+                    ProgramState::getInstance().resetWind();
                     break;
                 case SDLK_KP_PLUS:
                     {
