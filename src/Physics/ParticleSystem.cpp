@@ -84,8 +84,9 @@ void VerhoSystem::init()
   const int width = 100;
   const int height = 100;
   pParticleCount = width*height;
-  float offset = 0.01f;
+  float offset = 0.005f;
 
+  glm::vec4 basePos = glm::vec4(0.0f,0.5f,0.0f,1.0f);
   glm::vec3 a = glm::vec3(0.0f);
   glm::vec3 b = glm::vec3(offset,offset,0.0f);
   glm::vec3 c = glm::vec3(offset,0.0f,0.0f);
@@ -105,9 +106,9 @@ void VerhoSystem::init()
     int static_pah = position*20; 
 
     // Partikkelin positio.
-    array[pah] = (i%width)*offset; 
-    array[pah+1] = (-1.0f)*j*offset; 
-    array[pah+2] = 0.0f; 
+    array[pah] = (i%width)*offset + basePos.x; 
+    array[pah+1] = (-1.0f)*j*offset + basePos.y; 
+    array[pah+2] = 0.0f + basePos.z; 
     array[pah+3] = 1.0f; 
 
     // Alku velocity partikkelille.
@@ -248,33 +249,6 @@ void VerhoSystem::takeStep(const float h)
 void VerhoSystem::draw(const glm::mat4& mvp)
 {
 
-//  glm::mat4 mx = glm::mat4(1.0f);
-//
-//  auto drawBuffer = VertexBufferManager::getInstance().getByKey("piirto_indeksit_verho"); 
-//
-//  glLineWidth(1);
-//  drawBuffer->bind();
-//
-//  Shader* shader = ShaderManager::getInstance().getByKey("jousi_particle_render");
-//  shader->bind();
-//  shader->setUniform("MVP", mvp);
-//  shader->setUniform("input_color", glm::vec3(0.2f,0.0f,1.0));
-//
-//  auto initial_data = VertexBufferManager::getInstance().getByKey(VerhoSystem::INITIAL_BUFFER);
-//  auto static_data = VertexBufferManager::getInstance().getByKey(VerhoSystem::STATIC_DATA_BUFFER);
-//
-//  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, initial_data->getHandle());
-//  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, static_data->getHandle());
-//
-////  auto render_shader_name = ProgramState::getInstance().getMetadata()->meshShader;
-////  Shader* shader = ShaderManager::getInstance().getByKey(render_shader_name);
-////  shader->bind();
-////  shader->setUniform("MVP", mvp);
-////  shader->setUniform("input_color", glm::vec3(0.0f,0.4f,0.0));
-//
-//  glDrawArrays(GL_POINTS, 0, pParticleCount);
-//  glLineWidth(3);
-
   auto drawBuffer = VertexBufferManager::getInstance().getByKey(VerhoSystem::INITIAL_BUFFER); 
 
   drawBuffer->bind();
@@ -283,7 +257,8 @@ void VerhoSystem::draw(const glm::mat4& mvp)
   Shader* shader = ShaderManager::getInstance().getByKey(render_shader_name);
   shader->bind();
   shader->setUniform("MVP", mvp);
-  shader->setUniform("input_color", glm::vec3(0.2f,0.0f,1.0f));
+  //shader->setUniform("input_color", glm::vec3(0.2f,0.0f,1.0f));
+  shader->setUniform("input_color", glm::vec3(0.9f,0.9f,0.9f));
 
   glDrawArrays(GL_POINTS, 0, pParticleCount);
 }
@@ -328,8 +303,8 @@ void LumihiutaleSystem::init()
   std::vector<std::string> src = {"shaders/lumi.comp"};
   compute_shader->build(src,false);
 
-  const int width = 30;
-  const int height = 30;
+  const int width = 60;
+  const int height = 60;
   pParticleCount = width*height;
 
   auto array = new GLfloat[8*pParticleCount];
@@ -343,14 +318,21 @@ void LumihiutaleSystem::init()
     int pah = position*8; 
     int static_pah = position*4; 
 
+//  VertexBufferManager::getInstance().createExamplePoints(30, 30, 30,30.0, glm::vec3(-0.5f,0.0f,-0.5f), "tuuli_pisteet");
     // Arvotaan lumihiutaleiden alkupaikat.
-    MyRandom<float> mr;
-    mr.setDistribution(-3.0f,3.0f);
+    MyRandom<float> mr_x;
+    mr_x.setDistribution(-0.5f,0.5f);
+
+    MyRandom<float> mr_y(std::to_string(mr_x()));
+    mr_y.setDistribution(0.0f,1.0f);
+
+    MyRandom<float> mr_z(std::to_string(mr_x()));
+    mr_z.setDistribution(-0.5f,0.5f);
 
     // Partikkelin positio.
-    array[pah] = mr(); 
-    array[pah+1] = mr(); 
-    array[pah+2] = mr(); 
+    array[pah] = mr_x(); 
+    array[pah+1] = mr_y(); 
+    array[pah+2] = mr_z(); 
     array[pah+3] = 1.0f; 
 
     // Alku velocity partikkelille.
@@ -413,7 +395,7 @@ void LumihiutaleSystem::takeStep(const float h)
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, k3->getHandle());
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, k4->getHandle());
 
-  const static int X = 30;
+  const static int X = 60;
   const static int Y = 1;
 
   // K1
@@ -470,7 +452,7 @@ void RuohikkoSystem::init()
   Log::getDebug().log("RuohikkoSystem::init");
 
   auto pgen = ParticleGenerator();
-  auto pCount = pgen.generateGrass("ruohikko",1000,1,1,1);
+  auto pCount = pgen.generateGrass("ruohikko",600,1,1,1);
   pParticleCount = pCount; 
   Log::getDebug().log("Grass particle count == %.",std::to_string(pCount));
 }

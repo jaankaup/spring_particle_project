@@ -18,7 +18,7 @@ void Renderer::init()
     glCullFace(GL_BACK);
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_PROGRAM_POINT_SIZE);
-    glPointSize(1);
+    glPointSize(3);
     glLineWidth(3);
 }
 
@@ -42,9 +42,11 @@ void Renderer::render(const Camera& camera) {
   /* Lumen piirto. */
 
   if (ProgramState::getInstance().getShowLumi()) {
+    ProgramState::getInstance().setTimeStep(0.0002f);
     auto lumi_particle_system = ParticleSystemManager::getInstance().getByKey("lumi");
     lumi_particle_system->takeStep(ProgramState::getInstance().getTimeStep());
     lumi_particle_system->draw(MVP);
+    ProgramState::getInstance().setTimeStep(0.0008f);
   }
 
 
@@ -65,10 +67,11 @@ void Renderer::render(const Camera& camera) {
         glDrawArrays(GL_POINTS, 0, 40*40);
       }
 
-      ProgramState::getInstance().setTimeStep(0.0012f);
+      //ProgramState::getInstance().setTimeStep(0.0012f);
       auto ruohikko_particle_system = ParticleSystemManager::getInstance().getByKey("ruohikko");
       ruohikko_particle_system->takeStep(ProgramState::getInstance().getTimeStep());
       ruohikko_particle_system->draw(MVP);
+      ProgramState::getInstance().setTimeStep(0.0008f);
     
 
   }

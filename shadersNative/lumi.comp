@@ -4,10 +4,19 @@ uniform float time = 0.0;
 uniform float h = 0.0;
 uniform vec4 gravity = vec4(0.0,-9.81,0.0,0.0);
 uniform float phase = 1.0;
-uniform float mass = 2.0;
+uniform float mass = 0.5;
 uniform float viskositeettiKerroin = 25.9;
 uniform sampler3D diffuse3DTexture;
 uniform float wind_strength = 0.0;
+
+uniform float rear = -0.5;
+uniform float front = 0.5;
+
+uniform float bottom = 0.0;
+uniform float top = 1.0;
+
+uniform float left = -0.5;
+uniform float right = 0.5;
 
 struct PVdata
 {
@@ -15,7 +24,7 @@ struct PVdata
   vec4 vel;
 };
 
-layout (local_size_x = 30,local_size_y=1,local_size_z=1) in;
+layout (local_size_x = 60,local_size_y=1,local_size_z=1) in;
 
 layout (std430, binding = 0) buffer InitialBuf { PVdata initial[]; };
 layout (std430, binding = 1) buffer StaticBuf { vec4 static_data[]; };
@@ -64,8 +73,10 @@ void evalF(uint index) {
      PVdata final_data;
      vec4 final_velocity = (1.0/6.0) * (k1[index] + 2*k2[index] + 2*k3[index] + k4[index]); 
      vec4 fPos = pv_initial.pos + h*final_velocity; 
-     fPos = vec4(fPos.x < -3.0 ? 3.0 : fPos.x, fPos.y < -3.0 ? 3.0 : fPos.y, fPos.z < -3.0 ? 3.0 : fPos.z, 1.0);
-     fPos = vec4(fPos.x > 3.0 ? -3.0 : fPos.x, fPos.y, fPos.z > 3.0 ? -3.0 : fPos.z, 1.0);
+     fPos = vec4(fPos.x < left ? right : fPos.x, fPos.y < bottom ? top :
+     fPos.y, fPos.z < rear ? front : fPos.z, 1.0); fPos = vec4(fPos.x > right ? left : fPos.x, fPos.y, fPos.z > front ? rear : fPos.z, 1.0);
+     //fPos = vec4(fPos.x < -box ? box : fPos.x, fPos.y < -box ? box : fPos.y, fPos.z < -box ? box : fPos.z, 1.0);
+     //fPos = vec4(fPos.x > box ? -box : fPos.x, fPos.y, fPos.z > box ? -box : fPos.z, 1.0);
      final_data.pos = fPos;  
      final_data.vel = final_velocity;  
      initial[index] = final_data;

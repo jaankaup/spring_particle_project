@@ -3,7 +3,7 @@
 layout(points) in;
 
 uniform mat4 MVP;
-uniform float radius = 0.01;
+uniform float radius = 0.001;
 const vec4 up = vec4(0.0,radius,0.0,0.0);
 const vec4 down = vec4(0.0,-radius,0.0,0.0);
 const vec4 up_right = vec4(radius, radius*0.67,0.0,0.0);

@@ -4,8 +4,8 @@ layout(points) in;
 
 uniform mat4 MVP;
 uniform float arrayOffset = 0.15;
-uniform float arrayOffset_inner = 0.05;
-uniform float windLenght_factor = 0.2;
+uniform float arrayOffset_inner = 0.03;
+uniform float windLenght_factor = 0.05;
 
 //uniform float arrayOffset = 0.1;
 //uniform float arrayOffset_inner = 0.01;
@@ -27,29 +27,29 @@ void createArray() {
   vec4 pos =  gl_in[0].gl_Position;
   vec4 wind = vec4(texture(diffuse3DTexture,pos.xyz + vec3(time)).rgb,0.0);
   wind = wind+vec4(-0.5,-0.5,-0.5,0.0);
-  wind *= windLenght_factor;
+  vec4 wind_converted = wind * windLenght_factor;
 
-  float dist = distance(pos,wind);
+  float dist = distance(pos.xyz,wind_converted.xyz);
 
 //  vec4 basePos = MVP * pos;
-//  vec4 endPos = MVP * (pos + wind);
+//  vec4 endPos = MVP * (pos + wind_converted);
 
   vec4 basePos = pos;
-  vec4 endPos = pos + wind;
+  vec4 endPos = pos + wind_converted;
 
   vec3 up = vec3(0.0,1.0,0.0);
-  vec4 right = vec4(cross(up,wind.xyz),0.0);
+  vec4 right = vec4(cross(up,wind_converted.xyz),0.0);
 
-  //vec4 rightPos = MVP * (pos + wind*(1.0-arrayOffset) + arrayOffset*right);
-  //vec4 leftPos = MVP * (pos + wind*(1.0-arrayOffset) - arrayOffset*right);
+  //vec4 rightPos = MVP * (pos + wind_converted*(1.0-arrayOffset) + arrayOffset*right);
+  //vec4 leftPos = MVP * (pos + wind_converted*(1.0-arrayOffset) - arrayOffset*right);
 
-  vec4 rightPos = pos + wind*(1.0-arrayOffset) + arrayOffset*right;
-  vec4 leftPos = pos + wind*(1.0-arrayOffset) - arrayOffset*right;
+  vec4 rightPos = pos + wind_converted*(1.0-arrayOffset) + arrayOffset*right;
+  vec4 leftPos = pos + wind_converted*(1.0-arrayOffset) - arrayOffset*right;
 
-  vec4 rightPos_inner = pos + wind*(1.0-arrayOffset_inner) + arrayOffset_inner*right;
-  vec4 leftPos_inner = pos + wind*(1.0-arrayOffset_inner) - arrayOffset_inner*right;
+  vec4 rightPos_inner = pos + wind_converted*(1.0-arrayOffset_inner) + arrayOffset_inner*right;
+  vec4 leftPos_inner = pos + wind_converted*(1.0-arrayOffset_inner) - arrayOffset_inner*right;
 
-  vec3 color = wind.xyz*2;
+  vec3 color = vec3(abs(wind.x),abs(wind.y),abs(wind.z));
   
   //////////////////////////////
 

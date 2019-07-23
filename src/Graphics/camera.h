@@ -56,7 +56,7 @@ class Camera
         float lastMouseY = 0.0f;
 
         // Kameran liikkumisnopeuden kertoimet
-        float camSpeed = 0.01;       // 1.0 - 10.0
+        float camSpeed = 0.005;       // 1.0 - 10.0
         float camSensitivity = 0.05; // 0.1 - 1.0
 
         uint32_t pPrevTick;

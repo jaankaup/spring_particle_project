@@ -124,13 +124,13 @@ void loop_handler2(void *arg)
             switch (e.key.keysym.sym)
             {
                 case SDLK_1:
-                    ProgramState::getInstance().toggleVerho();
-                    ProgramState::getInstance().toggleRuohikko();
-                    break;
-                case SDLK_2:
                     ProgramState::getInstance().toggleLumi();
                     break;
+                case SDLK_2:
+                    ProgramState::getInstance().toggleVerho();
+                    break;
                 case SDLK_3:
+                    ProgramState::getInstance().toggleRuohikko();
                     break;
                 case SDLK_4:
                     changeScene(4);
@@ -282,7 +282,7 @@ int main(int argc, char* argv[])
 
   createShaders();
 
-  VertexBufferManager::getInstance().createExamplePoints(30, 30, 30,10.0, glm::vec3(-1.0f,-1.0f,-1.0f), "tuuli_pisteet");
+  VertexBufferManager::getInstance().createExamplePoints(30, 30, 30,30.0, glm::vec3(-0.5f,0.0f,-0.5f), "tuuli_pisteet");
   VertexBufferManager::getInstance().createExamplePoints(40, 1, 40,50.0, glm::vec3(-0.2f,0.0f,-0.2f), "maa_pisteet");
   #endif
 

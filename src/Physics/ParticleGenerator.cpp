@@ -38,10 +38,10 @@ int ParticleGenerator::generateGrass(const std::string& name_prefix, const uint3
 
     /* Large area. */
     MyRandom<float> x_pos(std::to_string(next_seed()));
-    x_pos.setDistribution(0.0f,float(areaWidth));
+    x_pos.setDistribution(0.0f,float(areaWidth)*0.5f);
 
     MyRandom<float> z_pos(std::to_string(next_seed()));
-    z_pos.setDistribution(0.0f,float(areaHeight));
+    z_pos.setDistribution(0.0f,float(areaHeight)*0.5f);
 
     /* Color. */
     MyRandom<float> next_green_color(std::to_string(next_seed()));

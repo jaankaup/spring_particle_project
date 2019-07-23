@@ -14,7 +14,7 @@ Janne Kauppinen
 |               | shaderissa?                     |                          |             |
 +---------------+---------------------------------+--------------------------+-------------+
 | 8h (3.7.2019) | Miten siirtää transformfeedback | Vielä jäi paljon mietit- |   20h       |
-|               | puskurista data texstuuriin?    | tävää.                   |             | 
+|               | puskurista data tekstuuriin?    | tävää.                   |             | 
 |               | Euler-methodiin tutustuminen.   |                          |             |
 |               | Timestepper ja Particlesystem   |                          |             |
 |               | luokat aloitettu omassa         |                          |             |
@@ -22,9 +22,9 @@ Janne Kauppinen
 +---------------+---------------------------------+--------------------------+-------------+
 | 8h (4.7.2019) | Compute shaderin opiskelua.     | Epäselvyyttä vielä on.   |   28h       |
 +---------------+---------------------------------+--------------------------+-------------+
-| 7h 5.7.2019)  | Comput shaderin opiuskelua.     | Epäselvyyttä hieman.     |   35h       |
+| 7h 5.7.2019)  | Compute shaderin opiuskelua.    | Epäselvyyttä hieman.     |   35h       |
 +---------------+---------------------------------+--------------------------+-------------+
-| 8h 8.7.2019)  | Comput shaderin opiuskelua.     | Vain yksi partikkeli     |   43h       |
+| 8h 8.7.2019)  | Compute shaderin opiuskelua.    | Vain yksi partikkeli     |   43h       |
 |               |                                 | onnistui.                |             |
 +---------------+---------------------------------+--------------------------+-------------+
 | 8h 9.7.2019)  | Compute shaderin opiskelua.     | Vaikueksia hahmottaa se  |   51h       |
@@ -39,48 +39,49 @@ Janne Kauppinen
 |               |                                 | Mutta onko se oikein?    |             |
 +---------------+---------------------------------+--------------------------+-------------+
 
--------------------------------------------------------------------------------------------
 11.7.2019 (7h)  (67h)                                                                           
 
 Mitä tein:
 
-Katselin RK4 vidota (https://youtu.be/hGCP6I2WisM?t=1126).
-Luin mit kurssin task3 matskua runge kuttaa wikipediasta. Luin lisäksi kurssisivulta siggraphin 
-matskuja. Yritin vielä hahmottaa tuota RK4 menetelmää. Jotenkin tuntuu siltä että toteutan 
-sen väärin.  
+Katselin taas RK4 vidota (https://youtu.be/hGCP6I2WisM?t=1126).  Luin taas mit
+kurssin task3 matskua runge kuttaa wikipediasta. Luin lisäksi kurssisivulta
+sigraphin matskuja. Yritin vielä hahmottaa tuota RK4 menetelmää. Jotenkin tuntuu
+siltä että toteutan sen väärin.  
 
 Mitä jäi epäselväksi:
 
-Edelleenkin mietityttää se mikä mättää tuossa RK4:ssa. Tässä vaikeuttaa se, että nyt fysiikka 
-pyörii shaderissa ja debuggaus on hieman vaikeaa.
+Edelleenkin mietityttää se mikä mättää tuossa RK4:ssa. Tässä vaikeuttaa se, että
+nyt fysiikka pyörii shaderissa ja debuggaus on hieman vaikeaa.
 
 -------------------------------------------------------------------------------------------
 12.7.2019 (9h)  (76h)                                                                           
 
 Mitä tein:
 
-Yritän toteuttaa verhorakennetta shearin rakenteella. Pyrkimyksenä on luoda algoritmi joka 
-tuottaa n*n kokoisen verhon. Joudun nyt luomaan 6 erilaista puskuria opengl:ssa. Piirtopuskuri, 
-joka on samalla piirtopuskuri. Sitten puskuri partikkeleiden staattista tietoa varten, eli 
-se onko partikkeli staattinen, partikkelin liittyvien toisten partikkeleiden indeksit sekä 
-niitä vastaavat lepopituudet. Lisäksi on tilapäispuskurit k1-k4, jonne tallensin vain väliaikaiset
-velocityt. Tähän turhaantui paljon aikaa ja virheitä tuli tehtyä. Luovuin tekstuureihin piirtämisestä, 
-puskureiden indeksointi tuntui helpommalta. 
+Yritän toteuttaa verhorakennetta shearin rakenteella. Pyrkimyksenä on luoda
+algoritmi joka tuottaa n*n kokoisen verhon. Joudun nyt luomaan 6 erilaista
+puskuria opengl:ssa. Piirtopuskuri, joka on samalla alkuperäinen state. Sitten
+puskuri partikkeleiden staattista tietoa varten, eli se onko partikkeli
+staattinen, partikkelin liittyvien toisten partikkeleiden indeksit sekä niitä
+vastaavat lepopituudet. Lisäksi on tilapäispuskurit k1-k4, jonne tallensin vain
+väliaikaiset velocityt. Tähän tuhraantui paljon aikaa ja virheitä tuli tehtyä.
+Luovuin tekstuureihin piirtämisestä, puskureiden indeksointi tuntui helpommalta. 
 
 Paljon indeksikikkailua josta en tähän viitsi sen määräänsä enempää rapostoida.
 
 Mitä jäi epäselväksi:
 
-Edelleenkin on epäselvää moni asia. Esimerkiksi se pitääkö partikkelilla olla massa ja se 
-toimiiko toteutukseni RK4:sta. Verho edelleenkin keskeneräinen.
+Edelleenkin on epäselvää moni asia. Esimerkiksi se pitääkö partikkelilla olla
+massa ja se toimiiko toteutukseni RK4:sta. Verho edelleenkin keskeneräinen.
 
 -------------------------------------------------------------------------------------------
 13.7.2019 (8h)  (84h)                                                                           
 
 Mitä tein:
 
-Indeksikikkailu jatkuu. Algoritmi naapuripartikkeleiden indeksointi diagonaalisesti toimii. 
-Edelleenkin suurta debuggausta ja opengl puskureiden sisällön tulkitsemista. 
+Indeksikikkailu jatkuu. Algoritmi naapuripartikkeleiden indeksointi
+diagonaalisesti toimii.  Edelleenkin suurta debuggausta ja opengl puskureiden
+sisällön tulkitsemista. 
 
 Ḱasasin hyödyllisiä opengl compute shaderiin liityvää matskua.
 
@@ -89,46 +90,35 @@ https://www.geeks3d.com/20140704/tutorial-introduction-to-opengl-4-3-shader-stor
 https://community.arm.com/developer/tools-software/graphics/b/blog/posts/get-started-with-compute-shaders
 http://developer.download.nvidia.com/GTC/PDF/GTC2012/PresentationPDF/SS104-Open-GPU-Utility-ToolkitGL.pdf
 
-Varsinkin nvidian matsku oli erityisen hyvä. Nyt alkaa olla jo melko hyvä tuntuma siihen miten compute shadereita 
-voisi hyödyntää jousifysiikassa.
+Varsinkin nvidian matsku oli erityisen hyvä. Nyt alkaa olla jo melko hyvä
+tuntuma siihen miten compute shadereita voisi hyödyntää jousifysiikassa.
 
 Mitä jäi epäselväksi:
 
-Toimiiko RK4? Verho räjähtelee kokoajan ja muljuilee pelottavasti. Jotain on pielessä ja pahasti.
+Toimiiko RK4? Verho räjähtelee kokoajan ja muljuilee pelottavasti. Jotain on
+pielessä ja pahasti.
 
 -------------------------------------------------------------------------------------------
 14.7.2019 (9h)  (93h)                                                                           
 
 Mitä tein:
 
-Etsin netistä olisiko joku jo tehnyt opengl computeshaderilla verhoa. Yksi tulos löytyi:
+Etsin netistä olisiko joku jo tehnyt opengl computeshaderilla verhoa. Yksi tulos
+löytyi:
 
   * https://github.com/daw42/glslcookbook/tree/master/chapter10/shader
 
-Tuo on ilmeisesti jonkun kaupallisen opengl kirjan lähdekoodia. En päässyt lukemaan itse kirjaa, mutta 
-näin hieman miten joku oli tuon verhon totettanut. Itse olin jo tehnyt melkolailla eri tavalla kuin 
-tuo ihminen, mutta yksi asia selvisi: verhon rakenne oli itselläni liian harva. Kirjan tekijä oli 
-tehnyt niin että jokaisella partikkelilla on diagonaalisen suunnan lisäksi myös horisontaaliset ja 
-vertikaaliset kaverit.   
+Tuo on ilmeisesti jonkun kaupallisen opengl kirjan lähdekoodia. En päässyt
+lukemaan itse kirjaa, mutta näin hieman miten joku oli tuon verhon totettanut.
+Itse olin jo tehnyt melkolailla eri tavalla kuin tuo ihminen, mutta yksi asia
+selvisi: verhon rakenne oli itselläni liian harva. Kirjan tekijä oli tehnyt niin
+että jokaisella partikkelilla on diagonaalisen suunnan lisäksi myös
+horisontaaliset ja vertikaaliset kaverit.   
 
-Muutin verhon rakenetta, ja lopputulos on jo parempi. Verho ei karkaa eikä räjähtele, mutta venyy 
-loputtomiin painovoiman suuntaan. Lisäsin nyt myös partikkeleille massa ja huomasin että jousien 
-välinen voimakerroin saa olla todella suuri.
-
-Etsin netistä olisiko joku jo tehnyt opengl computeshaderilla verhoa. Yksi tulos löytyi:
-
-  * https://github.com/daw42/glslcookbook/tree/master/chapter10/shader
-
-Tuo on ilmeisesti jonkun kaupallisen opengl kirjan lähdekoodia. En päässyt lukemaan itse kirjaa, mutta 
-näin hieman miten joku oli tuon verhon totettanut. Itse olin jo tehnyt melkolailla eri tavalla kuin 
-tuo ihminen, mutta yksi asia selvisi: verhon rakenne oli itselläni liian harva. Kirjan tekijä oli 
-tehnyt niin että jokaisella partikkelilla on diagonaalisen suunnan lisäksi myös horisontaaliset ja 
-vertikaaliset kaverit.   
-
-Muutin verhon rakenetta, ja lopputulos on jo parempi. Verho ei karkaa eikä räjähtele, mutta venyy 
-loputtomiin painovoiman suuntaan. Lisäsin nyt myös partikkeleille massa ja huomasin että jousien 
-välinen voimakerroin saa olla todella suuri.
-Mitä jäi epäselväksi:
+Muutin verhon rakenetta, ja lopputulos on jo parempi. Verho ei karkaa eikä
+räjähtele, mutta venyy loputtomiin painovoiman suuntaan. Lisäsin nyt myös
+partikkeleille massa ja huomasin että jousien välinen voimakerroin saa olla
+todella suuri.
 
 Mikä jäi epäselväksi.
 
@@ -139,9 +129,10 @@ Verho ei edelleenkään toimi ihan niin kuin pitäisi. Missähän vika.
 
 Mitä tein:
 
-Lisatin nyt lopullisesti 3d tekstuurin tuulen skalaarikentäksi. Verho reagoi tuuleen, mutta 
-ei oikein vieläkään ole kovinkaan hieno. Tutkiskelin netistä jälleen matskuja jotta ymmärtäisin 
-paremmin jousi-laskut ja rk4:sta. Luin muunmuassa näitä.
+Lisäsin nyt lopullisesti 3d tekstuurin tuulen skalaarikentäksi. Verho reagoi
+tuuleen, mutta ei oikein vieläkään ole kovinkaan hieno. Tutkiskelin netistä
+jälleen matskuja jotta ymmärtäisin paremmin jousilaskut ja rk4:sta. Luin
+muunmuassa näitä.
 
 http://www.cs.cmu.edu/~15869-f10/lec/02/lec02.pdf
 https://www.youtube.com/watch?v=1YZnic1Ug9g  
@@ -157,9 +148,10 @@ Edelleenkin on epäselvää miksi verho ei tottele kunnolla.
 
 Mitä tein:
 
-Hieman koodin uudelleen järjestämistä ja shaderien debuggausta. Kaikkea säätöä shadereissa. 
-Jousien voimien ja viskositeettien kokeilua. Debuggaaminen on aika hidasta. Lisäksi ohjelman 
-logiikka on aika turhan hajanaista. Pitäisi refaktoroida, mutta ei oikein tunnu olevan aikaa.  
+Hieman koodin uudelleen järjestämistä ja shaderien debuggausta. Kaikkea säätöä
+shadereissa.  Jousien voimien ja viskositeettien kokeilua. Debuggaaminen on aika
+hidasta. Lisäksi ohjelman logiikka on aika turhan hajanaista. Pitäisi
+refaktoroida, mutta ei oikein tunnu olevan aikaa.  
 
 Mitä jäi epäselväksi:
 
@@ -170,10 +162,11 @@ Edelleenkin on epäselvää miksi verho ei tottele kunnolla.
 
 Mitä tein:
 
-Kaiken säätämisen jälkeen sain verhon viimeinkin näyttämään hienolta eikä se veny ja vanu loputtomiin. 
-Laskin shaderissa voimien ja k1:sten mittayksiköt. Niissä oli epäjohdonmukaisuuksia. Esim. käytin 
-velocityä voimana, ja pituuksia velocityinä ym. Kun korjasin mittayksiköt johdonmukaisiksi, niin 
-nyt RK4 ja animaatio näyttäisi toimivan. Jee!
+Kaiken säätämisen jälkeen sain verhon viimeinkin näyttämään hienolta eikä se
+veny ja vanu loputtomiin.  Laskin shaderissa voimien ja k1-k4:sten mittayksiköt.
+Niissä oli epäjohdonmukaisuuksia. Esim. käytin velocityä voimana, ja pituuksia
+velocityinä ym. Kun korjasin mittayksiköt johdonmukaisiksi, niin nyt RK4 ja
+animaatio näyttäisi toimivan. Jee!
 
 Shaderin hienosäätöä.
 
@@ -186,9 +179,10 @@ Mikä on massan inversio? Mikä sen rooli on jousimallissa?
 
 Mitä tein:
 
-Refaktorointia. Loin ParticleSystem luokan jonne olisi tarkoitus siirtää partikkeleihin 
-liittyvä logiikka pois muilta luokilta. Nyt toiminta on jakautut Renderer- ja VertexBuffer-
-luokkiin sekä pääohjelmaan. Tarkoitus on saada kontrolli nyt yhteen luokkaan.
+Refaktorointia. Loin ParticleSystem luokan jonne olisi tarkoitus siirtää
+partikkeleihin liittyvä logiikka pois muilta luokilta. Nyt toiminta on jakautut
+Renderer- ja VertexBuffer- luokkiin sekä pääohjelmaan. Tarkoitus on saada
+kontrolli nyt yhteen luokkaan.
 
 Mitä jäi epäselväksi:
 
@@ -199,23 +193,23 @@ Mitä tehdä seuraavaksi. Edelleenkin massan inversio epäselvä.
 
 Mitä tein:
 
-Partikkeleille on nyt selvästi määritelty massa. Se tuntuu olevan oleellinen verhossa. Lisäksi tein 
-tuulen suuntavektorin näkyviksi renderöinnissä. Vielä on hieman epäselvän näköistä. Kaikennäköistä koodin 
-korjailua ja hienosäätöä. Ongelmia c++:n kanssa. Massiivisempi refaktorointi.
+Partikkeleille on nyt selvästi määritelty massa. Se tuntuu olevan oleellinen
+verhossa. Lisäksi tein tuulen suuntavektorin näkyviksi renderöinnissä. Vielä on
+hieman epäselvän näköistä. Kaikennäköistä koodin korjailua ja hienosäätöä.
+Ongelmia c++:n kanssa. Massiivisempi refaktorointi.
 
 Mitä jäi epäselväksi:
 
 Mitä tehdä seuraavaksi.
-
 
 -------------------------------------------------------------------------------------------
 20.7.2019 (9h)  (147h)                                                                           
 
 Mitä tein:
 
-Verhoa hienosäädetty näyttämään paremmalta. Tuulivektoreille ovat nyt nuolia. Particle luokalla 
-luotu lumipartikkelit. Nyt partikkelisysteemeitä voi luoda nopeammin. Refaktorointi maksaa 
-itsentä takaisin.
+Verhoa hienosäädetty näyttämään paremmalta. Tuulivektoreille ovat nyt nuolia.
+Particle luokalla luotu lumipartikkelit. Nyt partikkelisysteemeitä voi luoda
+nopeammin. Refaktorointi maksaa nyt itsensä takaisin.
 
 Mitä jäi epäselväksi:
 
@@ -226,10 +220,12 @@ Mitä tehdä seuraavaksi.
 
 Mitä tein:
 
-Ruohikon tekoa. Tätä varten aloitin ParticleGenerator luokan tekemistä, jotta voisin luoda 
-esim. ruohikkoa proseduraalisesti. Yksittäinen ruoho on siis joisista tehty. Tajuton määrä 
-indeksi kikkailua. Ruohot eivät käyttäydy kuten pitäisi. Muljuilevat. Nyt painovoima on käänntetty 
-ruohojen kohdalla ylöspäin. Ehkä huojausta, mutta aikaa on mennyt jo liikaakin.
+Ruohikon tekoa. Tätä varten aloitin ParticleGenerator luokan tekemistä, jotta
+voisin luoda esim. ruohikkoa proseduraalisesti. Yksittäinen ruoho on siis tehty
+jousista. Tajuton määrä indeksi kikkailua. Ruohot eivät käyttäydy kuten pitäisi.
+Muljuilevat kuin madot. Kauhu-scifileffan aineksia.  Nyt painovoima on
+käänntetty ruohojen kohdalla ylöspäin. Ehkä huojausta, mutta aikaa on mennyt jo
+liikaakin.
 
 Mitä jäi epäselväksi:
 
@@ -240,18 +236,48 @@ Miten ruohikko käyttäytyy. Ei toimi samalla tavalla kuin kangas.
 
 Mitä tein:
 
-Ruohikon teko jatkuu. Nyt pystyn pakottamaan ruohossa olevan jousen omaamaan tietyn määrään 
-kavereita. Ruohikko pysyy paremmin kasassa. 
+Ruohikon teko jatkuu. Nyt pystyn pakottamaan ruohossa olevan jousen omaamaan
+tietyn määrään kavereita. Ruohikko pysyy paremmin kasassa. 
 
-Tuulivektorien nuoliremontti. Nyt luon geometryshaderissa luodaan kunnolliset nuolet tuulivektoreille. 
-Lisäksi lumihiutaleet tehdään geometryshaderissa nyt "tähden" muotoisiksi. Ruohon jousien viivat piirtyvät nyt 
-(geometry shaderissa). Lisäksi ruohojen värit arvotaan, jotta ruohot erottuisivat paremmin toisistaan. 
-Täysin koodauspainotteinen päivä. 
+Tuulivektorien nuoliremontti. Nyt luon geometryshaderissa luodaan kunnolliset
+nuolet tuulivektoreille.  Lisäksi lumihiutaleet tehdään geometryshaderissa nyt
+"tähden" muotoisiksi. Ruohon jousien viivat piirtyvät nyt (geometry shaderissa).
+Verhon jousien väliset viivat näyttävät huonolta. Kangas on liian tiheää joten
+luovun ideasta.  Lisäksi ruohojen värit arvotaan, jotta ruohot erottuisivat
+paremmin toisistaan. Täysin koodauspainotteinen päivä. 
 
 Mitä jäi epäselväksi:
 
 Mikä on massan inversio? Tunnit ylittyivät. Jatkanko enää.
 
-Tapaaminen:
+-------------------------------------------------------------------------------------------
+23.7.2019 (4h)  (169h)                                                                           
 
-23.7. Klo 16:15 -> 
+Mitä tein:
+
+Partikkelimallien hienosäätöä. Tuulinuolien pienennys ja tihennys.
+Näppäinkomentojen viimeistely.  Verho onnistui parhaiten. Näyttää uskottavalta
+tuulen puhaltaessa. Sceneä tehty nyt muokattu siten että 
+se näyttää paremmalta (partikkelisysteemien siirtelyä ym.). 
+
+Ruohikko on aika raskas laskea. Ehkä turhan monta partikkelia (n. 40 000).
+Ruohikkokin näytti toimivan, mutta huijaamalla: painovoima on käännetty
+ylösalaisin. Pitäisi tehdä malli jossa kasvit ovat pystyssä ilman
+painovoimakikkailuja. Lisäksi olisi hyvä kehittää ruoholle parempi jousimalli.
+Katsoa kenties malleja biologiasta. Jousilla pitäisi ehkä olla myös tieto
+"lepokulmasta". Tai sitten vain fiksumpi jousimalli.  Olisi ollut mukava kyhätä
+myös puita ja pensaita, mutta aika loppui. 
+
+Lumisade ei oikein toimi. Näyttää epäuskottavalta ja lumihiutaleet muodostavat
+säännöllisiä joukkoja (lumihiutalekeskittymiä).  Tämä johtuu siitä, että 3d
+tekstuurissa oleva tuuli toistuu jaksottain samanlaisena. Ei ollut oikein aikaa
+kehittää mitään parempaa tuulitekstuuria ja näytteistystekniikkaa.
+
+Tuuli on aika yksinkertainen ja puhaltaa joka suuntaan, myös maasta ylös. Jos
+haluaisi tuulen joka vaihtaa suuntaa osuessaan esteisiin tai maahan, pitäisi
+varmaankin suunnitella tuuli nestevirtauksena. 
+
+Mitä jäi epäselväksi:
+
+Nyt on selvillä se, miten voidaan tehdä yksinkertaisia partikkelifysikkaa.
+Kaikki muu jäi epäselväksi.
